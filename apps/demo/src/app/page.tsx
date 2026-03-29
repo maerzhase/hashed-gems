@@ -1,6 +1,7 @@
 "use client";
 
 import { HashedGem } from "@m3000/hashed-gems";
+import { IconBrandGithub, IconHandLoveYou, IconHeart, IconHeartFilled, IconMoon, IconSun } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -136,7 +137,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      <div className="fixed top-4 right-4 z-10">
+      <div className="fixed top-4 right-4 z-10 flex gap-2">
+        <a
+          href="https://github.com/maerzhase/hashed-gems"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="GitHub repository"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
+        >
+          <IconBrandGithub className="h-5 w-5" />
+        </a>
         <button
           type="button"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -147,51 +157,10 @@ export default function Home() {
           }
           className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
         >
-          {!mounted ? (
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-              />
-            </svg>
-          ) : theme === "dark" ? (
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-              />
-            </svg>
+          {!mounted || theme === "dark" ? (
+            <IconSun className="h-5 w-5" />
           ) : (
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-              />
-            </svg>
+            <IconMoon className="h-5 w-5" />
           )}
         </button>
       </div>
@@ -275,7 +244,7 @@ export default function Home() {
               key={example.label}
               className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
             >
-              <div className="flex min-w-0 border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900 items-center">
+              <div className="flex min-w-0 items-center border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
                 <div className="shrink-0">
                   <HashedGem
                     seed={example.seed}
@@ -312,6 +281,30 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <footer className="py-8 text-center">
+        <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
+          <span className="inline-flex gap-1 items-center">build with <IconHeartFilled size="16" /> by </span>
+          <a
+            href="https://m3000.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-neutral-700 underline-offset-2 hover:underline dark:text-neutral-300"
+          >
+            m3000.io
+          </a>
+          <span>·</span>
+          <a
+            href="https://github.com/maerzhase/hashed-gems"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-medium text-neutral-700 underline-offset-2 hover:underline dark:text-neutral-300"
+          >
+            <IconBrandGithub className="h-4 w-4" />
+            GitHub
+          </a>
+        </div>
+      </footer>
     </main>
   );
 }
