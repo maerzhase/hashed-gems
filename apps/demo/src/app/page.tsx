@@ -121,6 +121,11 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const t = setTimeout(() => setGeneratorSeed(generatorInput.trim()), 200);
+    return () => clearTimeout(t);
+  }, [generatorInput]);
+
+  useEffect(() => {
     import("shiki").then(async ({ createHighlighter }) => {
       const highlighter = await createHighlighter({
         themes: ["github-dark", "github-light"],
@@ -182,7 +187,7 @@ export default function Home() {
         </button>
       </div>
 
-      <section className="flex flex-col items-center px-6 py-32 md:py-48">
+      <section className="flex flex-col items-center px-6 pt-24 pb-12 md:pt-36">
         <button
           type="button"
           onClick={() => setSeed(Math.random().toString(36).slice(2))}
@@ -198,7 +203,7 @@ export default function Home() {
           shimmering.
         </p>
 
-        <div className="mb-10 flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2">
           {DEMO_USERS.map((user) => (
             <div
               key={user}
@@ -213,51 +218,87 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
 
-        <div className="w-full max-w-md rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
-          <div className="flex border-b border-neutral-200 dark:border-neutral-800">
-            {PACKAGE_MANAGERS.map((pm) => (
-              <button
-                key={pm.id}
-                type="button"
-                onClick={() => setSelectedPm(pm.id)}
-                className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
-                  selectedPm === pm.id
-                    ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
-                    : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                }`}
-              >
-                {pm.label}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={copyInstall}
-            className="group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
-          >
-            <span className="text-neutral-500 dark:text-neutral-500">$</span>
-            <span className="flex-1 text-left font-mono text-sm text-neutral-800 dark:text-neutral-300">
-              {currentCommand}
-            </span>
-            <span
-              className={`rounded px-2 py-0.5 text-xs transition-colors ${
-                copied
-                  ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
-                  : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-              }`}
-            >
-              {copied ? "copied!" : "copy"}
-            </span>
-          </button>
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-xl">
+        <h2 className="mb-6 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
+          Try it
+        </h2>
+        <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
+          <input
+            type="text"
+            value={generatorInput}
+            onChange={(e) => setGeneratorInput(e.target.value)}
+            placeholder="What's your gem? Type your name…"
+            autoComplete="off"
+            data-1p-ignore
+            maxLength={100}
+            className="w-full bg-transparent px-4 py-3 font-mono text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600"
+          />
+          {generatorSeed && (
+            <>
+              <div className="border-t border-neutral-100 dark:border-neutral-800" />
+              <GemGenerator seed={generatorSeed} />
+            </>
+          )}
+        </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-2xl px-6 pb-24">
-        <h2 className="mb-6 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
-          Usage
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-xl">
+        <h2 className="mb-3 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
+          Installation
         </h2>
-        <div className="flex flex-col gap-6">
+        <p className="mb-6 text-sm text-neutral-500">
+          Install with your favourite package manager.
+        </p>
+        <div className="mb-16 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
+            <div className="flex border-b border-neutral-200 dark:border-neutral-800">
+              {PACKAGE_MANAGERS.map((pm) => (
+                <button
+                  key={pm.id}
+                  type="button"
+                  onClick={() => setSelectedPm(pm.id)}
+                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
+                    selectedPm === pm.id
+                      ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
+                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                  }`}
+                >
+                  {pm.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={copyInstall}
+              className="group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
+            >
+              <span className="text-neutral-500 dark:text-neutral-500">$</span>
+              <span className="flex-1 text-left font-mono text-sm text-neutral-800 dark:text-neutral-300">
+                {currentCommand}
+              </span>
+              <span
+                className={`rounded px-2 py-0.5 text-xs transition-colors ${
+                  copied
+                    ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
+                    : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
+                }`}
+              >
+                {copied ? "copied!" : "copy"}
+              </span>
+            </button>
+          </div>
+
+          <h2 className="mb-3 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
+            Usage
+          </h2>
+          <p className="mb-6 text-sm text-neutral-500">
+            Import the component and pass any string as a seed.
+          </p>
+          <div className="flex flex-col gap-6">
           {EXAMPLES.map((example) => (
             <div
               key={example.label}
@@ -305,6 +346,7 @@ export default function Home() {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </section>
 
