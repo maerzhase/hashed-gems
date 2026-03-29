@@ -4,11 +4,73 @@ import { HashedGem } from "@m3000/hashed-gems";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-const codeString = `import "@m3000/hashed-gems/styles.css";
+const EXAMPLES = [
+  {
+    label: "Basic usage",
+    description:
+      "The only required prop is seed — any string produces a unique, deterministic gem.",
+    code: `import "@m3000/hashed-gems/styles.css";
 import { HashedGem } from "@m3000/hashed-gems";
 
-<HashedGem seed="alice" />
-<HashedGem seed="bob" size={48} />`;
+<HashedGem seed="alice" />`,
+    seed: "alice",
+  },
+  {
+    label: "Size",
+    description:
+      "Control the gem dimensions with the size prop. Default is 64px.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
+
+<HashedGem seed="bob" size={48} />`,
+    seed: "bob",
+    size: 48,
+  },
+  {
+    label: "Static mode",
+    description:
+      "Disable the shimmer animation for improved performance in lists or print contexts.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
+
+<HashedGem seed="carol" static />`,
+    seed: "carol",
+    static: true,
+  },
+  {
+    label: "Gem type",
+    description:
+      "Choose from 12 predefined gemstone types — diamond, ruby, sapphire, and more.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
+
+<HashedGem seed="dave" gemType="emerald" />`,
+    seed: "dave",
+    gemType: "emerald" as const,
+  },
+  {
+    label: "Cut type",
+    description:
+      "Select from 4 different gem cuts — round-brilliant, princess, cushion, or emerald-step.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
+
+<HashedGem seed="eve" cutType="cushion" />`,
+    seed: "eve",
+    cutType: "cushion" as const,
+  },
+  {
+    label: "Custom styling",
+    description:
+      "Apply your own classes for border radius, borders, or shadows.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
+
+<HashedGem seed="frank" className="rounded-xl border-2 border-white shadow-lg" />`,
+    seed: "frank",
+    className: "rounded-xl border-2 border-white shadow-lg",
+  },
+];
 
 const DEMO_USERS = [
   "bob",
@@ -36,7 +98,9 @@ export default function Home() {
   const [seed, setSeed] = useState("hashed-gems");
   const [selectedPm, setSelectedPm] = useState("pnpm");
   const [copied, setCopied] = useState(false);
-  const [highlightedCode, setHighlightedCode] = useState<string>("");
+  const [highlightedExamples, setHighlightedExamples] = useState<
+    Record<string, string>
+  >({});
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -50,11 +114,14 @@ export default function Home() {
         themes: ["github-dark", "github-light"],
         langs: ["tsx"],
       });
-      const html = highlighter.codeToHtml(codeString, {
-        lang: "tsx",
-        theme: theme === "dark" ? "github-dark" : "github-light",
-      });
-      setHighlightedCode(html);
+      const highlighted: Record<string, string> = {};
+      for (const example of EXAMPLES) {
+        highlighted[example.label] = highlighter.codeToHtml(example.code, {
+          lang: "tsx",
+          theme: theme === "dark" ? "github-dark" : "github-light",
+        });
+      }
+      setHighlightedExamples(highlighted);
     });
   }, [theme]);
 
@@ -140,8 +207,9 @@ export default function Home() {
         <h1 className="mb-3 text-center font-sans text-2xl font-medium tracking-tight md:text-3xl">
           Your users are gems. Show it.
         </h1>
-        <p className="mb-8 max-w-md text-center text-sm text-neutral-500 md:text-base">
-          Deterministic gemstone avatars generated from any string.
+        <p className="mb-8 max-w-xl text-center text-sm text-neutral-500 md:text-base">
+          Deterministic gemstone avatars, uniquely yours — infinitely
+          shimmering.
         </p>
 
         <div className="mb-10 flex flex-wrap justify-center gap-2">
@@ -167,11 +235,10 @@ export default function Home() {
                 key={pm.id}
                 type="button"
                 onClick={() => setSelectedPm(pm.id)}
-                className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
-                  selectedPm === pm.id
-                    ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
-                    : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                }`}
+                className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${selectedPm === pm.id
+                  ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
+                  : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                  }`}
               >
                 {pm.label}
               </button>
@@ -187,11 +254,10 @@ export default function Home() {
               {currentCommand}
             </span>
             <span
-              className={`rounded px-2 py-0.5 text-xs transition-colors ${
-                copied
-                  ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
-                  : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-              }`}
+              className={`rounded px-2 py-0.5 text-xs transition-colors ${copied
+                ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
+                : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
+                }`}
             >
               {copied ? "copied!" : "copy"}
             </span>
@@ -199,16 +265,51 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-xl px-6 pb-24">
+      <section className="mx-auto max-w-2xl px-6 pb-24">
         <h2 className="mb-6 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
           Usage
         </h2>
-        <div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
-          {highlightedCode ? (
-            <div dangerouslySetInnerHTML={{ __html: highlightedCode }} />
-          ) : (
-            <pre className="font-mono text-xs text-neutral-500">Loading...</pre>
-          )}
+        <div className="flex flex-col gap-6">
+          {EXAMPLES.map((example) => (
+            <div
+              key={example.label}
+              className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
+            >
+              <div className="flex min-w-0 border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900 items-center">
+                <div className="shrink-0">
+                  <HashedGem
+                    seed={example.seed}
+                    size={example.size}
+                    static={example.static}
+                    gemType={example.gemType}
+                    cutType={example.cutType}
+                    {...(example.className && { className: example.className })}
+                  />
+                </div>
+                <div className="ml-4 flex flex-col justify-center">
+                  <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                    {example.label}
+                  </span>
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    {example.description}
+                  </span>
+                </div>
+              </div>
+              <div className="p-4 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
+                {highlightedExamples[example.label] ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: highlightedExamples[example.label],
+                    }}
+                  />
+                ) : (
+                  <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
+                    {example.code}
+                  </pre>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
     </main>
