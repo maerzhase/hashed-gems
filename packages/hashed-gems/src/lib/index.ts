@@ -1,2 +1,2 @@
 export { cn } from "./cn";
-export { springs, transitions } from "./motion";
+export { hashString128, sfc32 } from "./rng";
