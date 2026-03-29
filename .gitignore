@@ -1,0 +1,45 @@
+# dependencies
+node_modules
+/.pnp
+.pnp.*
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+/storybook-static
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+.pnpm-debug.log*
+nvim-verbose.log
+
+# task runners
+.turbo
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# typescript
+*.tsbuildinfo
+
+# ai
+.cursor
+.agents
+.claude
+
+# monorepo
+.next/
+.vercel/
+.output/
+.cache/
+
+# packages build output
+packages/*/dist/
+packages/*/.turbo/
+

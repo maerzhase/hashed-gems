@@ -1,0 +1,185 @@
+@theme {
+  /* ============================================================
+     PRIMITIVE SCALE - based on Radix UI grey scale
+     Light mode values (used directly) / Dark mode has separate scale
+     ============================================================ */
+
+  /* Light mode primitives (Radix gray 1-12) */
+  --color-grey-1: #fcfcfc;
+  --color-grey-2: #f9f9f9;
+  --color-grey-3: #f0f0f0;
+  --color-grey-4: #e8e8e8;
+  --color-grey-5: #e0e0e0;
+  --color-grey-6: #d9d9d9;
+  --color-grey-7: #cecece;
+  --color-grey-8: #bbbbbb;
+  --color-grey-9: #8d8d8d;
+  --color-grey-10: #838383;
+  --color-grey-11: #646464;
+  --color-grey-12: #202020;
+
+  --color-white: #ffffff;
+  --color-black: #111111;
+  --color-current: currentColor;
+  --color-transparent: transparent;
+
+  /* ============================================================
+     SEMANTIC TOKENS (shadcn naming) - light mode defaults
+     Using Radix scale semantics:
+     1-2: backgrounds, 3-5: component bg, 6-8: borders, 11-12: text
+     ============================================================ */
+
+  /* Page backgrounds */
+  --color-background: var(--color-white);
+  --color-foreground: var(--color-grey-12);
+
+  /* Muted surfaces (cards, secondary backgrounds) */
+  --color-muted: var(--color-grey-2);
+  --color-muted-foreground: var(--color-grey-11);
+
+  /* Card surfaces */
+  --color-card: var(--color-white);
+  --color-card-foreground: var(--color-grey-12);
+
+  /* Popover surfaces */
+  --color-popover: var(--color-white);
+  --color-popover-foreground: var(--color-grey-12);
+
+  /* Primary actions (solid buttons) */
+  --color-primary: var(--color-grey-12);
+  --color-primary-hover: var(--color-grey-11);
+  --color-primary-foreground: var(--color-white);
+
+  /* Secondary actions */
+  --color-secondary: var(--color-grey-3);
+  --color-secondary-hover: var(--color-grey-4);
+  --color-secondary-foreground: var(--color-grey-12);
+
+  /* Accent (interactive element backgrounds) */
+  --color-accent: var(--color-grey-3);
+  --color-accent-hover: var(--color-grey-4);
+  --color-accent-active: var(--color-grey-5);
+  --color-accent-foreground: var(--color-grey-12);
+
+  /* Borders - using Radix steps 6-7 for subtle borders */
+  --color-border: var(--color-grey-6);
+  --color-input: var(--color-grey-7);
+  --color-ring: var(--color-grey-12);
+
+  /* Disabled states */
+  --color-disabled: var(--color-grey-3);
+  --color-disabled-foreground: var(--color-grey-9);
+
+  /* Destructive/Error */
+  --color-destructive: #e5484d;
+  --color-destructive-hover: #dc3d43;
+  --color-destructive-foreground: var(--color-white);
+  --color-destructive-muted: #fff8f8;
+  --color-destructive-muted-foreground: #cd2b31;
+
+  /* Success */
+  --color-success: #30a46c;
+  --color-success-hover: #2b9a64;
+  --color-success-foreground: var(--color-white);
+  --color-success-muted: #e9f9ee;
+  --color-success-muted-foreground: #18794e;
+
+  /* Warning/Alert */
+  --color-warning: #f5d90a;
+  --color-warning-hover: #e5c800;
+  --color-warning-foreground: var(--color-grey-12);
+  --color-warning-muted: #fefce9;
+  --color-warning-muted-foreground: #946800;
+
+  /* Separator (subtle dividers) */
+  --color-separator: var(--color-grey-3);
+}
+
+/* ============================================================
+   DARK MODE - using Radix dark grey scale for proper layering
+   ============================================================ */
+@layer base {
+  @variant dark {
+    /* Dark mode primitives (Radix gray-dark 1-12) 
+       These override the light primitives contextually */
+    --color-grey-1: #111111;
+    --color-grey-2: #191919;
+    --color-grey-3: #222222;
+    --color-grey-4: #2a2a2a;
+    --color-grey-5: #313131;
+    --color-grey-6: #3a3a3a;
+    --color-grey-7: #484848;
+    --color-grey-8: #606060;
+    --color-grey-9: #6e6e6e;
+    --color-grey-10: #7b7b7b;
+    --color-grey-11: #b4b4b4;
+    --color-grey-12: #eeeeee;
+
+    --color-black: #111111;
+
+    /* Page backgrounds */
+    --color-background: var(--color-grey-1);
+    --color-foreground: var(--color-grey-12);
+
+    /* Muted surfaces - step 2 for subtle elevation */
+    --color-muted: var(--color-grey-2);
+    --color-muted-foreground: var(--color-grey-11);
+
+    /* Card surfaces */
+    --color-card: var(--color-grey-2);
+    --color-card-foreground: var(--color-grey-12);
+
+    /* Popover surfaces */
+    --color-popover: var(--color-grey-2);
+    --color-popover-foreground: var(--color-grey-12);
+
+    /* Primary actions */
+    --color-primary: var(--color-grey-12);
+    --color-primary-hover: var(--color-white);
+    --color-primary-foreground: var(--color-grey-1);
+
+    /* Secondary actions - steps 3-4 */
+    --color-secondary: var(--color-grey-3);
+    --color-secondary-hover: var(--color-grey-4);
+    --color-secondary-foreground: var(--color-grey-12);
+
+    /* Accent - steps 3-5 */
+    --color-accent: var(--color-grey-3);
+    --color-accent-hover: var(--color-grey-4);
+    --color-accent-active: var(--color-grey-5);
+    --color-accent-foreground: var(--color-grey-12);
+
+    /* Borders - step 6 for subtle, step 7 for interactive */
+    --color-border: var(--color-grey-6);
+    --color-input: var(--color-grey-7);
+    --color-ring: var(--color-grey-12);
+
+    /* Disabled states */
+    --color-disabled: var(--color-grey-3);
+    --color-disabled-foreground: var(--color-grey-9);
+
+    /* Destructive/Error */
+    --color-destructive: #e5484d;
+    --color-destructive-hover: #f16a6e;
+    --color-destructive-foreground: var(--color-white);
+    --color-destructive-muted: #291415;
+    --color-destructive-muted-foreground: #ff6369;
+
+    /* Success */
+    --color-success: #30a46c;
+    --color-success-hover: #3cb77a;
+    --color-success-foreground: var(--color-white);
+    --color-success-muted: #0d2117;
+    --color-success-muted-foreground: #4cc38a;
+
+    /* Warning/Alert */
+    --color-warning: #f5d90a;
+    --color-warning-hover: #ffe629;
+    --color-warning-foreground: var(--color-grey-12);
+    --color-warning-muted: #1c1500;
+    --color-warning-muted-foreground: #f0c000;
+
+    /* Separator */
+    --color-separator: var(--color-grey-3);
+  }
+}
