@@ -77,7 +77,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
     // Fire-and-forget upload so the OG is ready when someone opens the link
     captureCanvas()
       .then((blob) => blob && uploadGem(blob))
-      .catch(() => {});
+      .catch(() => { });
 
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);
@@ -110,7 +110,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   return (
     <div className="flex flex-col items-center gap-5 px-4 py-6">
       <div ref={containerRef} className="overflow-hidden rounded-full">
-        <HashedGem seed={seed} size={128} static />
+        <HashedGem seed={seed} size={128} />
       </div>
 
       <div className="flex flex-wrap justify-center gap-1.5">
