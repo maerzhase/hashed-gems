@@ -138,7 +138,7 @@ export default function Home() {
           <HashedGem seed={seed} size={64} />
         </button>
         <h1 className="mb-3 text-center font-sans text-2xl font-medium tracking-tight md:text-3xl">
-          Your users are gems. Treat them like it.
+          Your users are gems. Show it.
         </h1>
         <p className="mb-8 max-w-md text-center text-sm text-neutral-500 md:text-base">
           Deterministic gemstone avatars generated from any string.
