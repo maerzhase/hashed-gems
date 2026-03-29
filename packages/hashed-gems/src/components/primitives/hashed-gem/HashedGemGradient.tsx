@@ -30,9 +30,16 @@ function getAlexandriteColors(uSeed: number): { inner: string; outer: string } {
   const lerp = (a: number, b: number) => Math.round(a + (b - a) * t);
   const h = (n: number) => n.toString(16).padStart(2, "0");
   // green state: #40ff80 / #204010 — red state: #ff4060 / #601020
-  const ri = lerp(0x40, 0xff), gi = lerp(0xff, 0x40), bi = lerp(0x80, 0x60);
-  const ro = lerp(0x20, 0x60), go = lerp(0x40, 0x10), bo = lerp(0x10, 0x20);
-  return { inner: `#${h(ri)}${h(gi)}${h(bi)}`, outer: `#${h(ro)}${h(go)}${h(bo)}` };
+  const ri = lerp(0x40, 0xff),
+    gi = lerp(0xff, 0x40),
+    bi = lerp(0x80, 0x60);
+  const ro = lerp(0x20, 0x60),
+    go = lerp(0x40, 0x10),
+    bo = lerp(0x10, 0x20);
+  return {
+    inner: `#${h(ri)}${h(gi)}${h(bi)}`,
+    outer: `#${h(ro)}${h(go)}${h(bo)}`,
+  };
 }
 
 function getFacetOverlay(

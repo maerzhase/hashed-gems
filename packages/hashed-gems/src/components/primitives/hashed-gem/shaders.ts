@@ -164,10 +164,10 @@ void main() {
   // Rarity-based sparkle multiplier (computed here, applied later)
   float raritySparkle = 1.0;
   float rarityGlow    = 0.0;
-  if      (uRarity == 1) { raritySparkle = 1.2; }
-  else if (uRarity == 2) { raritySparkle = 1.5; rarityGlow = 0.08; }
-  else if (uRarity == 3) { raritySparkle = 2.0; rarityGlow = 0.15; }
-  else if (uRarity == 4) { raritySparkle = 2.8; rarityGlow = 0.30; }
+  if      (uRarity == 1) { raritySparkle = 1.05; }
+  else if (uRarity == 2) { raritySparkle = 1.1; rarityGlow = 0.04; }
+  else if (uRarity == 3) { raritySparkle = 1.2; rarityGlow = 0.06; }
+  else if (uRarity == 4) { raritySparkle = 1.35; rarityGlow = 0.10; }
 
   /* ── 3. Crown facet geometry ───────────────────────────────────────────── */
   /* Each cut has a fundamentally different facet layout:                     */
@@ -554,11 +554,11 @@ void main() {
     internalTint = gemBodyColor;
   } else if (isOpal) {
     // Opal: play-of-color — shifting spectral patches across the surface
-    float oN1 = sin(uv.x*8.0 + uv.y*5.0 + uSeed*0.7 + uTime*0.15);
-    float oN2 = sin(uv.x*5.0 - uv.y*9.0 + uSeed*1.3 + uTime*0.08);
-    float oN3 = sin(uv.x*12.0 + uv.y*7.0 + uSeed*2.1 - uTime*0.12);
+    float oN1 = sin(uv.x*4.0 + uv.y*2.5 + uSeed*0.7 + uTime*0.15);
+    float oN2 = sin(uv.x*2.5 - uv.y*4.5 + uSeed*1.3 + uTime*0.08);
+    float oN3 = sin(uv.x*6.0 + uv.y*3.5 + uSeed*2.1 - uTime*0.12);
     float opalHue = fract(oN1 * 0.3 + oN2 * 0.25 + oN3 * 0.15 + uSeed * 0.1);
-    vec3 opalPlay = hue2rgb(opalHue) * 1.5 + vec3(0.5);
+    vec3 opalPlay = hue2rgb(opalHue) * 0.5 + vec3(0.2);
     internalTint = opalPlay * absorption;
   } else {
     internalTint = absorption * 2.2;
@@ -628,7 +628,7 @@ void main() {
     ? hue2rgb(fract(dispAngle + uTime * 0.02))
     : vec3(1.0);
   float spkTotal = step(spkThresh, spk1) + step(spkThresh + 0.05, spk2) * 0.7;
-  rawColor += spkColor * spkTotal * spkIntensity * 0.15;
+  rawColor += spkColor * spkTotal * spkIntensity * 0.04;
 
   /* ── 12. Facet edge effects ────────────────────────────────────────────── */
   edgeMask *= 0.85 + 0.30 * hash21(uv * 47.0 + vec2(uSeed * 0.3));
