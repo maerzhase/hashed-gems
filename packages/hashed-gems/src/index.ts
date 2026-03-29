@@ -1,6 +1,4 @@
-export type {
-  GemRarity,
-  HashedGemProps,
-} from "./components/primitives/hashed-gem";
+export type { HashedGemProps } from "./components/primitives/hashed-gem";
 export { HashedGem } from "./components/primitives/hashed-gem";
-export { cn } from "./lib/cn";
+export { cn, getGemProperties } from "./lib";
+export type { CutType, GemProperties, GemType, Rarity } from "./lib/gem";

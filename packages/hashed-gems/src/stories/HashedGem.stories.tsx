@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { HashedGem } from "@/components/primitives/hashed-gem";
+import { CUT_TYPES, GEM_TYPES } from "@/lib/gem";
 
 const meta: Meta<typeof HashedGem> = {
   title: "Primitives/HashedGem",
@@ -33,28 +34,15 @@ const SEED_NAMES = [
   "grace",
 ];
 
-// Use gemType override prop so labels always match regardless of hash
-const GEM_TYPES: { gemType: number; label: string }[] = [
-  { gemType: 0, label: "Diamond" },
-  { gemType: 1, label: "Ruby" },
-  { gemType: 2, label: "Sapphire" },
-  { gemType: 3, label: "Emerald" },
-  { gemType: 4, label: "Topaz" },
-  { gemType: 5, label: "Amethyst" },
-  { gemType: 6, label: "Aquamarine" },
-  { gemType: 7, label: "Rose Quartz" },
-  { gemType: 8, label: "Citrine" },
-  { gemType: 9, label: "Onyx" },
-  { gemType: 10, label: "Alexandrite" },
-  { gemType: 11, label: "Opal" },
-];
+const GEM_TYPES_DATA = GEM_TYPES.map((gemType) => ({
+  gemType,
+  label: gemType.charAt(0).toUpperCase() + gemType.slice(1).replace(/-/g, " "),
+}));
 
-const CUT_TYPES: { cutType: number; label: string }[] = [
-  { cutType: 0, label: "Round Brilliant" },
-  { cutType: 1, label: "Princess" },
-  { cutType: 2, label: "Cushion" },
-  { cutType: 3, label: "Emerald Step" },
-];
+const CUT_TYPES_DATA = CUT_TYPES.map((cutType) => ({
+  cutType,
+  label: cutType.charAt(0).toUpperCase() + cutType.slice(1).replace(/-/g, " "),
+}));
 
 export const SeedVariations: Story = {
   render: () => (
@@ -108,7 +96,7 @@ export const GemTypes: Story = {
           gap: 16,
         }}
       >
-        {GEM_TYPES.map(({ gemType, label }) => (
+        {GEM_TYPES_DATA.map(({ gemType, label }) => (
           <div
             key={gemType}
             style={{
@@ -122,7 +110,7 @@ export const GemTypes: Story = {
               size={80}
               seed="showcase"
               gemType={gemType}
-              cutType={0}
+              cutType="round-brilliant"
               className="rounded-full"
             />
             <span style={{ fontSize: 11, opacity: 0.6 }}>{label}</span>
@@ -136,7 +124,7 @@ export const GemTypes: Story = {
           gap: 16,
         }}
       >
-        {CUT_TYPES.map(({ cutType, label }) => (
+        {CUT_TYPES_DATA.map(({ cutType, label }) => (
           <div
             key={cutType}
             style={{
@@ -149,7 +137,7 @@ export const GemTypes: Story = {
             <HashedGem
               size={80}
               seed="showcase"
-              gemType={0}
+              gemType="diamond"
               cutType={cutType}
               className="rounded-full"
             />
