@@ -28,6 +28,9 @@
       },
       "suspicious": {
         "noUnknownAtRules": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
       }
     },
     "domains": {

@@ -6,13 +6,29 @@
   --font-mono: ui-monospace, monospace;
 }
 
+@variant dark (&:where(.dark, .dark *));
+
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f23 100%);
+  background: #fafafa;
   min-height: 100vh;
-  color: #e4e4e7;
+  color: #171717;
+}
+
+html.dark body {
+  background: #0a0a0a;
+  color: #fafafa;
 }
 
 ::selection {
-  background: #7c3aed;
-  color: white;
+  background: #d4d4d4;
+  color: #171717;
+}
+
+html.dark ::selection {
+  background: #525252;
+  color: #fafafa;
 }
