@@ -67,9 +67,9 @@ import { HashedGem } from "@m3000/hashed-gems";
     code: `import "@m3000/hashed-gems/styles.css";
 import { HashedGem } from "@m3000/hashed-gems";
 
-<HashedGem seed="frank" className="rounded-xl border-2 border-white shadow-lg" />`,
-    seed: "frank",
-    className: "rounded-xl border-2 border-white shadow-lg",
+<HashedGem seed="hashed-gem" className="rounded-full border border-neutral-500 shadow-lg" />`,
+    seed: "hashed-gem",
+    className: "rounded-full border border-neutral-500 shadow-lg",
   },
 ];
 
