@@ -60,6 +60,17 @@ export default async function Image() {
       >
         Deterministic gemstone avatars generated from any string.
       </div>
+      <div
+        style={{
+          color: "#525252",
+          fontSize: 20,
+          fontFamily: "Inter",
+          position: "absolute",
+          bottom: 50,
+        }}
+      >
+        gems.m3000.io
+      </div>
     </div>,
     {
       ...size,

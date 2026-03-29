@@ -1,5 +1,5 @@
-import { getGemColors, getGemProperties } from "@m3000/hashed-gems";
 import type { Rarity } from "@m3000/hashed-gems";
+import { getGemColors, getGemProperties } from "@m3000/hashed-gems";
 import { ImageResponse } from "next/og";
 
 export const size = { width: 1200, height: 630 };
@@ -24,31 +24,27 @@ const RARITY_GLOW_ALPHA: Record<Rarity, number> = {
 function hexToRgb(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
-    ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
+    ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16),
+      ]
     : [255, 255, 255];
 }
 
 export default async function Image({
   params,
-}: { params: Promise<{ seed: string }> }) {
+}: {
+  params: Promise<{ seed: string }>;
+}) {
   const { seed: raw } = await params;
   const seed = decodeURIComponent(raw);
 
-  const { gemTypeName, rarityName } = getGemProperties(seed);
+  const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
   const { inner, outer } = getGemColors(gemTypeName);
   const badge = RARITY_BADGE_COLORS[rarityName];
   const glowAlpha = RARITY_GLOW_ALPHA[rarityName];
   const [r, g, b] = hexToRgb(inner);
-
-  // Try to load real gem PNG from Vercel Blob
-  let gemImageUrl: string | null = null;
-  try {
-    const { head } = await import("@vercel/blob");
-    const info = await head(`gems/${encodeURIComponent(seed)}.png`);
-    gemImageUrl = info.url;
-  } catch {
-    // Blob not found or not configured — use gradient fallback
-  }
 
   const displaySeed = seed.length > 20 ? `${seed.slice(0, 20)}…` : seed;
   const seedFontSize = seed.length > 16 ? (seed.length > 20 ? 44 : 52) : 68;
@@ -78,75 +74,28 @@ export default async function Image({
           <div
             style={{
               position: "absolute",
-              width: 420,
-              height: 420,
-              borderRadius: "50%",
+              width: 300,
+              height: 300,
               background: `radial-gradient(circle at center, rgba(${r},${g},${b},${glowAlpha}) 0%, transparent 65%)`,
             }}
           />
         )}
 
-        {gemImageUrl ? (
-          // Real gem PNG from Vercel Blob
-          // biome-ignore lint/performance/noImgElement: next/og context, <Image> not available
+        <div
+          style={{
+            display: "flex",
+            width: 280,
+            height: 280,
+          }}
+        >
+          {/* biome-ignore lint/performance/noImgElement: next/og context, <Image> not available */}
           <img
-            src={gemImageUrl}
-            width={400}
-            height={400}
+            src={`https://c36zhng9zp5ehtzj.public.blob.vercel-storage.com/gems/${encodeURIComponent(seed)}.png`}
+            width={280}
+            height={280}
             alt={seed}
-            style={{ borderRadius: "50%", objectFit: "cover" }}
           />
-        ) : (
-          // Gradient fallback gem
-          <div
-            style={{
-              width: 360,
-              height: 360,
-              borderRadius: "50%",
-              background: `radial-gradient(circle at 35% 30%, ${inner} 0%, ${inner} 20%, ${outer} 65%, ${outer} 100%)`,
-              position: "relative",
-              overflow: "hidden",
-              display: "flex",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                background:
-                  "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.4) 18%, transparent 42%)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                background:
-                  "radial-gradient(circle at 68% 72%, rgba(255,255,255,0.25) 0%, transparent 30%)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                background:
-                  "radial-gradient(circle at center, transparent 52%, rgba(0,0,0,0.7) 100%)",
-              }}
-            />
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Right: text */}
@@ -163,6 +112,8 @@ export default async function Image({
       >
         <div
           style={{
+            display: "flex",
+            alignItems: "center",
             color: "#737373",
             fontSize: 20,
             letterSpacing: "0.12em",
@@ -170,33 +121,58 @@ export default async function Image({
             marginBottom: 16,
           }}
         >
-          YOUR GEM
+          MY GEM
         </div>
 
         <div
           style={{
-            color: "#ffffff",
-            fontSize: seedFontSize,
-            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
             lineHeight: 1.1,
             marginBottom: 32,
             maxWidth: 520,
           }}
         >
-          {displaySeed}
+          <span
+            style={{
+              fontSize: seedFontSize,
+              fontWeight: 700,
+              color: "#525252",
+            }}
+          >
+            @
+          </span>
+          <span
+            style={{
+              fontSize: seedFontSize,
+              fontWeight: 700,
+              color: "#ffffff",
+            }}
+          >
+            {displaySeed}
+          </span>
         </div>
 
-        <div style={{ display: "flex", gap: 12, marginBottom: 48 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 48,
+          }}
+        >
           <div
             style={{
+              display: "flex",
+              alignItems: "center",
               background: badge.bg,
               color: badge.text,
               borderRadius: 999,
-              paddingLeft: 20,
-              paddingRight: 20,
-              paddingTop: 8,
-              paddingBottom: 8,
-              fontSize: 24,
+              paddingLeft: 16,
+              paddingRight: 16,
+              paddingTop: 6,
+              paddingBottom: 6,
+              fontSize: 20,
               fontWeight: 600,
               textTransform: "capitalize",
             }}
@@ -205,23 +181,49 @@ export default async function Image({
           </div>
           <div
             style={{
+              display: "flex",
+              alignItems: "center",
               background: "#262626",
               color: "#a3a3a3",
               borderRadius: 999,
-              paddingLeft: 20,
-              paddingRight: 20,
-              paddingTop: 8,
-              paddingBottom: 8,
-              fontSize: 24,
+              paddingLeft: 16,
+              paddingRight: 16,
+              paddingTop: 6,
+              paddingBottom: 6,
+              fontSize: 20,
               textTransform: "capitalize",
             }}
           >
             {gemTypeName}
           </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              background: "#262626",
+              color: "#a3a3a3",
+              borderRadius: 999,
+              paddingLeft: 16,
+              paddingRight: 16,
+              paddingTop: 6,
+              paddingBottom: 6,
+              fontSize: 20,
+              textTransform: "lowercase",
+            }}
+          >
+            {cutTypeName} cut
+          </div>
         </div>
 
-        <div style={{ color: "#525252", fontSize: 20 }}>
-          hashed-gems.vercel.app
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            color: "#525252",
+            fontSize: 20,
+          }}
+        >
+          gems.m3000.io
         </div>
       </div>
     </div>,
