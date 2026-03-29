@@ -1,10 +1,11 @@
 "use client";
 
 import { HashedGem } from "@m3000/hashed-gems";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-const codeString = `import { HashedGem } from "@m3000/hashed-gems";
-import "@m3000/hashed-gems/styles.css";
+const codeString = `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="alice" />
 <HashedGem seed="bob" size={48} />`;
@@ -36,11 +37,12 @@ export default function Home() {
   const [selectedPm, setSelectedPm] = useState("pnpm");
   const [copied, setCopied] = useState(false);
   const [highlightedCode, setHighlightedCode] = useState<string>("");
-  const [isDark, setIsDark] = useState(true);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-  }, [isDark]);
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     import("shiki").then(async ({ createHighlighter }) => {
@@ -50,11 +52,11 @@ export default function Home() {
       });
       const html = highlighter.codeToHtml(codeString, {
         lang: "tsx",
-        theme: isDark ? "github-dark" : "github-light",
+        theme: theme === "dark" ? "github-dark" : "github-light",
       });
       setHighlightedCode(html);
     });
-  }, [isDark]);
+  }, [theme]);
 
   const currentCommand =
     PACKAGE_MANAGERS.find((pm) => pm.id === selectedPm)?.command ?? "";
@@ -70,11 +72,30 @@ export default function Home() {
       <div className="fixed top-4 right-4 z-10">
         <button
           type="button"
-          onClick={() => setIsDark(!isDark)}
-          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          aria-label={
+            mounted && theme === "dark"
+              ? "Switch to light mode"
+              : "Switch to dark mode"
+          }
           className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
         >
-          {isDark ? (
+          {!mounted ? (
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+              />
+            </svg>
+          ) : theme === "dark" ? (
             <svg
               className="h-5 w-5"
               fill="none"
