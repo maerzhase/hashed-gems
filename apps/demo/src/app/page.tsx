@@ -1,17 +1,11 @@
 "use client";
 
 import { HashedGem } from "@m3000/hashed-gems";
-import { GemGenerator } from "@/components/GemGenerator";
-import {
-  IconBrandGithub,
-  IconHandLoveYou,
-  IconHeart,
-  IconHeartFilled,
-  IconMoon,
-  IconSun,
-} from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { GemGenerator } from "@/components/GemGenerator";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 
 const EXAMPLES = [
   {
@@ -113,12 +107,7 @@ export default function Home() {
   const [highlightedExamples, setHighlightedExamples] = useState<
     Record<string, string>
   >({});
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { theme } = useTheme();
 
   useEffect(() => {
     const t = setTimeout(() => setGeneratorSeed(generatorInput.trim()), 200);
@@ -159,33 +148,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      <div className="fixed top-4 right-4 z-10 flex gap-2">
-        <a
-          href="https://github.com/maerzhase/hashed-gems"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="GitHub repository"
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
-        >
-          <IconBrandGithub className="h-5 w-5" />
-        </a>
-        <button
-          type="button"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          aria-label={
-            mounted && theme === "dark"
-              ? "Switch to light mode"
-              : "Switch to dark mode"
-          }
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
-        >
-          {!mounted || theme === "dark" ? (
-            <IconSun className="h-5 w-5" />
-          ) : (
-            <IconMoon className="h-5 w-5" />
-          )}
-        </button>
-      </div>
+      <SiteHeader />
 
       <section className="flex flex-col items-center px-6 pt-24 pb-12 md:pt-36">
         <button
@@ -195,7 +158,7 @@ export default function Home() {
         >
           <HashedGem seed={seed} size={64} />
         </button>
-        <h1 className="mb-3 text-center font-sans text-2xl font-medium tracking-tight md:text-3xl">
+        <h1 className="mb-3 text-center font-sans text-2xl font-medium tracking-tight text-neutral-900 md:text-3xl dark:text-white">
           Your users are gems. Show it.
         </h1>
         <p className="mb-8 max-w-xl text-center text-sm text-neutral-500 md:text-base">
@@ -222,39 +185,39 @@ export default function Home() {
 
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
-        <h2 className="mb-6 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
-          Try it
-        </h2>
-        <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
-          <input
-            type="text"
-            value={generatorInput}
-            onChange={(e) => setGeneratorInput(e.target.value)}
-            placeholder="What's your gem? Type your name…"
-            autoComplete="off"
-            data-1p-ignore
-            maxLength={100}
-            className="w-full bg-transparent px-4 py-3 font-mono text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600"
-          />
-          {generatorSeed && (
-            <>
-              <div className="border-t border-neutral-100 dark:border-neutral-800" />
-              <GemGenerator seed={generatorSeed} />
-            </>
-          )}
-        </div>
+          <h2 className="mb-6 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            Create your own gem
+          </h2>
+          <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
+            <input
+              type="text"
+              value={generatorInput}
+              onChange={(e) => setGeneratorInput(e.target.value)}
+              placeholder="What's your gem? Type your name…"
+              autoComplete="off"
+              data-1p-ignore
+              maxLength={100}
+              className="w-full bg-transparent px-4 py-3 font-mono text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600"
+            />
+            {generatorSeed && (
+              <>
+                <div className="border-t border-neutral-100 dark:border-neutral-800" />
+                <GemGenerator seed={generatorSeed} />
+              </>
+            )}
+          </div>
         </div>
       </section>
 
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
-        <h2 className="mb-3 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
-          Installation
-        </h2>
-        <p className="mb-6 text-sm text-neutral-500">
-          Install with your favourite package manager.
-        </p>
-        <div className="mb-16 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
+          <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            Installation
+          </h2>
+          <p className="mb-6 text-sm text-neutral-500">
+            Install with your favourite package manager.
+          </p>
+          <div className="mb-16 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
             <div className="flex border-b border-neutral-200 dark:border-neutral-800">
               {PACKAGE_MANAGERS.map((pm) => (
                 <button
@@ -292,89 +255,67 @@ export default function Home() {
             </button>
           </div>
 
-          <h2 className="mb-3 font-sans text-sm font-medium tracking-wider text-neutral-500 uppercase">
+          <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
             Usage
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
             Import the component and pass any string as a seed.
           </p>
           <div className="flex flex-col gap-6">
-          {EXAMPLES.map((example) => (
-            <div
-              key={example.label}
-              className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
-            >
-              <div className="flex min-w-0 items-center border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
-                <div className="shrink-0">
-                  <HashedGem
-                    seed={example.seed}
-                    size={example.size}
-                    static={example.static}
-                    gemType={example.gemType}
-                    cutType={example.cutType}
-                    {...(example.className && { className: example.className })}
-                  />
+            {EXAMPLES.map((example) => (
+              <div
+                key={example.label}
+                className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
+              >
+                <div className="flex min-w-0 items-center border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
+                  <div className="shrink-0">
+                    <HashedGem
+                      seed={example.seed}
+                      size={example.size}
+                      static={example.static}
+                      gemType={example.gemType}
+                      cutType={example.cutType}
+                      {...(example.className && {
+                        className: example.className,
+                      })}
+                    />
+                  </div>
+                  <div className="ml-4 flex flex-col justify-center">
+                    <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                      {example.label}
+                    </span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      {example.description}
+                    </span>
+                  </div>
                 </div>
-                <div className="ml-4 flex flex-col justify-center">
-                  <span className="font-medium text-neutral-900 dark:text-neutral-100">
-                    {example.label}
-                  </span>
-                  <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {example.description}
-                  </span>
+                <div className="relative p-4 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
+                  <button
+                    type="button"
+                    onClick={() => copyExample(example.code, example.label)}
+                    className="absolute top-2 right-2 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                  >
+                    {copiedExample === example.label ? "copied!" : "copy"}
+                  </button>
+                  {highlightedExamples[example.label] ? (
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: highlightedExamples[example.label],
+                      }}
+                    />
+                  ) : (
+                    <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
+                      {example.code}
+                    </pre>
+                  )}
                 </div>
               </div>
-              <div className="relative p-4 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
-                <button
-                  type="button"
-                  onClick={() => copyExample(example.code, example.label)}
-                  className="absolute top-2 right-2 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
-                >
-                  {copiedExample === example.label ? "copied!" : "copy"}
-                </button>
-                {highlightedExamples[example.label] ? (
-                  <div
-                    dangerouslySetInnerHTML={{
-                      __html: highlightedExamples[example.label],
-                    }}
-                  />
-                ) : (
-                  <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
-                    {example.code}
-                  </pre>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
           </div>
         </div>
       </section>
 
-      <footer className="py-8 text-center">
-        <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
-          <span className="inline-flex items-center gap-1">
-            build with <IconHeartFilled size="16" /> by{" "}
-          </span>
-          <a
-            href="https://m3000.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-neutral-700 underline-offset-2 hover:underline dark:text-neutral-300"
-          >
-            m3000.io
-          </a>
-          <span>·</span>
-          <a
-            href="https://github.com/maerzhase/hashed-gems"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-medium text-neutral-700 underline-offset-2 hover:underline dark:text-neutral-300"
-          >
-            <IconBrandGithub className="h-4 w-4" />
-            GitHub
-          </a>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

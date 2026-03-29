@@ -1,6 +1,7 @@
 "use client";
 
-import { HashedGem, getGemProperties } from "@m3000/hashed-gems";
+import { HashedGem } from "@m3000/hashed-gems";
+import type { Rarity } from "@m3000/hashed-gems";
 import { useEffect, useRef, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
 
@@ -9,24 +10,66 @@ const GEM_URL_BASE = "https://hashed-gems.vercel.app/gem";
 const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
 
-interface GemGeneratorProps {
+interface Props {
   seed: string;
+  gemTypeName: string;
+  cutTypeName: string;
+  rarityName: Rarity;
 }
 
-export function GemGenerator({ seed }: GemGeneratorProps) {
+export function GemPageClient({
+  seed,
+  gemTypeName,
+  cutTypeName,
+  rarityName,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [sharing, setSharing] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [canNativeShare, setCanNativeShare] = useState(false);
+  const [canShare, setCanShare] = useState(false);
 
-  const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
   const gemUrl = `${GEM_URL_BASE}/${encodeURIComponent(seed)}`;
+  const tweetText = `Check out ${seed}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
 
   useEffect(() => {
-    setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
+    setCanShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
 
-  const captureCanvas = async (): Promise<Blob | null> => {
+  // Auto-upload blob on mount so OG is ready when anyone shares the URL
+  useEffect(() => {
+    const upload = async () => {
+      const srcCanvas = containerRef.current?.querySelector(
+        "canvas.hashed-gem",
+      ) as HTMLCanvasElement | null;
+      if (!srcCanvas) return;
+
+      const out = document.createElement("canvas");
+      out.width = 400;
+      out.height = 400;
+      const ctx = out.getContext("2d");
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, 400, 400);
+      ctx.drawImage(srcCanvas, 0, 0, 400, 400);
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        out.toBlob(resolve, "image/png"),
+      );
+      if (!blob) return;
+
+      const form = new FormData();
+      form.append("file", blob, `${seed}.png`);
+      form.append("seed", seed);
+      await fetch("/api/gem-image", { method: "POST", body: form });
+    };
+
+    // Wait a frame so the WebGL gem has rendered at least once
+    const id = requestAnimationFrame(() => {
+      upload().catch(() => {});
+    });
+    return () => cancelAnimationFrame(id);
+  }, [seed]);
+
+  const captureBlob = async (): Promise<Blob | null> => {
     const srcCanvas = containerRef.current?.querySelector(
       "canvas.hashed-gem",
     ) as HTMLCanvasElement | null;
@@ -38,7 +81,6 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
     const ctx = out.getContext("2d");
     if (!ctx) return null;
 
-    // Transparent background so it composites cleanly on any bg in the OG image
     ctx.clearRect(0, 0, 400, 400);
     ctx.drawImage(srcCanvas, 0, 0, 400, 400);
 
@@ -47,37 +89,17 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
     );
   };
 
-  const uploadGem = async (blob: Blob): Promise<void> => {
+  const uploadBlob = async (blob: Blob) => {
     const form = new FormData();
     form.append("file", blob, `${seed}.png`);
     form.append("seed", seed);
     await fetch("/api/gem-image", { method: "POST", body: form });
   };
 
-  const handleShareOnX = async () => {
-    setSharing(true);
-    try {
-      const blob = await captureCanvas();
-      if (blob) await uploadGem(blob);
-    } catch {
-      // Upload failed — proceed anyway, OG will use gradient fallback
-    } finally {
-      setSharing(false);
-    }
-
-    const text = `My gem is a ${rarityName} ${gemTypeName}! What's yours? 💎`;
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(gemUrl)}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
-  };
-
   const handleCopyLink = async () => {
-    // Fire-and-forget upload so the OG is ready when someone opens the link
-    captureCanvas()
-      .then((blob) => blob && uploadGem(blob))
-      .catch(() => { });
+    captureBlob()
+      .then((blob) => blob && uploadBlob(blob))
+      .catch(() => {});
 
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);
@@ -85,20 +107,20 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   };
 
   const handleNativeShare = async () => {
-    const blob = await captureCanvas();
+    const blob = await captureBlob();
     if (!blob) return;
     const file = new File([blob], `${seed}-gem.png`, { type: "image/png" });
     try {
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: `My ${rarityName} ${gemTypeName}`,
-          text: `My gem is a ${rarityName} ${gemTypeName}! What's yours? 💎`,
+          title: `${rarityName} ${gemTypeName}`,
+          text: tweetText,
           url: gemUrl,
         });
       } else {
         await navigator.share({
-          title: `My ${rarityName} ${gemTypeName}`,
+          title: `${rarityName} ${gemTypeName}`,
           url: gemUrl,
         });
       }
@@ -108,12 +130,12 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-5 px-4 py-6">
-      <div ref={containerRef}>
+    <div className="flex flex-col items-center">
+      <div ref={containerRef} className="mb-6">
         <HashedGem seed={seed} size={64} />
       </div>
 
-      <div className="flex flex-wrap justify-center gap-1.5">
+      <div className="mb-8 flex flex-wrap justify-center gap-1.5">
         <span
           className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${RARITY_BADGE[rarityName]}`}
         >
@@ -128,20 +150,20 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          onClick={handleShareOnX}
-          disabled={sharing}
-          className={`${BUTTON_CLASS} disabled:cursor-wait disabled:opacity-60`}
+        <a
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(gemUrl)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={BUTTON_CLASS}
         >
-          {sharing ? "Preparing…" : "Post on X"}
-        </button>
+          Post on X
+        </a>
 
         <button type="button" onClick={handleCopyLink} className={BUTTON_CLASS}>
           {copied ? "Copied!" : "Copy link"}
         </button>
 
-        {canNativeShare && (
+        {canShare && (
           <button
             type="button"
             onClick={handleNativeShare}
@@ -151,13 +173,6 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
           </button>
         )}
       </div>
-
-      <a
-        href={`/gem/${encodeURIComponent(seed)}`}
-        className="text-xs text-neutral-400 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300"
-      >
-        View gem page →
-      </a>
     </div>
   );
 }

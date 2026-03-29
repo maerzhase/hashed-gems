@@ -12,6 +12,7 @@ export async function POST(request: Request) {
   const blob = await put(`gems/${encodeURIComponent(seed)}.png`, file, {
     access: "public",
     addRandomSuffix: false,
+    allowOverwrite: true,
   });
 
   return Response.json({ url: blob.url });
