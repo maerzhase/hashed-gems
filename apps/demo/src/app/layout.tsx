@@ -12,6 +12,19 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "@m3000/hashed-gems",
   description: "Generative gem avatars for user identification",
+  openGraph: {
+    title: "@m3000/hashed-gems",
+    description: "Deterministic gemstone avatars generated from any string.",
+    type: "website",
+    url: "https://hashed-gems.vercel.app",
+    images: [{ url: "/opengraph-image" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "@m3000/hashed-gems",
+    description: "Deterministic gemstone avatars generated from any string.",
+    images: ["/opengraph-image"],
+  },
 };
 
 export default function RootLayout({
