@@ -2,7 +2,7 @@
 
 Generative gem avatars for user identification. Each gem is uniquely rendered based on a seed string (username, address, id) using WebGL shaders with spectral color dispersion.
 
-Built on React 19 and Tailwind CSS 4.
+Built on React 19.
 
 ## Installation
 
@@ -13,12 +13,12 @@ pnpm add @m3000/hashed-gems
 Peer dependencies:
 
 ```bash
-pnpm add react react-dom tailwindcss
+pnpm add react react-dom
 ```
 
 ## Styles
 
-Import the compiled stylesheet once in your app entry:
+Import the stylesheet once in your app entry:
 
 ```ts
 import "@m3000/hashed-gems/styles.css";

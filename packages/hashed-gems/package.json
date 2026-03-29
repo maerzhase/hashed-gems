@@ -12,14 +12,11 @@
     },
     "./styles.css": "./dist/styles.css"
   },
-  "sideEffects": [
-    "*.css"
-  ],
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsdown && tailwindcss -i src/styles/index.css -o dist/styles.css --minify",
+    "build": "tsdown",
     "build:watch": "tsdown --watch",
     "dev": "tsdown --watch",
     "format": "biome format .",
@@ -30,14 +27,9 @@
     "storybook": "storybook dev -p 6007",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "clsx": "2.1.1",
-    "tailwind-merge": "3.3.1"
-  },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
-    "tailwindcss": "^4.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@tsconfig/vite-react": "7.0.2",
@@ -47,27 +39,17 @@
     "@storybook/addon-themes": "10.1.2",
     "@storybook/react": "10.1.2",
     "@storybook/react-vite": "10.1.2",
-    "@tailwindcss/cli": "4.1.11",
-    "@tailwindcss/postcss": "4.2.1",
     "@types/node": "22.14.1",
     "@types/react": "^18.0.0 || ^19.0.0",
     "@types/react-dom": "^18.0.0 || ^19.0.0",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
     "storybook": "10.1.2",
-    "tailwindcss": "4.2.1",
     "tsdown": "0.20.3",
     "typescript": "5.9.2",
     "vite-tsconfig-paths": "5.1.4"
   },
   "publishConfig": {
-    "access": "public",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
-      },
-      "./styles.css": "./dist/styles.css"
-    }
+    "access": "public"
   }
 }

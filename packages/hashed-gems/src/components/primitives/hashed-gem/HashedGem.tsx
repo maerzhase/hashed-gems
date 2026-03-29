@@ -1,7 +1,6 @@
 "use client";
 
 import type * as React from "react";
-import { cn } from "@/lib/cn";
 import type { CutType, GemType } from "@/lib/gem";
 import { CUT_TYPES, GEM_TYPES, getGemProperties } from "@/lib/gem";
 import { FRAGMENT_SHADER, VERTEX_SHADER } from "./shaders";
@@ -51,7 +50,7 @@ export function HashedGem({
       ref={canvasRef}
       width={size}
       height={size}
-      className={cn("block shrink-0", className)}
+      className={`hashed-gem ${className ?? ""}`}
       style={{ width: size, height: size }}
       role="img"
       aria-label="Hashed gem avatar"
