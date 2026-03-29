@@ -22,12 +22,20 @@ const gemColorsMap: Record<GemType, GemColors> = {
   opal: { inner: "#ffffff", outer: "#b0a090", accent: "#ffffff" },
 };
 
-const rarityGlowMap: Record<Rarity, string> = {
-  common: "0px 0px 0px rgba(0,0,0,0)",
-  uncommon: "0px 0px 4px rgba(255,255,255,0.3)",
-  rare: "0px 0px 8px rgba(255,255,255,0.5)",
-  epic: "0px 0px 12px rgba(255,255,255,0.7)",
-  legendary: "0px 0px 20px rgba(255,255,255,0.9)",
+const rarityGlowSizes: Record<Rarity, number> = {
+  common: 0,
+  uncommon: 4,
+  rare: 10,
+  epic: 16,
+  legendary: 24,
+};
+
+const rarityGlowAlphas: Record<Rarity, number> = {
+  common: 0,
+  uncommon: 0.45,
+  rare: 0.65,
+  epic: 0.8,
+  legendary: 0.95,
 };
 
 const rarityIntensityMap: Record<Rarity, number> = {
@@ -38,12 +46,23 @@ const rarityIntensityMap: Record<Rarity, number> = {
   legendary: 1.0,
 };
 
+function hexToRgb(hex: string): [number, number, number] {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
+    : [255, 255, 255];
+}
+
 export function getGemColors(gemType: GemType): GemColors {
   return gemColorsMap[gemType];
 }
 
-export function getRarityGlow(rarity: Rarity): string {
-  return rarityGlowMap[rarity];
+export function getRarityGlow(rarity: Rarity, gemType: GemType): string {
+  if (rarity === "common") return "0px 0px 0px rgba(0,0,0,0)";
+  const size = rarityGlowSizes[rarity];
+  const alpha = rarityGlowAlphas[rarity];
+  const [r, g, b] = hexToRgb(gemColorsMap[gemType].inner);
+  return `0px 0px ${size}px rgba(${r},${g},${b},${alpha})`;
 }
 
 export function getRarityIntensity(rarity: Rarity): number {
