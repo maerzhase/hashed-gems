@@ -1,7 +1,15 @@
 "use client";
 
 import { HashedGem } from "@m3000/hashed-gems";
-import { IconBrandGithub, IconHandLoveYou, IconHeart, IconHeartFilled, IconMoon, IconSun } from "@tabler/icons-react";
+import { GemGenerator } from "@/components/GemGenerator";
+import {
+  IconBrandGithub,
+  IconHandLoveYou,
+  IconHeart,
+  IconHeartFilled,
+  IconMoon,
+  IconSun,
+} from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -99,6 +107,9 @@ export default function Home() {
   const [seed, setSeed] = useState("hashed-gems");
   const [selectedPm, setSelectedPm] = useState("pnpm");
   const [copied, setCopied] = useState(false);
+  const [generatorInput, setGeneratorInput] = useState("");
+  const [generatorSeed, setGeneratorSeed] = useState("");
+  const [copiedExample, setCopiedExample] = useState<string | null>(null);
   const [highlightedExamples, setHighlightedExamples] = useState<
     Record<string, string>
   >({});
@@ -133,6 +144,12 @@ export default function Home() {
     await navigator.clipboard.writeText(currentCommand);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyExample = async (code: string, label: string) => {
+    await navigator.clipboard.writeText(code);
+    setCopiedExample(label);
+    setTimeout(() => setCopiedExample(null), 2000);
   };
 
   return (
@@ -204,10 +221,11 @@ export default function Home() {
                 key={pm.id}
                 type="button"
                 onClick={() => setSelectedPm(pm.id)}
-                className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${selectedPm === pm.id
-                  ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
-                  : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                  }`}
+                className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
+                  selectedPm === pm.id
+                    ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
+                    : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                }`}
               >
                 {pm.label}
               </button>
@@ -223,10 +241,11 @@ export default function Home() {
               {currentCommand}
             </span>
             <span
-              className={`rounded px-2 py-0.5 text-xs transition-colors ${copied
-                ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
-                : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                }`}
+              className={`rounded px-2 py-0.5 text-xs transition-colors ${
+                copied
+                  ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
+                  : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
+              }`}
             >
               {copied ? "copied!" : "copy"}
             </span>
@@ -264,7 +283,14 @@ export default function Home() {
                   </span>
                 </div>
               </div>
-              <div className="p-4 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
+              <div className="relative p-4 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
+                <button
+                  type="button"
+                  onClick={() => copyExample(example.code, example.label)}
+                  className="absolute top-2 right-2 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                >
+                  {copiedExample === example.label ? "copied!" : "copy"}
+                </button>
                 {highlightedExamples[example.label] ? (
                   <div
                     dangerouslySetInnerHTML={{
@@ -284,7 +310,9 @@ export default function Home() {
 
       <footer className="py-8 text-center">
         <div className="flex items-center justify-center gap-2 text-sm text-neutral-500">
-          <span className="inline-flex gap-1 items-center">build with <IconHeartFilled size="16" /> by </span>
+          <span className="inline-flex items-center gap-1">
+            build with <IconHeartFilled size="16" /> by{" "}
+          </span>
           <a
             href="https://m3000.io"
             target="_blank"
