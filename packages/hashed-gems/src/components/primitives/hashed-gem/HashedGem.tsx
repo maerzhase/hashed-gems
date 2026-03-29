@@ -49,7 +49,12 @@ export function HashedGem({
   return (
     <div
       className={`hashed-gem-container ${className}`}
-      style={{ width: size, height: size, position: "relative" }}
+      style={{
+        width: size,
+        height: size,
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
       <HashedGemGradient
         size={size}
