@@ -3,6 +3,7 @@
 import type * as React from "react";
 import type { CutType, GemType } from "@/lib/gem";
 import { CUT_TYPES, GEM_TYPES, getGemProperties } from "@/lib/gem";
+import { HashedGemGradient } from "./HashedGemGradient";
 import { FRAGMENT_SHADER, VERTEX_SHADER } from "./shaders";
 import { useWebGL } from "./useWebGL";
 
@@ -46,14 +47,32 @@ export function HashedGem({
   });
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={size}
-      height={size}
-      className={`hashed-gem ${className ?? ""}`}
-      style={{ width: size, height: size }}
-      role="img"
-      aria-label="Hashed gem avatar"
-    />
+    <div
+      className={`hashed-gem-container ${className}`}
+      style={{ width: size, height: size, position: "relative" }}
+    >
+      <HashedGemGradient
+        size={size}
+        seed={seed}
+        gemType={gemType}
+        cutType={cutType}
+        position="absolute"
+      />
+      <canvas
+        ref={canvasRef}
+        width={size}
+        height={size}
+        className="hashed-gem"
+        style={{
+          width: size,
+          height: size,
+          position: "absolute",
+          top: 0,
+          left: 0,
+        }}
+        role="img"
+        aria-label="Hashed gem avatar"
+      />
+    </div>
   );
 }

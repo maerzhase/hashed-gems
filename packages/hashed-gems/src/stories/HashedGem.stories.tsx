@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { HashedGem } from "@/components/primitives/hashed-gem";
+import {
+  HashedGem,
+  HashedGemGradient,
+} from "@/components/primitives/hashed-gem";
 import { CUT_TYPES, GEM_TYPES } from "@/lib/gem";
 
 const meta: Meta<typeof HashedGem> = {
@@ -11,6 +14,8 @@ const meta: Meta<typeof HashedGem> = {
   argTypes: {
     size: { control: { type: "range", min: 24, max: 256, step: 8 } },
     seed: { control: "text" },
+    gemType: { control: "select", options: GEM_TYPES },
+    cutType: { control: "select", options: CUT_TYPES },
   },
 };
 
@@ -223,6 +228,39 @@ export const StaticMode: Story = {
             className="rounded-full"
           />
         ))}
+      </div>
+    </div>
+  ),
+};
+
+export const GradientVsWebGL: Story = {
+  args: {
+    seed: "alice",
+    size: 96,
+  },
+  render: (args) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <HashedGemGradient {...args} />
+        <span style={{ fontSize: 10, opacity: 0.5 }}>Gradient</span>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <HashedGem {...args} />
+        <span style={{ fontSize: 10, opacity: 0.5 }}>WebGL</span>
       </div>
     </div>
   ),
