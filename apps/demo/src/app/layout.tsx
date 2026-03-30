@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "@m3000/hashed-gems",
     description: "Deterministic gemstone avatars generated from any string.",
     type: "website",
-    url: "https://hashed-gems.vercel.app",
+    url: "https://gems.m3000.io",
     images: [{ url: "/opengraph-image" }],
   },
   twitter: {

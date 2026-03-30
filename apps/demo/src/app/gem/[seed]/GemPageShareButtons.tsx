@@ -15,7 +15,7 @@ export function GemPageShareButtons({ seed, gemTypeName, rarityName }: Props) {
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
 
-  const gemUrl = `https://hashed-gems.vercel.app/gem/${encodeURIComponent(seed)}`;
+  const gemUrl = `https://gems.m3000.io/gem/${encodeURIComponent(seed)}`;
   const tweetText = `Check out ${seed}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
 
   useEffect(() => {

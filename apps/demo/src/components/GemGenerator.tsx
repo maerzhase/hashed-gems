@@ -1,10 +1,10 @@
 "use client";
 
-import { HashedGem, getGemProperties } from "@m3000/hashed-gems";
+import { getGemProperties, HashedGem } from "@m3000/hashed-gems";
 import { useEffect, useRef, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
 
-const GEM_URL_BASE = "https://hashed-gems.vercel.app/gem";
+const GEM_URL_BASE = "https://gems.m3000.io/gem";
 
 const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
@@ -120,7 +120,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
         >
           {rarityName}
         </span>
-        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium capitalize text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600 capitalize dark:bg-neutral-800 dark:text-neutral-400">
           {gemTypeName}
         </span>
         <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500">
