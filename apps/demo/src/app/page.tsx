@@ -169,7 +169,7 @@ export default function Home() {
           onClick={() => setSeed(Math.random().toString(36).slice(2))}
           className="mb-8 cursor-pointer rounded-full transition-transform outline-none hover:scale-110"
         >
-          <HashedGem seed={seed} size={64} />
+          <HashedGem seed={seed} size={64} resolution={512} />
         </button>
         <h1 className="mb-3 text-center font-sans text-2xl font-medium tracking-tight text-neutral-900 md:text-3xl dark:text-white">
           Your users are gems. Show it.
@@ -237,11 +237,10 @@ export default function Home() {
                   key={pm.id}
                   type="button"
                   onClick={() => setSelectedPm(pm.id)}
-                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
-                    selectedPm === pm.id
-                      ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
-                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                  }`}
+                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${selectedPm === pm.id
+                    ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
+                    : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                    }`}
                 >
                   {pm.label}
                 </button>
@@ -257,11 +256,10 @@ export default function Home() {
                 {currentCommand}
               </span>
               <span
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${
-                  copied
-                    ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
-                    : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                }`}
+                className={`rounded px-2 py-0.5 text-xs transition-colors ${copied
+                  ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
+                  : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
+                  }`}
               >
                 {copied ? "copied!" : "copy"}
               </span>
