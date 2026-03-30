@@ -1,6 +1,6 @@
 # @m3000/hashed-gems
 
-Generative gem avatars for user identification.
+Deterministic gemstone avatars, uniquely yours — infinitely shimmering.
 
 ## Packages
 

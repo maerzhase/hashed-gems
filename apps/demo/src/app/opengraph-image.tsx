@@ -2,7 +2,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-export const alt = "Hashed Gems - Deterministic gemstone avatars";
+export const alt =
+  "Hashed Gems - Deterministic gemstone avatars, uniquely yours — infinitely shimmering.";
 export const size = {
   width: 1200,
   height: 630,
@@ -58,7 +59,7 @@ export default async function Image() {
           bottom: 100,
         }}
       >
-        Deterministic gemstone avatars generated from any string.
+        Deterministic gemstone avatars, uniquely yours — infinitely shimmering.
       </div>
       <div
         style={{
