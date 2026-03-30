@@ -32,15 +32,16 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
     ) as HTMLCanvasElement | null;
     if (!srcCanvas) return null;
 
+    const { width: w, height: h } = srcCanvas;
     const out = document.createElement("canvas");
-    out.width = 400;
-    out.height = 400;
+    out.width = w;
+    out.height = h;
     const ctx = out.getContext("2d");
     if (!ctx) return null;
 
     // Transparent background so it composites cleanly on any bg in the OG image
-    ctx.clearRect(0, 0, 400, 400);
-    ctx.drawImage(srcCanvas, 0, 0, 400, 400);
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(srcCanvas, 0, 0);
 
     return new Promise<Blob | null>((resolve) =>
       out.toBlob(resolve, "image/png"),
@@ -110,7 +111,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   return (
     <div className="flex flex-col items-center gap-5 px-4 py-6">
       <div ref={containerRef}>
-        <HashedGem seed={seed} size={64} />
+        <HashedGem seed={seed} size={128} resolution={512} />
       </div>
 
       <div className="flex flex-wrap justify-center gap-1.5">

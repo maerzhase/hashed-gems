@@ -13,6 +13,8 @@ export interface UseWebGLOptions {
     uCutType: number;
     uRarity: number;
     size: number;
+    /** Explicit canvas pixel resolution. When omitted, defaults to size × devicePixelRatio. */
+    resolution?: number;
   };
   /** Render a single frame and stop. Default: false */
   isStatic?: boolean;
@@ -297,7 +299,7 @@ export function useWebGL(
 ): React.RefObject<HTMLCanvasElement | null> {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { vertexShader, fragmentShader, uniforms, isStatic = false } = options;
-  const { uSeed, uCausticCount, uGemType, uCutType, uRarity, size } = uniforms;
+  const { uSeed, uCausticCount, uGemType, uCutType, uRarity, size, resolution } = uniforms;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -305,8 +307,8 @@ export function useWebGL(
 
     const dpr =
       typeof window !== "undefined" ? (window.devicePixelRatio ?? 1) : 1;
-    const w = Math.round(size * dpr);
-    const h = Math.round(size * dpr);
+    const w = resolution ?? Math.round(size * dpr);
+    const h = resolution ?? Math.round(size * dpr);
     canvas.width = w;
     canvas.height = h;
 
@@ -383,6 +385,7 @@ export function useWebGL(
     uCutType,
     uRarity,
     size,
+    resolution,
     isStatic,
   ]);
 

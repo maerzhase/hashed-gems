@@ -25,10 +25,10 @@ function hexToRgb(hex: string): [number, number, number] {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-      ]
+      parseInt(result[1], 16),
+      parseInt(result[2], 16),
+      parseInt(result[3], 16),
+    ]
     : [255, 255, 255];
 }
 
@@ -55,82 +55,58 @@ export default async function Image({
         width: 1200,
         height: 630,
         display: "flex",
+        alignItems: "center",
         background: "#0a0a0a",
+        paddingLeft: 160,
+        paddingRight: 104,
       }}
     >
-      {/* Left: gem visual */}
+      {/* Gem with glow */}
       <div
         style={{
-          width: 580,
-          height: 630,
+          position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          position: "relative",
+          flexShrink: 0,
         }}
       >
-        {/* Glow behind gem */}
         {glowAlpha > 0 && (
           <div
             style={{
               position: "absolute",
-              width: 300,
-              height: 300,
+              width: 200,
+              height: 200,
               background: `radial-gradient(circle at center, rgba(${r},${g},${b},${glowAlpha}) 0%, transparent 65%)`,
             }}
           />
         )}
-
-        <div
-          style={{
-            display: "flex",
-            width: 280,
-            height: 280,
-          }}
-        >
+        <div style={{ display: "flex", width: 128, height: 128 }}>
           {/* biome-ignore lint/performance/noImgElement: next/og context, <Image> not available */}
           <img
             src={`https://c36zhng9zp5ehtzj.public.blob.vercel-storage.com/gems/${encodeURIComponent(seed)}.png`}
-            width={280}
-            height={280}
+            width={128}
+            height={128}
             alt={seed}
           />
         </div>
       </div>
 
-      {/* Right: text */}
+      {/* Text */}
       <div
         style={{
-          width: 620,
-          height: 630,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          paddingLeft: 48,
-          paddingRight: 72,
+          marginLeft: 88,
         }}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            color: "#737373",
-            fontSize: 20,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            marginBottom: 16,
-          }}
-        >
-          MY GEM
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
             lineHeight: 1.1,
-            marginBottom: 32,
-            maxWidth: 520,
+            marginBottom: 36,
           }}
         >
           <span
@@ -158,7 +134,7 @@ export default async function Image({
             display: "flex",
             alignItems: "center",
             gap: 12,
-            marginBottom: 48,
+            marginBottom: 44,
           }}
         >
           <div
@@ -168,11 +144,11 @@ export default async function Image({
               background: badge.bg,
               color: badge.text,
               borderRadius: 999,
-              paddingLeft: 16,
-              paddingRight: 16,
-              paddingTop: 6,
-              paddingBottom: 6,
-              fontSize: 20,
+              paddingLeft: 18,
+              paddingRight: 18,
+              paddingTop: 7,
+              paddingBottom: 7,
+              fontSize: 24,
               fontWeight: 600,
               textTransform: "capitalize",
             }}
@@ -186,11 +162,11 @@ export default async function Image({
               background: "#262626",
               color: "#a3a3a3",
               borderRadius: 999,
-              paddingLeft: 16,
-              paddingRight: 16,
-              paddingTop: 6,
-              paddingBottom: 6,
-              fontSize: 20,
+              paddingLeft: 18,
+              paddingRight: 18,
+              paddingTop: 7,
+              paddingBottom: 7,
+              fontSize: 24,
               textTransform: "capitalize",
             }}
           >
@@ -203,11 +179,11 @@ export default async function Image({
               background: "#262626",
               color: "#a3a3a3",
               borderRadius: 999,
-              paddingLeft: 16,
-              paddingRight: 16,
-              paddingTop: 6,
-              paddingBottom: 6,
-              fontSize: 20,
+              paddingLeft: 18,
+              paddingRight: 18,
+              paddingTop: 7,
+              paddingBottom: 7,
+              fontSize: 24,
               textTransform: "lowercase",
             }}
           >
@@ -220,10 +196,10 @@ export default async function Image({
             display: "flex",
             alignItems: "center",
             color: "#525252",
-            fontSize: 20,
+            fontSize: 24,
           }}
         >
-          gems.m3000.io
+          Get yours → gems.m3000.io
         </div>
       </div>
     </div>,

@@ -15,6 +15,7 @@ interface Props {
   gemTypeName: string;
   cutTypeName: string;
   rarityName: Rarity;
+  hasBlobImage: boolean;
 }
 
 export function GemPageClient({
@@ -22,6 +23,7 @@ export function GemPageClient({
   gemTypeName,
   cutTypeName,
   rarityName,
+  hasBlobImage,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
@@ -34,22 +36,26 @@ export function GemPageClient({
     setCanShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
 
-  // Auto-upload blob on mount so OG is ready when anyone shares the URL
+  // Auto-upload blob on mount so OG is ready when anyone shares the URL.
+  // Skip if the server already confirmed the blob exists.
   useEffect(() => {
+    if (hasBlobImage) return;
+
     const upload = async () => {
       const srcCanvas = containerRef.current?.querySelector(
         "canvas.hashed-gem",
       ) as HTMLCanvasElement | null;
       if (!srcCanvas) return;
 
+      const { width: w, height: h } = srcCanvas;
       const out = document.createElement("canvas");
-      out.width = 400;
-      out.height = 400;
+      out.width = w;
+      out.height = h;
       const ctx = out.getContext("2d");
       if (!ctx) return;
 
-      ctx.clearRect(0, 0, 400, 400);
-      ctx.drawImage(srcCanvas, 0, 0, 400, 400);
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(srcCanvas, 0, 0);
 
       const blob = await new Promise<Blob | null>((resolve) =>
         out.toBlob(resolve, "image/png"),
@@ -64,10 +70,10 @@ export function GemPageClient({
 
     // Wait a frame so the WebGL gem has rendered at least once
     const id = requestAnimationFrame(() => {
-      upload().catch(() => {});
+      upload().catch(() => { });
     });
     return () => cancelAnimationFrame(id);
-  }, [seed]);
+  }, [seed, hasBlobImage]);
 
   const captureBlob = async (): Promise<Blob | null> => {
     const srcCanvas = containerRef.current?.querySelector(
@@ -75,14 +81,15 @@ export function GemPageClient({
     ) as HTMLCanvasElement | null;
     if (!srcCanvas) return null;
 
+    const { width: w, height: h } = srcCanvas;
     const out = document.createElement("canvas");
-    out.width = 400;
-    out.height = 400;
+    out.width = w;
+    out.height = h;
     const ctx = out.getContext("2d");
     if (!ctx) return null;
 
-    ctx.clearRect(0, 0, 400, 400);
-    ctx.drawImage(srcCanvas, 0, 0, 400, 400);
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(srcCanvas, 0, 0);
 
     return new Promise<Blob | null>((resolve) =>
       out.toBlob(resolve, "image/png"),
@@ -99,7 +106,7 @@ export function GemPageClient({
   const handleCopyLink = async () => {
     captureBlob()
       .then((blob) => blob && uploadBlob(blob))
-      .catch(() => {});
+      .catch(() => { });
 
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);
@@ -132,7 +139,7 @@ export function GemPageClient({
   return (
     <div className="flex flex-col items-center">
       <div ref={containerRef} className="mb-6">
-        <HashedGem seed={seed} size={64} />
+        <HashedGem seed={seed} size={128} resolution={512} />
       </div>
 
       <div className="mb-8 flex flex-wrap justify-center gap-1.5">

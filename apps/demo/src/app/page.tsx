@@ -21,13 +21,26 @@ import { HashedGem } from "@m3000/hashed-gems";
   {
     label: "Size",
     description:
-      "Control the gem dimensions with the size prop. Default is 64px.",
+      "size sets the CSS display size in pixels. Default is 64px. Internally the gem renders at size × devicePixelRatio for crisp results on retina screens.",
     code: `import "@m3000/hashed-gems/styles.css";
 import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="bob" size={48} />`,
     seed: "bob",
     size: 48,
+  },
+  {
+    label: "Resolution",
+    description:
+      "Pass resolution to override the WebGL canvas pixel count. Useful when you need a high-quality capture for sharing or exports — display size stays the same.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
+
+// Displays at 96px, renders internally at 512px — sharp capture
+<HashedGem seed="frank" size={96} resolution={512} />`,
+    seed: "frank",
+    size: 96,
+    resolution: 512,
   },
   {
     label: "Static mode",
@@ -271,7 +284,8 @@ export default function Home() {
                   <div className="shrink-0">
                     <HashedGem
                       seed={example.seed}
-                      size={example.size}
+                      size={example.size ?? 64}
+                      resolution={example.resolution}
                       static={example.static}
                       gemType={example.gemType}
                       cutType={example.cutType}
