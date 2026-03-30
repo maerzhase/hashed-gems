@@ -237,10 +237,11 @@ export default function Home() {
                   key={pm.id}
                   type="button"
                   onClick={() => setSelectedPm(pm.id)}
-                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${selectedPm === pm.id
-                    ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
-                    : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                    }`}
+                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
+                    selectedPm === pm.id
+                      ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
+                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+                  }`}
                 >
                   {pm.label}
                 </button>
@@ -256,10 +257,11 @@ export default function Home() {
                 {currentCommand}
               </span>
               <span
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${copied
-                  ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
-                  : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                  }`}
+                className={`rounded px-2 py-0.5 text-xs transition-colors ${
+                  copied
+                    ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
+                    : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
+                }`}
               >
                 {copied ? "copied!" : "copy"}
               </span>
@@ -301,25 +303,29 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
-                <div className="relative p-4 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
-                  <button
-                    type="button"
-                    onClick={() => copyExample(example.code, example.label)}
-                    className="absolute top-2 right-2 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
-                  >
-                    {copiedExample === example.label ? "copied!" : "copy"}
-                  </button>
-                  {highlightedExamples[example.label] ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: highlightedExamples[example.label],
-                      }}
-                    />
-                  ) : (
-                    <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
-                      {example.code}
-                    </pre>
-                  )}
+                <div className="relative overflow-hidden p-4">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => copyExample(example.code, example.label)}
+                      className="absolute top-0 right-0 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                    >
+                      {copiedExample === example.label ? "copied!" : "copy"}
+                    </button>
+                    <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
+                      {highlightedExamples[example.label] ? (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: highlightedExamples[example.label],
+                          }}
+                        />
+                      ) : (
+                        <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
+                          {example.code}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
