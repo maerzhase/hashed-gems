@@ -78,7 +78,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
     // Fire-and-forget upload so the OG is ready when someone opens the link
     captureCanvas()
       .then((blob) => blob && uploadGem(blob))
-      .catch(() => { });
+      .catch(() => {});
 
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);

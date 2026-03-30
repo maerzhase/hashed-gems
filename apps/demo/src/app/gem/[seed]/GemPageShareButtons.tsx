@@ -30,7 +30,10 @@ export function GemPageShareButtons({ seed, gemTypeName, rarityName }: Props) {
 
   const handleNativeShare = async () => {
     try {
-      await navigator.share({ title: `${rarityName} ${gemTypeName}`, url: gemUrl });
+      await navigator.share({
+        title: `${rarityName} ${gemTypeName}`,
+        url: gemUrl,
+      });
     } catch {
       // User cancelled
     }
@@ -52,7 +55,11 @@ export function GemPageShareButtons({ seed, gemTypeName, rarityName }: Props) {
       </button>
 
       {canShare && (
-        <button type="button" onClick={handleNativeShare} className={BUTTON_CLASS}>
+        <button
+          type="button"
+          onClick={handleNativeShare}
+          className={BUTTON_CLASS}
+        >
           Share
         </button>
       )}

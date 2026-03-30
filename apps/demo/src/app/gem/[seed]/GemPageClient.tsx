@@ -70,7 +70,7 @@ export function GemPageClient({
 
     // Wait a frame so the WebGL gem has rendered at least once
     const id = requestAnimationFrame(() => {
-      upload().catch(() => { });
+      upload().catch(() => {});
     });
     return () => cancelAnimationFrame(id);
   }, [seed, hasBlobImage]);
@@ -106,7 +106,7 @@ export function GemPageClient({
   const handleCopyLink = async () => {
     captureBlob()
       .then((blob) => blob && uploadBlob(blob))
-      .catch(() => { });
+      .catch(() => {});
 
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);

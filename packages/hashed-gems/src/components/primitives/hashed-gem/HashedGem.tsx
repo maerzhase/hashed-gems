@@ -50,7 +50,15 @@ export function HashedGem({
   const canvasRef = useWebGL({
     vertexShader: VERTEX_SHADER,
     fragmentShader: FRAGMENT_SHADER,
-    uniforms: { uSeed, uCausticCount, uGemType, uCutType, uRarity, size, resolution },
+    uniforms: {
+      uSeed,
+      uCausticCount,
+      uGemType,
+      uCutType,
+      uRarity,
+      size,
+      resolution,
+    },
     isStatic,
   });
 

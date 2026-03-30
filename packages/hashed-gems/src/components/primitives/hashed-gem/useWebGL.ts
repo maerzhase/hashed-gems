@@ -299,7 +299,15 @@ export function useWebGL(
 ): React.RefObject<HTMLCanvasElement | null> {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { vertexShader, fragmentShader, uniforms, isStatic = false } = options;
-  const { uSeed, uCausticCount, uGemType, uCutType, uRarity, size, resolution } = uniforms;
+  const {
+    uSeed,
+    uCausticCount,
+    uGemType,
+    uCutType,
+    uRarity,
+    size,
+    resolution,
+  } = uniforms;
 
   useEffect(() => {
     const canvas = canvasRef.current;
