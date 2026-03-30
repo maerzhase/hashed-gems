@@ -4,7 +4,6 @@ import type { CutType, GemType, Rarity } from "@/lib/gem";
 import { getGemProperties } from "@/lib/gem";
 
 export interface HashedGemGradientProps {
-  size?: number;
   seed: string;
   gemType?: GemType;
   cutType?: CutType;
@@ -143,7 +142,6 @@ function getFacetOverlay(
 function getAsterismOverlay(
   rarity: Rarity,
   borderRadius: string,
-  size: number,
 ): React.CSSProperties | null {
   if (rarity !== "epic" && rarity !== "legendary") return null;
   const opacity = rarity === "legendary" ? 0.25 : 0.15;
@@ -193,7 +191,6 @@ function getOpalRainbowOverlay(
 }
 
 export function HashedGemGradient({
-  size = 64,
   seed,
   gemType,
   cutType,
@@ -239,8 +236,8 @@ export function HashedGemGradient({
   `;
 
   const gradientStyle: React.CSSProperties = {
-    width: size,
-    height: size,
+    width: "100%",
+    height: "100%",
     borderRadius,
     background: `${baseGradient}, ${sparkleGradient}`,
     backgroundBlendMode: isLightGem ? "screen" : "normal",
@@ -287,12 +284,12 @@ export function HashedGemGradient({
     borderRadius,
     background:
       "radial-gradient(circle at center, transparent 52%, rgba(0,0,0,0.65) 100%)",
-    boxShadow: `inset 0 0 ${size * 0.4}px rgba(255,255,255,0.12)`,
+    boxShadow: "inset 0 0 25px rgba(255,255,255,0.12)",
     pointerEvents: "none",
   };
 
   const facetOverlay = getFacetOverlay(cutTypeName, props.seed, borderRadius);
-  const asterismOverlay = getAsterismOverlay(rarityName, borderRadius, size);
+  const asterismOverlay = getAsterismOverlay(rarityName, borderRadius);
   const opalRainbow = getOpalRainbowOverlay(gemTypeName, borderRadius);
 
   return (

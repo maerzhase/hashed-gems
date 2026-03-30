@@ -1,10 +1,24 @@
 {
   "name": "@m3000/hashed-gems",
-  "version": "0.0.1",
-  "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "@storybook/addon-a11y": "10.1.2",
+    "@storybook/addon-docs": "10.1.2",
+    "@storybook/addon-themes": "10.1.2",
+    "@storybook/react": "10.1.2",
+    "@storybook/react-vite": "10.1.2",
+    "@tsconfig/vite-react": "7.0.2",
+    "@types/node": "22.14.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "storybook": "10.1.2",
+    "tsdown": "0.20.3",
+    "typescript": "5.9.2",
+    "vite-tsconfig-paths": "5.1.4"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -15,6 +29,15 @@
   "files": [
     "dist"
   ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "peerDependencies": {
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown",
     "build:watch": "tsdown --watch",
@@ -27,29 +50,6 @@
     "storybook": "storybook dev -p 6007",
     "typecheck": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
-  },
-  "devDependencies": {
-    "@tsconfig/vite-react": "7.0.2",
-    "@biomejs/biome": "2.2.0",
-    "@storybook/addon-a11y": "10.1.2",
-    "@storybook/addon-docs": "10.1.2",
-    "@storybook/addon-themes": "10.1.2",
-    "@storybook/react": "10.1.2",
-    "@storybook/react-vite": "10.1.2",
-    "@types/node": "22.14.1",
-    "@types/react": "^18.0.0 || ^19.0.0",
-    "@types/react-dom": "^18.0.0 || ^19.0.0",
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
-    "storybook": "10.1.2",
-    "tsdown": "0.20.3",
-    "typescript": "5.9.2",
-    "vite-tsconfig-paths": "5.1.4"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

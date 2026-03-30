@@ -20,6 +20,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: 0.7.2
         version: 0.7.2(prettier@3.8.1)
+      syncpack:
+        specifier: ^14.3.0
+        version: 14.3.0
       turbo:
         specifier: 2.8.18
         version: 2.8.18
@@ -38,6 +41,9 @@ importers:
       '@vercel/analytics':
         specifier: 2.0.1
         version: 2.0.1(next@16.2.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+      '@vercel/blob':
+        specifier: ^2.3.2
+        version: 2.3.2
       analytics:
         specifier: github:vercel/analytics
         version: https://codeload.github.com/vercel/analytics/tar.gz/0d6941670b31bf2f3cbcf47540840b0b08860077
@@ -118,16 +124,16 @@ importers:
         specifier: 22.14.1
         version: 22.14.1
       '@types/react':
-        specifier: ^18.0.0 || ^19.0.0
+        specifier: 19.2.2
         version: 19.2.2
       '@types/react-dom':
-        specifier: ^18.0.0 || ^19.0.0
+        specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.2)
       react:
-        specifier: ^18.0.0 || ^19.0.0
+        specifier: 19.2.4
         version: 19.2.4
       react-dom:
-        specifier: ^18.0.0 || ^19.0.0
+        specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       storybook:
         specifier: 10.1.2
@@ -1767,6 +1773,10 @@ packages:
       vue-router:
         optional: true
 
+  '@vercel/blob@2.3.2':
+    resolution: {integrity: sha512-FjlTJ5ffGj0RssrU0dJ90Zgr83AdhpIs2y9f3x386w+q9sM0P8m8Ouxsm3fqsjr4IyqTTo7Ioc2PJqxxOKNhjA==}
+    engines: {node: '>=20.0.0'}
+
   '@vitest/expect@3.2.4':
     resolution: {integrity: sha512-Io0yyORnB6sikFlt8QW5K7slY4OjqNX9jmJQ02QDda8lyM6B5oNgVWoSoKPac8/kgnCUzuHQKrSLtu/uOqqrig==}
 
@@ -1855,6 +1865,9 @@ packages:
   ast-types@0.16.1:
     resolution: {integrity: sha512-6t10qk83GOG8p0vKmaCr8eiilZwO171AvbROMtvvNiwrTly62t+7XkA8RdIIVbpMhCASAsxgAzdRSwh6nw/5Dg==}
     engines: {node: '>=4'}
+
+  async-retry@1.3.3:
+    resolution: {integrity: sha512-wfr/jstw9xNi/0teMHrRW7dsz3Lt5ARhYNZ2ewpadnhaIp5mbALhOAP+EAdsC7t4Z6wqsDVv9+W6gm1Dk9mEyw==}
 
   axe-core@4.11.1:
     resolution: {integrity: sha512-BASOg+YwO2C+346x3LZOeoovTIoTrRqEsqMa6fmfAV0P+U9mFr9NsyOEpiYvFjbc64NMrSswhV50WdXzdb/Z5A==}
@@ -2181,6 +2194,10 @@ packages:
   indent-string@4.0.0:
     resolution: {integrity: sha512-EdDDZu4A2OyIK7Lr/2zG+w5jmbuk1DVBnEwREQvBzspBJkCEbRa8GxU1lghYcaGJCnRWibjDXlq779X1/y5xwg==}
     engines: {node: '>=8'}
+
+  is-buffer@2.0.5:
+    resolution: {integrity: sha512-i2R6zNFDwgEHJyQUtJEk0XFi1i0dPFn/oqjK3/vPCcDeJvW5NQ83V8QbicfF1SupOaB0h8ntgBC2YiE7dfyctQ==}
+    engines: {node: '>=4'}
 
   is-core-module@2.16.1:
     resolution: {integrity: sha512-UfoeMA6fIJ8wTYFEUjelnaGI67v6+N7qXJEvQuIGa99l4xsCruSYOVSQ0uPANn4dAzm8lkYPaKLrrijLq7x23w==}
@@ -2751,6 +2768,10 @@ packages:
     engines: {node: '>= 0.4'}
     hasBin: true
 
+  retry@0.13.1:
+    resolution: {integrity: sha512-XQBQ3I8W1Cge0Seh+6gjj03LbmRFWuoszgK9ooCpwYIrhhoO80pfq4cUkU5DkknwfOfFteRwlZ56PYOGYyFWdg==}
+    engines: {node: '>= 4'}
+
   rettime@0.10.1:
     resolution: {integrity: sha512-uyDrIlUEH37cinabq0AX4QbgV4HbFZ/gqoiunWQ1UqBtRvTTytwhNYjE++pO/MjPTZL5KQCf2bEoJ/BJNVQ5Kw==}
 
@@ -2919,6 +2940,51 @@ packages:
     resolution: {integrity: sha512-Bh7QjT8/SuKUIfObSXNHNSK6WHo6J1tHCqJsuaFDP7gP0fkzSfTxI8y85JrppZ0h8l0maIgc2tfuZQ6/t3GtnQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
 
+  syncpack-darwin-arm64@14.3.0:
+    resolution: {integrity: sha512-gpbkBzO7yqa3BONc4EU3jY07yiPSZdoAxcpnz8REV9Bc6FkmKfOejCpYIh8RaogGPS4gOLJ/RUJEECqAaHTcjA==}
+    cpu: [arm64]
+    os: [darwin]
+
+  syncpack-darwin-x64@14.3.0:
+    resolution: {integrity: sha512-wTpl6Qj5qGIHrYhpCrlNnosmhQqvUoidqqmxtdM3f+j+b+OkTtpkUl2tdE28h3aeEEUPf9ClQnHuwRJMYNlrJw==}
+    cpu: [x64]
+    os: [darwin]
+
+  syncpack-linux-arm64-musl@14.3.0:
+    resolution: {integrity: sha512-AezJ5dv0s+l/p1l4/wBatYhM6SZEKLcyNKggSOX5uISzqbSKwj/Aak13pBXWarzS+N6LnOl4PMcwRMJPOUfN/g==}
+    cpu: [arm64]
+    os: [linux]
+
+  syncpack-linux-arm64@14.3.0:
+    resolution: {integrity: sha512-Vcf9zWkJGRqb5mGPKi9E+s/mB/Tw08LmKGRaiyKJjK8bhd1Ds65O8A2lOidy3jg0NOOojqREmDsli74Xd0z6KA==}
+    cpu: [arm64]
+    os: [linux]
+
+  syncpack-linux-x64-musl@14.3.0:
+    resolution: {integrity: sha512-tIRF0lvBJcoIwcO05/Q6j30CAg0jzn+A5eQL+06Ncq8CE5i8fBWrVwN1U/QQ4fzT+tondNWH/2BR5zlaB1VUpQ==}
+    cpu: [x64]
+    os: [linux]
+
+  syncpack-linux-x64@14.3.0:
+    resolution: {integrity: sha512-n/4iBJnoOCe5An+WYlaqfSxOKQ7Id3TZTpxOpI60Cucq3yqwq0JHQUielj6JBtVaxvo2rAsTwbCLyp2aB0SD2g==}
+    cpu: [x64]
+    os: [linux]
+
+  syncpack-windows-arm64@14.3.0:
+    resolution: {integrity: sha512-ZTX0rSUTJZjIde3qPKLEqU7IEt4KxFsmq6gKLfESx5rB1rxk/B1Ljv6nTYph5QVItEzHQHUXDWnqa9yCb15myw==}
+    cpu: [arm64]
+    os: [win32]
+
+  syncpack-windows-x64@14.3.0:
+    resolution: {integrity: sha512-zvbphZw40wFZYeEW2oJYqA9Uw6IOwNIpgFmVNdWdGmShPF/Zu1cavHEcGwtQmvVzwuTEyiu67uxQ3hDC2q6vtg==}
+    cpu: [x64]
+    os: [win32]
+
+  syncpack@14.3.0:
+    resolution: {integrity: sha512-8/WtPPxxGFqE21JPFz6Bpw0m9BT3lzMYDcewJFj++EBPmCaDWowTnx0R4V7ofH/1z3HAIaAps6g2GHL76l1Y2g==}
+    engines: {node: '>=14.17.0'}
+    hasBin: true
+
   tabbable@6.4.0:
     resolution: {integrity: sha512-05PUHKSNE8ou2dwIxTngl4EzcnsCDZGJ/iCLtDflR/SHB/ny14rXc+qU5P4mG9JkusiV7EivzY9Mhm55AzAvCg==}
 
@@ -2946,6 +3012,10 @@ packages:
   term-size@2.2.1:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
     engines: {node: '>=8'}
+
+  throttleit@2.1.0:
+    resolution: {integrity: sha512-nt6AMGKW1p/70DF/hGBdJB57B8Tspmbp5gfJ8ilhLnt7kkr2ye7hzD6NVG8GGErk2HWF34igrL2CXmNIkzKqKw==}
+    engines: {node: '>=18'}
 
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
@@ -3057,6 +3127,10 @@ packages:
 
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
+  undici@6.24.1:
+    resolution: {integrity: sha512-sC+b0tB1whOCzbtlx20fx3WgCXwkW627p4EA9uM+/tNNPkSS+eSEld6pAs9nDv7WbY1UUljBMYPtu9BCOrCWKA==}
+    engines: {node: '>=18.17'}
 
   unist-util-is@6.0.1:
     resolution: {integrity: sha512-LsiILbtBETkDz8I9p1dQ0uyRUWuaQzd/cuEeS1hoRSyW5E5XGmTzlwY1OrNzzakGowI9Dr/I8HVaw4hTtnxy8g==}
@@ -4604,6 +4678,14 @@ snapshots:
       next: 16.2.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       react: 19.2.4
 
+  '@vercel/blob@2.3.2':
+    dependencies:
+      async-retry: 1.3.3
+      is-buffer: 2.0.5
+      is-node-process: 1.2.0
+      throttleit: 2.1.0
+      undici: 6.24.1
+
   '@vitest/expect@3.2.4':
     dependencies:
       '@types/chai': 5.2.3
@@ -4680,6 +4762,10 @@ snapshots:
   ast-types@0.16.1:
     dependencies:
       tslib: 2.8.1
+
+  async-retry@1.3.3:
+    dependencies:
+      retry: 0.13.1
 
   axe-core@4.11.1: {}
 
@@ -4991,6 +5077,8 @@ snapshots:
 
   indent-string@4.0.0: {}
 
+  is-buffer@2.0.5: {}
+
   is-core-module@2.16.1:
     dependencies:
       hasown: 2.0.2
@@ -5003,8 +5091,7 @@ snapshots:
     dependencies:
       is-extglob: 2.1.1
 
-  is-node-process@1.2.0:
-    optional: true
+  is-node-process@1.2.0: {}
 
   is-number@7.0.0: {}
 
@@ -5447,6 +5534,8 @@ snapshots:
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
 
+  retry@0.13.1: {}
+
   rettime@0.10.1:
     optional: true
 
@@ -5691,6 +5780,41 @@ snapshots:
       '@pkgr/core': 0.2.9
     optional: true
 
+  syncpack-darwin-arm64@14.3.0:
+    optional: true
+
+  syncpack-darwin-x64@14.3.0:
+    optional: true
+
+  syncpack-linux-arm64-musl@14.3.0:
+    optional: true
+
+  syncpack-linux-arm64@14.3.0:
+    optional: true
+
+  syncpack-linux-x64-musl@14.3.0:
+    optional: true
+
+  syncpack-linux-x64@14.3.0:
+    optional: true
+
+  syncpack-windows-arm64@14.3.0:
+    optional: true
+
+  syncpack-windows-x64@14.3.0:
+    optional: true
+
+  syncpack@14.3.0:
+    optionalDependencies:
+      syncpack-darwin-arm64: 14.3.0
+      syncpack-darwin-x64: 14.3.0
+      syncpack-linux-arm64: 14.3.0
+      syncpack-linux-arm64-musl: 14.3.0
+      syncpack-linux-x64: 14.3.0
+      syncpack-linux-x64-musl: 14.3.0
+      syncpack-windows-arm64: 14.3.0
+      syncpack-windows-x64: 14.3.0
+
   tabbable@6.4.0: {}
 
   tagged-tag@1.0.0:
@@ -5713,6 +5837,8 @@ snapshots:
       yallist: 5.0.0
 
   term-size@2.2.1: {}
+
+  throttleit@2.1.0: {}
 
   tiny-invariant@1.3.3: {}
 
@@ -5819,6 +5945,8 @@ snapshots:
       quansync: 1.0.0
 
   undici-types@6.21.0: {}
+
+  undici@6.24.1: {}
 
   unist-util-is@6.0.1:
     dependencies:

@@ -8,8 +8,14 @@ import { FRAGMENT_SHADER, VERTEX_SHADER } from "./shaders";
 import { useWebGL } from "./useWebGL";
 
 export interface HashedGemProps {
-  /** Display size in pixels (canvas width & height). Default: 64 */
+  /** CSS display size in pixels. Controls the container width & height. Default: 64 */
   size?: number;
+  /**
+   * WebGL canvas pixel resolution. Defaults to size × devicePixelRatio (retina-sharp).
+   * Pass a larger value to render at higher quality for captures/exports
+   * (e.g. resolution={512} on a size={160} gem for a crisp blob image).
+   */
+  resolution?: number;
   /** Any string — username, address, id — hashed to a deterministic avatar */
   seed: string;
   /** Render a single frame and stop animating. Good for lists. Default: false */
@@ -18,11 +24,13 @@ export interface HashedGemProps {
   gemType?: GemType;
   /** Override the cut type derived from seed */
   cutType?: CutType;
+  /** CSS classes for styling (border-radius, shadows, etc.) */
   className?: string;
 }
 
 export function HashedGem({
   size = 64,
+  resolution,
   seed,
   static: isStatic = false,
   gemType,
@@ -42,7 +50,15 @@ export function HashedGem({
   const canvasRef = useWebGL({
     vertexShader: VERTEX_SHADER,
     fragmentShader: FRAGMENT_SHADER,
-    uniforms: { uSeed, uCausticCount, uGemType, uCutType, uRarity, size },
+    uniforms: {
+      uSeed,
+      uCausticCount,
+      uGemType,
+      uCutType,
+      uRarity,
+      size,
+      resolution,
+    },
     isStatic,
   });
 
@@ -57,7 +73,6 @@ export function HashedGem({
       }}
     >
       <HashedGemGradient
-        size={size}
         seed={seed}
         gemType={gemType}
         cutType={cutType}
@@ -65,12 +80,10 @@ export function HashedGem({
       />
       <canvas
         ref={canvasRef}
-        width={size}
-        height={size}
         className="hashed-gem"
         style={{
-          width: size,
-          height: size,
+          width: "100%",
+          height: "100%",
           position: "absolute",
           top: 0,
           left: 0,
