@@ -12,8 +12,12 @@ CutResult computeFirework(vec2 uv, float seed) {
   res.facetId = 0;
   res.edgeMask = 0.0;
 
-  float radius = length(uv) / 0.90;
   float angle = atan(uv.y, uv.x);
+  float burstRadius = seededSpan(seed, 80.0, 0.03, 0.08);
+  float ringWarp = 1.0
+    + burstRadius * cos(angle * 6.0 + seed * 0.75)
+    + 0.016 * sin(angle * 12.0 + seed * 1.2);
+  float radius = clamp(length(uv) / (0.90 * ringWarp), 0.0, 1.0);
 
   float majorSpokes = 12.0;
   float majorSw = TWO_PI / majorSpokes;
@@ -34,14 +38,15 @@ CutResult computeFirework(vec2 uv, float seed) {
   float burstWave = 0.5 + 0.5 * cos(angle * majorSpokes + seed * 0.75);
   float flareMetric = radius / (0.93 + 0.10 * burstWave);
 
-  float zj = 0.020 * sin(seed * 5.9 + majorOi * 1.2);
-  float z0 = 0.11 + zj * 0.4;
-  float z1 = 0.23 + zj * 0.6;
-  float z2 = 0.38 + zj;
-  float z3 = 0.54 + zj;
-  float z4 = 0.69 + zj * 0.7;
-  float z5 = 0.82 + zj * 0.4;
-  float z6 = 0.92;
+  float zj = 0.010 * sin(seed * 5.9 + majorOi * 1.2);
+  float burstScale = 0.95 + 0.10 * hash11(seed * 0.39 + majorOi * 0.81);
+  float z0 = seededSpan(seed, 81.0, 0.10, 0.13) * burstScale + zj * 0.4;
+  float z1 = z0 + seededSpan(seed, 82.0, 0.10, 0.14) * (0.95 + 0.08 * hash11(seed * 0.47 + subIndex * 0.63));
+  float z2 = z1 + seededSpan(seed, 83.0, 0.12, 0.17) * (0.95 + 0.08 * hash11(seed * 0.53 + majorOi * 0.71));
+  float z3 = z2 + seededSpan(seed, 84.0, 0.12, 0.17);
+  float z4 = z3 + seededSpan(seed, 85.0, 0.10, 0.15);
+  float z5 = z4 + seededSpan(seed, 86.0, 0.08, 0.13);
+  float z6 = min(0.92, z5 + seededSpan(seed, 87.0, 0.05, 0.09));
 
   if (flareMetric < z0) {
     float tableA = majorOi * majorSw + majorSw * 0.5;
@@ -143,9 +148,7 @@ export function fireworkCssGradient(
     height: "100%",
     borderRadius,
     background: `
-      radial-gradient(circle at 50% 50%, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.10) 12%, transparent 28%),
-      radial-gradient(circle at 50% 50%, transparent 34%, rgba(255,255,255,0.10) 52%, transparent 68%),
-      radial-gradient(circle at 50% 50%, transparent 72%, rgba(255,255,255,0.08) 84%, transparent 100%),
+      radial-gradient(circle at ${50 + Math.sin(seed * 0.013) * 4}% ${50 + Math.cos(seed * 0.017) * 4}%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 14%, transparent 28%),
       conic-gradient(from ${fromAngle}deg at 50% 50%, ${majorStops}, transparent 360deg),
       conic-gradient(from ${secondaryAngle}deg at 50% 50%, ${secondaryStops}, transparent 360deg)
     `,

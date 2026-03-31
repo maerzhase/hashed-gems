@@ -9,6 +9,7 @@ interface Props {
   seed: string;
   gemTypeName: string;
   cutTypeName: string;
+  cutVariantName: string;
   rarityName: Rarity;
 }
 
@@ -16,6 +17,7 @@ export function GemPageContent({
   seed,
   gemTypeName,
   cutTypeName,
+  cutVariantName,
   rarityName,
 }: Props) {
   return (
@@ -34,6 +36,7 @@ export function GemPageContent({
           seed={seed}
           gemTypeName={gemTypeName}
           cutTypeName={cutTypeName}
+          cutVariantName={cutVariantName}
           rarityName={rarityName}
         />
 

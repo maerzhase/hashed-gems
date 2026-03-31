@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import type { CutType, GemType } from "@/lib/gem";
-import { CUT_TYPES, GEM_TYPES, getGemProperties } from "@/lib/gem";
+import { CUT_TYPES, GEM_TYPES, getGemProperties, getShaderSeed } from "@/lib/gem";
 import { HashedGemGradient } from "./HashedGemGradient";
 import { FRAGMENT_SHADER, VERTEX_SHADER } from "./shaders";
 import { useWebGL } from "./useWebGL";
@@ -39,7 +39,7 @@ export function HashedGem({
 }: HashedGemProps): React.ReactElement {
   const props = getGemProperties(seed);
 
-  const uSeed = props.seed;
+  const uSeed = getShaderSeed(seed);
   const uGemType =
     gemType !== undefined ? GEM_TYPES.indexOf(gemType) : props.gemType;
   const uCutType =

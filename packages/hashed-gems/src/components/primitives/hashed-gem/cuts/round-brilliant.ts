@@ -12,9 +12,19 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
   res.facetId = 0;
   res.edgeMask = 0.0;
 
-  // Circular radius — makes facet rings truly round, distinct from princess
-  float radius = length(uv) / 0.90;
   float angle  = atan(uv.y, uv.x);
+  float tableRatio = seededSpan(seed, 20.0, 0.10, 0.14);
+  float starReach = seededSpan(seed, 21.0, 0.09, 0.13);
+  float bezelSpan = seededSpan(seed, 22.0, 0.10, 0.14);
+  float mainSpan = seededSpan(seed, 23.0, 0.10, 0.13);
+  float upperGirdleSpan = seededSpan(seed, 24.0, 0.08, 0.12);
+  float lowerGirdleSpan = seededSpan(seed, 25.0, 0.07, 0.11);
+  float girdleSpan = seededSpan(seed, 26.0, 0.07, 0.10);
+  float lobeStrength = seededSpan(seed, 27.0, 0.010, 0.032);
+  float ringWarp = 1.0
+    + lobeStrength * cos(angle * 8.0 + seed * 0.63)
+    + 0.012 * sin(angle * 16.0 + seed * 1.1);
+  float radius = clamp(length(uv) / (0.90 * ringWarp), 0.0, 1.0);
 
   float sw  = PI / 8.0;  // 16-fold
   float oa  = mod(angle + sw*0.5, sw) - sw*0.5;
@@ -27,9 +37,16 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
   float oa2   = mod(sang + sw2*0.5, sw2) - sw2*0.5;
   float oi2f  = floor((sang + sw2*0.5) / sw2);
 
-  float zj = 0.025 * sin(seed * 7.3 + oi * 1.4);
-  float z1=0.12+zj, z2=0.26+zj, z3=0.40+zj, z4=0.54+zj,
-        z5=0.66+zj*0.7, z6=0.78+zj*0.4, z7=0.88;
+  float zj = 0.012 * sin(seed * 7.3 + oi * 1.4);
+  float sectorScale = 0.95 + 0.10 * hash11(seed * 0.47 + oi * 0.73);
+  float subScale = 0.96 + 0.08 * hash11(seed * 0.63 + oi2f * 0.31);
+  float z1 = tableRatio * sectorScale + zj;
+  float z2 = z1 + starReach * mix(sectorScale, subScale, 0.45);
+  float z3 = z2 + bezelSpan * mix(1.0, subScale, 0.55);
+  float z4 = z3 + mainSpan * mix(sectorScale, subScale, 0.50);
+  float z5 = z4 + upperGirdleSpan * mix(1.0, sectorScale, 0.35);
+  float z6 = z5 + lowerGirdleSpan * mix(1.0, subScale, 0.30);
+  float z7 = min(0.90, z6 + girdleSpan);
 
   if (radius < z1) {
     // Subdivide table into 8 sectors matching the cut's symmetry.
@@ -47,12 +64,12 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
     res.facetId = 200 + int(tOi);
     res.edgeMask = tableEdge * tableFade * 0.45;
   } else if (radius < z2) {
-    float outA = oi*sw + sw*0.5;
+    float outA = oi*sw + sw*0.5 + 0.04 * sin(seed * 1.6 + oi * 0.7);
     float tilt = 0.18 + 0.06*sin(seed*1.7+oi*0.78) + 0.03*sin(oi2f*2.1+seed*3.3);
     res.normal  = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
     res.facetId = 1 + int(oi);
   } else if (radius < z3) {
-    float outA = oi*sw + sw*0.5;
+    float outA = oi*sw + sw*0.5 + 0.05 * cos(seed * 1.9 + oi * 0.6);
     float subA = 0.06 * cos(oi2f*1.9 + seed*1.4);
     float tilt = 0.30 + 0.08*cos(seed*2.3+oi*0.79) + 0.04*sin(oi2f*1.5+seed);
     res.normal  = normalize(vec3(cos(outA+subA)*tilt, sin(outA+subA)*tilt, 1.0-tilt));
@@ -106,11 +123,13 @@ export function roundBrilliantCssGradient(
 ): React.CSSProperties {
   const rotOffset = seed % 360;
   const fromAngle = rotOffset % 22.5;
+  const centerX = 48 + Math.sin(seed * 0.019) * 4;
+  const centerY = 50 + Math.cos(seed * 0.023) * 4;
   const stops = Array.from({ length: 8 }, (_, i) => {
     const s = i * 45;
     const mid = s + 11.25;
     const e = s + 22.5;
-    return `transparent ${s}deg, rgba(255,255,255,0.1) ${mid}deg, transparent ${e}deg`;
+    return `transparent ${s}deg, rgba(255,255,255,0.08) ${mid}deg, transparent ${e}deg`;
   }).join(", ");
   return {
     position: "absolute",
@@ -119,7 +138,10 @@ export function roundBrilliantCssGradient(
     width: "100%",
     height: "100%",
     borderRadius,
-    background: `conic-gradient(from ${fromAngle}deg at 50% 50%, ${stops}, transparent 360deg)`,
+    background: `
+      radial-gradient(circle at ${centerX}% ${centerY}%, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 14%, transparent 28%),
+      conic-gradient(from ${fromAngle}deg at ${centerX}% ${centerY}%, ${stops}, transparent 360deg)
+    `,
     mixBlendMode: "screen",
     pointerEvents: "none",
   };

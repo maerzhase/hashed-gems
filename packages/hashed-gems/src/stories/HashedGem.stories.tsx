@@ -3,7 +3,13 @@ import {
   HashedGem,
   HashedGemGradient,
 } from "@/components/primitives/hashed-gem";
-import { CUT_TYPES, GEM_TYPES } from "@/lib/gem";
+import {
+  CUT_TYPES,
+  GEM_TYPES,
+  getCutVariant,
+  getCutVariantLabel,
+  getGemProperties,
+} from "@/lib/gem";
 
 const meta: Meta<typeof HashedGem> = {
   title: "Primitives/HashedGem",
@@ -39,6 +45,17 @@ const SEED_NAMES = [
   "grace",
 ];
 
+const VARIANCE_SEEDS = [
+  "aurora",
+  "marble",
+  "ember",
+  "solstice",
+  "tide",
+  "velvet",
+  "quartz",
+  "nova",
+];
+
 const GEM_TYPES_DATA = GEM_TYPES.map((gemType) => ({
   gemType,
   label: gemType.charAt(0).toUpperCase() + gemType.slice(1).replace(/-/g, " "),
@@ -48,6 +65,34 @@ const CUT_TYPES_DATA = CUT_TYPES.map((cutType) => ({
   cutType,
   label: cutType.charAt(0).toUpperCase() + cutType.slice(1).replace(/-/g, " "),
 }));
+
+const HELPER_ATTRIBUTE_ROWS = [
+  {
+    label: "Gem type",
+    getValue: (properties: ReturnType<typeof getGemProperties>) =>
+      properties.gemTypeName,
+  },
+  {
+    label: "Cut type",
+    getValue: (properties: ReturnType<typeof getGemProperties>) =>
+      properties.cutTypeName,
+  },
+  {
+    label: "Cut variant",
+    getValue: (properties: ReturnType<typeof getGemProperties> & { cutVariantName: string }) =>
+      properties.cutVariantName,
+  },
+  {
+    label: "Rarity",
+    getValue: (properties: ReturnType<typeof getGemProperties>) =>
+      properties.rarityName,
+  },
+  {
+    label: "Caustic count",
+    getValue: (properties: ReturnType<typeof getGemProperties>) =>
+      properties.causticCount,
+  },
+];
 
 export const SeedVariations: Story = {
   render: () => (
@@ -74,6 +119,81 @@ export const SeedVariations: Story = {
       ))}
     </div>
   ),
+};
+
+export const HelperAttributes: Story = {
+  args: {
+    seed: "alice",
+    size: 144,
+    className: "rounded-3xl",
+    static: true,
+  },
+  render: ({ seed, size = 144, className, static: isStatic, gemType, cutType }) => {
+    const properties = getGemProperties(seed);
+    const resolvedCutType = cutType ?? properties.cutTypeName;
+    const helperProperties = {
+      ...properties,
+      cutTypeName: resolvedCutType,
+      cutVariantName: getCutVariantLabel(getCutVariant(seed, resolvedCutType)),
+    };
+
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "minmax(0, auto) minmax(240px, 320px)",
+          alignItems: "center",
+          gap: 24,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          <HashedGem
+            size={size}
+            seed={seed}
+            className={className}
+            static={isStatic}
+            gemType={gemType}
+            cutType={cutType}
+          />
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gap: 10,
+            minWidth: 0,
+            padding: 16,
+            border: "1px solid rgba(255, 255, 255, 0.14)",
+            borderRadius: 16,
+            background: "rgba(255, 255, 255, 0.04)",
+          }}
+        >
+          {HELPER_ATTRIBUTE_ROWS.map(({ label, getValue }) => (
+            <div
+              key={label}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 16,
+                fontSize: 12,
+              }}
+            >
+              <span style={{ opacity: 0.6 }}>{label}</span>
+              <strong style={{ textTransform: "capitalize" }}>
+                {getValue(helperProperties)}
+              </strong>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  },
 };
 
 export const Sizes: Story = {
@@ -150,6 +270,46 @@ export const GemTypes: Story = {
           </div>
         ))}
       </div>
+    </div>
+  ),
+};
+
+export const CutSeedVariance: Story = {
+  render: () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      {CUT_TYPES_DATA.map(({ cutType, label }) => (
+        <div key={cutType} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, margin: 0 }}>{label}</p>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+              gap: 12,
+            }}
+          >
+            {VARIANCE_SEEDS.map((seed) => (
+              <div
+                key={`${cutType}-${seed}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <HashedGem
+                  size={72}
+                  seed={seed}
+                  gemType="diamond"
+                  cutType={cutType}
+                  className="rounded-full"
+                />
+                <span style={{ fontSize: 10, opacity: 0.55 }}>{seed}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   ),
 };

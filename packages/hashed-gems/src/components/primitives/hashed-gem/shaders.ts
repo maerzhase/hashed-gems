@@ -72,6 +72,9 @@ vec3 hue2rgb(float h) {
 
 float hash11(float p) { return fract(sin(p * 127.1) * 43758.5453); }
 float hash21(vec2 p)  { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float seededSpan(float seed, float salt, float minValue, float maxValue) {
+  return mix(minValue, maxValue, hash11(seed * 0.173 + salt * 13.1));
+}
 
 float f0FromIOR(float n) { float x = (1.0 - n) / (1.0 + n); return x * x; }
 
@@ -228,14 +231,25 @@ void main() {
   float edgeMask    = cut.edgeMask;
 
   /* ── 4. Internal facet layer ───────────────────────────────────────────── */
-  float iFolds = 24.0;
+  float iFolds = floor(seededSpan(uSeed, 1.0, 22.0, 30.999));
   float iAng = atan(uv.y, uv.x) + 0.43 + uSeed * 0.29;
-  float iRad = r / 0.90;
+  float iWarp = seededSpan(uSeed, 2.0, 0.010, 0.040) * cos(iAng * seededSpan(uSeed, 3.0, 4.0, 8.0) + uSeed * 0.91);
+  float iRad = clamp((r / 0.90) / (1.0 + iWarp), 0.0, 1.0);
   float iSw  = PI / iFolds;
   float iOa  = mod(iAng + iSw*0.5, iSw) - iSw*0.5;
   float iOi  = floor((iAng + iSw*0.5) / iSw);
-  float ij   = 0.025 * sin(uSeed*5.1 + iOi*1.8);
-  float iz1 = 0.14+ij, iz2 = 0.34+ij, iz3 = 0.54+ij*0.7, iz4 = 0.72+ij*0.4, iz5 = 0.88;
+  float ij   = 0.018 * sin(uSeed*5.1 + iOi*1.8);
+  float iBandScale = 0.95 + 0.12 * hash11(uSeed * 0.31 + iOi * 0.67);
+  float iw1 = seededSpan(uSeed, 4.0, 0.11, 0.16) * iBandScale;
+  float iw2 = seededSpan(uSeed, 5.0, 0.12, 0.20) * (0.94 + 0.10 * hash11(uSeed * 0.37 + iOi * 0.43));
+  float iw3 = seededSpan(uSeed, 6.0, 0.12, 0.18) * (0.96 + 0.10 * hash11(uSeed * 0.41 + iOi * 0.53));
+  float iw4 = seededSpan(uSeed, 7.0, 0.10, 0.16) * (0.94 + 0.08 * hash11(uSeed * 0.47 + iOi * 0.59));
+  float iw5 = seededSpan(uSeed, 8.0, 0.10, 0.14);
+  float iz1 = iw1 + ij;
+  float iz2 = iz1 + iw2;
+  float iz3 = iz2 + iw3;
+  float iz4 = iz3 + iw4;
+  float iz5 = min(0.90, iz4 + iw5);
 
   vec3  innerNormal  = vec3(0.0, 0.0, 1.0);
   int   innerFacetId = 100;
@@ -268,14 +282,25 @@ void main() {
   float innerEdge = max(1.0 - smoothstep(0.0, 0.008, min(iDa, iDr)), innerTableEdge);
 
   /* ── 5. Deep internal layer ────────────────────────────────────────────── */
-  float dFolds = 32.0;
+  float dFolds = floor(seededSpan(uSeed, 9.0, 28.0, 38.999));
   float dAng = atan(uv.y, uv.x) - 0.67 + uSeed * 0.41;
-  float dRad = r / 0.90;
+  float dWarp = seededSpan(uSeed, 10.0, 0.012, 0.050) * sin(dAng * seededSpan(uSeed, 11.0, 5.0, 11.0) - uSeed * 0.73);
+  float dRad = clamp((r / 0.90) / (1.0 + dWarp), 0.0, 1.0);
   float dSw  = PI / dFolds;
   float dOa  = mod(dAng + dSw*0.5, dSw) - dSw*0.5;
   float dOi  = floor((dAng + dSw*0.5) / dSw);
-  float dj   = 0.020 * sin(uSeed*3.7 + dOi*2.1);
-  float dz1 = 0.12+dj, dz2 = 0.30+dj, dz3 = 0.50+dj*0.7, dz4 = 0.68+dj*0.4, dz5 = 0.84;
+  float dj   = 0.016 * sin(uSeed*3.7 + dOi*2.1);
+  float dBandScale = 0.94 + 0.12 * hash11(uSeed * 0.29 + dOi * 0.71);
+  float dw1 = seededSpan(uSeed, 12.0, 0.10, 0.15) * dBandScale;
+  float dw2 = seededSpan(uSeed, 13.0, 0.11, 0.18) * (0.94 + 0.10 * hash11(uSeed * 0.43 + dOi * 0.37));
+  float dw3 = seededSpan(uSeed, 14.0, 0.11, 0.17) * (0.96 + 0.08 * hash11(uSeed * 0.51 + dOi * 0.47));
+  float dw4 = seededSpan(uSeed, 15.0, 0.10, 0.15) * (0.94 + 0.08 * hash11(uSeed * 0.57 + dOi * 0.41));
+  float dw5 = seededSpan(uSeed, 16.0, 0.09, 0.13);
+  float dz1 = dw1 + dj;
+  float dz2 = dz1 + dw2;
+  float dz3 = dz2 + dw3;
+  float dz4 = dz3 + dw4;
+  float dz5 = min(0.86, dz4 + dw5);
 
   vec3  deepNormal  = vec3(0.0, 0.0, 1.0);
   int   deepFacetId = 200;

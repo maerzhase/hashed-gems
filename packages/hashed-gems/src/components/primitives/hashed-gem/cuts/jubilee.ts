@@ -12,8 +12,13 @@ CutResult computeJubilee(vec2 uv, float seed) {
   res.facetId = 0;
   res.edgeMask = 0.0;
 
-  float radius = length(uv) / 0.90;
   float angle  = atan(uv.y, uv.x);
+  float domeWave = seededSpan(seed, 90.0, 0.018, 0.045);
+  float radius = clamp(
+    length(uv) / (0.90 * (1.0 + domeWave * cos(angle * 8.0 + seed * 0.31))),
+    0.0,
+    1.0
+  );
 
   float bezelSw = PI / 4.0;    // 8 primary bezel sectors
   float bezelOa = mod(angle + bezelSw*0.5, bezelSw) - bezelSw*0.5;
@@ -25,12 +30,22 @@ CutResult computeJubilee(vec2 uv, float seed) {
   float starOi = floor((angle + starSw*0.5) / starSw);
   float starTu = (starOa + starSw*0.5) / starSw;
 
-  float antiqueTwist = 0.035 * sin(seed * 1.4 + starOi * 0.7);
+  float antiqueTwist = seededSpan(seed, 91.0, 0.020, 0.050) * sin(seed * 1.4 + starOi * 0.7);
   float crownRise = 0.5 + 0.5 * cos(angle * 8.0 + seed * 0.31);
-  float zj = 0.014 * sin(seed * 5.1 + bezelOi * 1.2)
+  float zj = 0.010 * sin(seed * 5.1 + bezelOi * 1.2)
            + 0.008 * cos(seed * 2.4 + starOi * 0.9);
-  float z0=0.055+zj*0.25, z1=0.16+zj*0.45, z2=0.33+zj*0.65,
-        z3=0.53+zj*0.45, z4=0.72+zj*0.25, z5=0.87;
+  float w0 = seededSpan(seed, 92.0, 0.05, 0.08);
+  float w1 = seededSpan(seed, 93.0, 0.09, 0.13);
+  float w2 = seededSpan(seed, 94.0, 0.13, 0.19);
+  float w3 = seededSpan(seed, 95.0, 0.14, 0.20);
+  float w4 = seededSpan(seed, 96.0, 0.13, 0.18);
+  float w5 = seededSpan(seed, 97.0, 0.10, 0.15);
+  float z0 = w0 + zj * 0.25;
+  float z1 = z0 + w1;
+  float z2 = z1 + w2;
+  float z3 = z2 + w3;
+  float z4 = z3 + w4;
+  float z5 = min(0.89, z4 + w5);
 
   if (radius < z0) {
     float split = bezelTu < 0.5 ? -1.0 : 1.0;
@@ -126,7 +141,6 @@ export function jubileeCssGradient(
     borderRadius,
     background: `
       radial-gradient(circle at 50% 50%, rgba(255,255,255,0.48) 0%, rgba(255,255,255,0.20) 5%, transparent 10%),
-      radial-gradient(circle at center, transparent 10%, rgba(255,255,255,0.11) 20%, transparent 34%, rgba(255,255,255,0.06) 52%, transparent 72%, rgba(255,255,255,0.03) 88%, transparent 100%),
       conic-gradient(from ${starAngle}deg at 50% 50%, ${starStops}, transparent 360deg),
       conic-gradient(from ${bezelAngle}deg at 50% 50%, ${bezelStops}, transparent 360deg)
     `,

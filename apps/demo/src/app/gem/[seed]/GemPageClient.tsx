@@ -9,10 +9,18 @@ import { getGemShareUrl } from "@/lib/gemShareUrl";
 const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
 
+function formatCutLabel(cutTypeName: string): string {
+  return cutTypeName
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 interface Props {
   seed: string;
   gemTypeName: string;
   cutTypeName: string;
+  cutVariantName: string;
   rarityName: Rarity;
 }
 
@@ -20,11 +28,13 @@ export function GemPageClient({
   seed,
   gemTypeName,
   cutTypeName,
+  cutVariantName,
   rarityName,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
+  const cutLabel = formatCutLabel(cutTypeName);
 
   const gemUrl = getGemShareUrl(seed);
   const tweetText = `Check out ${seed}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
@@ -150,7 +160,10 @@ export function GemPageClient({
           {gemTypeName}
         </span>
         <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500">
-          {cutTypeName} cut
+          {cutLabel} Cut
+        </span>
+        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-500 capitalize dark:bg-neutral-800 dark:text-neutral-500">
+          {cutVariantName}
         </span>
       </div>
 

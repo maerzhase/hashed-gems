@@ -12,8 +12,13 @@ CutResult computeRose(vec2 uv, float seed) {
   res.facetId = 0;
   res.edgeMask = 0.0;
 
-  float radius = length(uv) / 0.90;
   float angle  = atan(uv.y, uv.x);
+  float bloomStrength = seededSpan(seed, 100.0, 0.035, 0.075);
+  float radius = clamp(
+    length(uv) / (0.90 * (1.0 + bloomStrength * cos(angle * 6.0 + seed * 0.41))),
+    0.0,
+    1.0
+  );
 
   float petalSw = PI / 6.0;  // 12 broad petals
   float petalOa = mod(angle + petalSw*0.5, petalSw) - petalSw*0.5;
@@ -27,9 +32,19 @@ CutResult computeRose(vec2 uv, float seed) {
   float bloom = 0.5 + 0.5 * cos(angle * 6.0 + seed * 0.41);
   float roseR = radius / (0.92 + 0.06 * bloom);
 
-  float zj = 0.018 * sin(seed * 4.9 + petalOi * 1.1);
-  float z0=0.07+zj*0.25, z1=0.18+zj*0.45, z2=0.36+zj*0.65,
-        z3=0.58+zj*0.55, z4=0.78+zj*0.25, z5=0.90;
+  float zj = 0.010 * sin(seed * 4.9 + petalOi * 1.1);
+  float w0 = seededSpan(seed, 101.0, 0.06, 0.09);
+  float w1 = seededSpan(seed, 102.0, 0.09, 0.13);
+  float w2 = seededSpan(seed, 103.0, 0.14, 0.20);
+  float w3 = seededSpan(seed, 104.0, 0.16, 0.22);
+  float w4 = seededSpan(seed, 105.0, 0.14, 0.20);
+  float w5 = seededSpan(seed, 106.0, 0.08, 0.12);
+  float z0 = w0 + zj * 0.25;
+  float z1 = z0 + w1;
+  float z2 = z1 + w2;
+  float z3 = z2 + w3;
+  float z4 = z3 + w4;
+  float z5 = min(0.91, z4 + w5);
 
   if (roseR < z0) {
     float apexA = petalOi * petalSw + (petalTu < 0.5 ? petalSw * 0.35 : petalSw * 0.65);
@@ -116,7 +131,6 @@ export function roseCssGradient(
     borderRadius,
     background: `
       radial-gradient(circle at 50% 50%, rgba(255,255,255,0.44) 0%, rgba(255,255,255,0.18) 6%, transparent 12%),
-      radial-gradient(circle at center, transparent 14%, rgba(255,255,255,0.12) 26%, transparent 40%, rgba(255,255,255,0.06) 58%, transparent 78%, rgba(255,255,255,0.03) 92%, transparent 100%),
       conic-gradient(from ${shoulderAngle}deg at 50% 50%, ${shoulderStops}, transparent 360deg),
       conic-gradient(from ${petalAngle}deg at 50% 50%, ${petalStops}, transparent 360deg)
     `,

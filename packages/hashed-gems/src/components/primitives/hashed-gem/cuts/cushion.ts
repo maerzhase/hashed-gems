@@ -12,19 +12,36 @@ CutResult computeCushion(vec2 uv, float seed) {
   res.facetId = 0;
   res.edgeMask = 0.0;
 
-  float p    = 2.5;
-  float cshR = pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0/p) / 0.90;
   float angle = atan(uv.y, uv.x);
+  float p = seededSpan(seed, 50.0, 2.15, 3.10);
+  float pillowBulge = seededSpan(seed, 51.0, 0.018, 0.050);
+  float shoulderWave = 1.0
+    + pillowBulge * cos(angle * 4.0 + seed * 0.53)
+    + 0.012 * sin(angle * 8.0 + seed * 1.1);
+  float cshR = clamp(
+    pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0/p) / (0.90 * shoulderWave),
+    0.0,
+    1.0
+  );
 
   float sw = PI / 4.0;  // 8-fold
   float oa = mod(angle + sw*0.5, sw) - sw*0.5;
   float oi = floor((angle + sw*0.5) / sw);
-
-  float zj = 0.025 * sin(seed * 7.3 + oi * 1.4);
-  float z0=0.18+zj, z1=0.38+zj, z2=0.56+zj, z3=0.72+zj*0.7, z4=0.85+zj*0.4;
-
   bool  upperHalf = oa > 0.0;
   float subOi     = oi * 2.0 + (upperHalf ? 1.0 : 0.0);
+
+  float zj = 0.014 * sin(seed * 7.3 + oi * 1.4);
+  float sectorScale = 0.94 + 0.11 * hash11(seed * 0.37 + oi * 0.79);
+  float w0 = seededSpan(seed, 52.0, 0.16, 0.22) * sectorScale;
+  float w1 = seededSpan(seed, 53.0, 0.12, 0.20) * (0.96 + 0.08 * hash11(seed * 0.41 + subOi * 0.51));
+  float w2 = seededSpan(seed, 54.0, 0.12, 0.18) * (0.95 + 0.08 * hash11(seed * 0.49 + subOi * 0.67));
+  float w3 = seededSpan(seed, 55.0, 0.11, 0.16);
+  float w4 = seededSpan(seed, 56.0, 0.08, 0.13);
+  float z0 = w0 + zj;
+  float z1 = z0 + w1;
+  float z2 = z1 + w2;
+  float z3 = z2 + w3;
+  float z4 = min(0.90, z3 + w4);
 
   if (cshR < z0) {
     // Subdivide table into 8 sectors matching the cushion's 8-fold symmetry.
@@ -83,11 +100,13 @@ export function cushionCssGradient(
 ): React.CSSProperties {
   const rotOffset = seed % 360;
   const fromAngle = 22.5 + (rotOffset % 45);
+  const centerX = 50 + Math.sin(seed * 0.017) * 3;
+  const centerY = 50 + Math.cos(seed * 0.021) * 3;
   const stops = Array.from({ length: 4 }, (_, i) => {
     const s = i * 90;
     const mid = s + 22.5;
     const e = s + 45;
-    return `transparent ${s}deg, rgba(255,255,255,0.09) ${mid}deg, transparent ${e}deg`;
+    return `transparent ${s}deg, rgba(255,255,255,0.07) ${mid}deg, transparent ${e}deg`;
   }).join(", ");
   return {
     position: "absolute",
@@ -96,7 +115,10 @@ export function cushionCssGradient(
     width: "100%",
     height: "100%",
     borderRadius,
-    background: `conic-gradient(from ${fromAngle}deg at 50% 50%, ${stops}, transparent 360deg)`,
+    background: `
+      radial-gradient(circle at ${centerX}% ${centerY}%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 20%, transparent 36%),
+      conic-gradient(from ${fromAngle}deg at ${centerX}% ${centerY}%, ${stops}, transparent 360deg)
+    `,
     mixBlendMode: "screen",
     pointerEvents: "none",
   };

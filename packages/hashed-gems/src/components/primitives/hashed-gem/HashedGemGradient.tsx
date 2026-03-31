@@ -1,7 +1,7 @@
 import type * as React from "react";
 import { getGemColors, getRarityGlow } from "@/lib/colors";
 import type { CutType, GemType, Rarity } from "@/lib/gem";
-import { getGemProperties } from "@/lib/gem";
+import { getGemProperties, getShaderSeed } from "@/lib/gem";
 import { CUT_MODULES } from "./cuts/index";
 
 export interface HashedGemGradientProps {
@@ -112,6 +112,7 @@ export function HashedGemGradient({
   position = "relative",
 }: HashedGemGradientProps): React.ReactElement {
   const props = getGemProperties(seed);
+  const shaderSeed = getShaderSeed(seed);
 
   const gemTypeName = gemType ?? props.gemTypeName;
   const cutTypeName = cutType ?? props.cutTypeName;
@@ -122,7 +123,7 @@ export function HashedGemGradient({
 
   let colors = getGemColors(gemTypeName);
   if (isAlexandrite) {
-    colors = { ...colors, ...getAlexandriteColors(props.seed) };
+    colors = { ...colors, ...getAlexandriteColors(shaderSeed) };
   }
   const glow = getRarityGlow(rarityName, gemTypeName);
   // Let the container or className define the silhouette.
@@ -130,7 +131,7 @@ export function HashedGemGradient({
   const borderRadius = "inherit";
 
   // Use the same seed value and light angle formula as the WebGL shader
-  const { angle1, angle2 } = shaderLightAngles(props.seed);
+  const { angle1, angle2 } = shaderLightAngles(shaderSeed);
   const sparkleX = Math.round(50 + Math.cos(angle1) * 22);
   const sparkleY = Math.round(50 - Math.sin(angle1) * 22);
   // Secondary highlight from shader's second light
@@ -205,7 +206,7 @@ export function HashedGemGradient({
     pointerEvents: "none",
   };
 
-  const facetOverlay = getFacetOverlay(cutTypeName, props.seed, borderRadius);
+  const facetOverlay = getFacetOverlay(cutTypeName, shaderSeed, borderRadius);
   const asterismOverlay = getAsterismOverlay(rarityName, borderRadius);
   const opalRainbow = getOpalRainbowOverlay(gemTypeName, borderRadius);
 
