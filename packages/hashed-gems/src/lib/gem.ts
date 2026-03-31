@@ -20,6 +20,9 @@ export const CUT_TYPES = [
   "princess",
   "cushion",
   "emerald-step",
+  "firework",
+  "jubilee",
+  "rose",
 ] as const;
 
 export const RARITIES = [

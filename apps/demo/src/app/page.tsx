@@ -1,11 +1,13 @@
 "use client";
 
-import { HashedGem } from "@m3000/hashed-gems";
+import { CUT_TYPES, HashedGem } from "@m3000/hashed-gems";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { GemGenerator } from "@/components/GemGenerator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+
+const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
 const EXAMPLES = [
   {
@@ -67,13 +69,13 @@ import { HashedGem } from "@m3000/hashed-gems";
   {
     label: "Cut type",
     description:
-      "Select from 4 different gem cuts — round-brilliant, princess, cushion, or emerald-step.",
+      `Select from ${CUT_TYPES.length} different gem cuts - ${CUT_TYPE_OPTIONS}.`,
     code: `import "@m3000/hashed-gems/styles.css";
 import { HashedGem } from "@m3000/hashed-gems";
 
-<HashedGem seed="eve" cutType="cushion" />`,
+<HashedGem seed="eve" cutType="rose" />`,
     seed: "eve",
-    cutType: "cushion" as const,
+    cutType: "rose" as const,
   },
   {
     label: "Custom styling",

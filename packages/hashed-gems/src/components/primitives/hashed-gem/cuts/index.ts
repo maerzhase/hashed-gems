@@ -21,6 +21,17 @@ import {
   EMERALD_STEP_BORDER_RADIUS,
   emeraldStepCssGradient,
 } from "./emerald-step";
+import {
+  FIREWORK_GLSL,
+  FIREWORK_BORDER_RADIUS,
+  fireworkCssGradient,
+} from "./firework";
+import {
+  JUBILEE_GLSL,
+  JUBILEE_BORDER_RADIUS,
+  jubileeCssGradient,
+} from "./jubilee";
+import { ROSE_GLSL, ROSE_BORDER_RADIUS, roseCssGradient } from "./rose";
 
 export interface CutModule {
   /** GLSL function string implementing `CutResult compute<Name>(vec2 uv, float seed)` */
@@ -52,7 +63,24 @@ export const CUT_MODULES: Record<CutType, CutModule> = {
     borderRadius: EMERALD_STEP_BORDER_RADIUS,
     cssGradient: emeraldStepCssGradient,
   },
+  firework: {
+    glsl: FIREWORK_GLSL,
+    borderRadius: FIREWORK_BORDER_RADIUS,
+    cssGradient: fireworkCssGradient,
+  },
+  jubilee: {
+    glsl: JUBILEE_GLSL,
+    borderRadius: JUBILEE_BORDER_RADIUS,
+    cssGradient: jubileeCssGradient,
+  },
+  rose: {
+    glsl: ROSE_GLSL,
+    borderRadius: ROSE_BORDER_RADIUS,
+    cssGradient: roseCssGradient,
+  },
 };
 
 /** All cut GLSL functions concatenated in CUT_TYPES order, ready to inject into the fragment shader. */
-export const ALL_CUT_GLSL: string = CUT_TYPES.map((c) => CUT_MODULES[c].glsl).join("\n");
+export const ALL_CUT_GLSL: string = CUT_TYPES.map(
+  (c) => CUT_MODULES[c].glsl,
+).join("\n");

@@ -125,7 +125,7 @@ export const GemTypes: Story = {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
+          gridTemplateColumns: "repeat(auto-fit, minmax(96px, 1fr))",
           gap: 16,
         }}
       >

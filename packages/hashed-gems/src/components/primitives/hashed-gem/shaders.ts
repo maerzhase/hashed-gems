@@ -1,3 +1,5 @@
+import type { CutType } from "@/lib/gem";
+import { CUT_TYPES } from "@/lib/gem";
 import { ALL_CUT_GLSL } from "./cuts/index";
 
 export const VERTEX_SHADER = /* glsl */ `#version 300 es
@@ -18,6 +20,31 @@ void main() {
 //   FRAGMENT_MAIN      — dispatcher + void main() body
 // Adding a new cut: create cuts/<name>.ts, register in cuts/index.ts. Done.
 
+const CUT_TYPE_LABELS = CUT_TYPES.map((cut, index) => `${index}=${cut}`).join(
+  " ",
+);
+
+const CUT_FUNCTIONS: Record<CutType, string> = {
+  "round-brilliant": "computeRoundBrilliant",
+  princess: "computePrincess",
+  cushion: "computeCushion",
+  "emerald-step": "computeEmeraldStep",
+  firework: "computeFirework",
+  jubilee: "computeJubilee",
+  rose: "computeRose",
+};
+
+const CUT_INDEX = Object.fromEntries(
+  CUT_TYPES.map((cut, index) => [cut, index]),
+) as Record<CutType, number>;
+
+const CUT_DISPATCH_LINES = CUT_TYPES.slice(1)
+  .map(
+    (cut, index) =>
+      `  if (cutType == ${index + 1}) return ${CUT_FUNCTIONS[cut]}(uv, seed);`,
+  )
+  .join("\n");
+
 const FRAGMENT_PREAMBLE = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
@@ -31,7 +58,7 @@ uniform int   uCausticCount;
 uniform vec2  uResolution;
 uniform int   uGemType;  // 0=diamond 1=ruby 2=sapphire 3=emerald 4=topaz 5=amethyst 6=aquamarine
                          // 7=rose-quartz 8=citrine 9=onyx 10=alexandrite 11=opal
-uniform int   uCutType;  // 0=round-brilliant 1=princess 2=cushion 3=emerald-step
+uniform int   uCutType;  // ${CUT_TYPE_LABELS}
 uniform int   uRarity;   // 0=common 1=uncommon 2=rare 3=epic 4=legendary
 
 in  vec2 vUv;
@@ -126,15 +153,11 @@ struct CutResult {
 };
 `;
 
-// ── Dispatcher — calls the appropriate per-cut function by index ──────────────
-// Keep in sync with CUT_TYPES order in gem.ts:
-//   0=round-brilliant  1=princess  2=cushion  3=emerald-step
+// ── Dispatcher — generated from CUT_TYPES order in gem.ts ─────────────────────
 const FRAGMENT_DISPATCHER = /* glsl */ `
 CutResult computeCut(int cutType, vec2 uv, float seed) {
-  if (cutType == 1) return computePrincess(uv, seed);
-  if (cutType == 2) return computeCushion(uv, seed);
-  if (cutType == 3) return computeEmeraldStep(uv, seed);
-  return computeRoundBrilliant(uv, seed);
+${CUT_DISPATCH_LINES}
+  return ${CUT_FUNCTIONS[CUT_TYPES[0]]}(uv, seed);
 }
 `;
 
@@ -383,7 +406,7 @@ void main() {
   vec3 rawColor = surfaceLight + internalLight;
 
   /* ── 10. Cut-specific light patterns ───────────────────────────────────── */
-  if (uCutType == 0) {
+  if (uCutType == ${CUT_INDEX["round-brilliant"]}) {
     float arrowAng  = atan(uv.y, uv.x);
     float arrowOa   = mod(arrowAng + PI/8.0, PI/4.0) - PI/8.0;
     float arrowMask = smoothstep(0.05, 0.13, abs(arrowOa));
@@ -391,12 +414,39 @@ void main() {
     rawColor *= 1.0 - (1.0 - arrowMask) * arrowRad * 0.35;
   }
 
-  if (uCutType == 1) {
+  if (uCutType == ${CUT_INDEX.princess}) {
     float crossAng  = atan(uv.y, uv.x);
     float crossOa   = mod(crossAng + PI/4.0, PI/2.0) - PI/4.0;
     float crossMask = smoothstep(0.06, 0.18, abs(crossOa));
     float crossRad  = smoothstep(0.20, 0.40, radNorm) * smoothstep(0.85, 0.60, radNorm);
     rawColor *= 1.0 - (1.0 - crossMask) * crossRad * 0.25;
+  }
+
+  if (uCutType == ${CUT_INDEX.jubilee}) {
+    float jubAng = atan(uv.y, uv.x);
+    float bezelDist = abs(mod(jubAng + PI/8.0, PI/4.0) - PI/8.0);
+    float starDist  = abs(mod(jubAng + PI/16.0, PI/8.0) - PI/16.0);
+    float apexGlow = smoothstep(0.09, 0.0, radNorm);
+    float bezelBloom = (1.0 - smoothstep(0.04, 0.14, bezelDist))
+      * smoothstep(0.10, 0.22, radNorm)
+      * smoothstep(0.48, 0.20, radNorm);
+    float crossContrast = (1.0 - smoothstep(0.016, 0.060, starDist))
+      * smoothstep(0.28, 0.42, radNorm)
+      * smoothstep(0.86, 0.54, radNorm);
+    rawColor += vec3(apexGlow * 0.22);
+    rawColor += gemBodyColor * bezelBloom * 0.12;
+    rawColor *= 1.0 - crossContrast * 0.16;
+  }
+
+  if (uCutType == ${CUT_INDEX.rose}) {
+    float roseAng = atan(uv.y, uv.x);
+    float petalDist = abs(mod(roseAng + PI/12.0, PI/6.0) - PI/12.0);
+    float petalMask = 1.0 - smoothstep(0.03, 0.11, petalDist);
+    float petalRing = smoothstep(0.10, 0.22, radNorm) * smoothstep(0.72, 0.46, radNorm);
+    float apexGlow = smoothstep(0.16, 0.0, radNorm);
+    rawColor += vec3(apexGlow * 0.16);
+    rawColor += gemBodyColor * petalMask * petalRing * 0.10;
+    rawColor *= 1.0 - (1.0 - petalMask) * petalRing * 0.10;
   }
 
   /* ── 11. Scintillation ─────────────────────────────────────────────────── */
@@ -410,11 +460,15 @@ void main() {
   vec3 h3 = normalize(l3 + viewDir);
 
   float shinBase, shinRange, spkThresh, spkIntensity;
-  if (uCutType == 0) {
+  if (uCutType == ${CUT_INDEX["round-brilliant"]}) {
     shinBase = 1200.0; shinRange = 800.0; spkThresh = 0.60; spkIntensity = 35.0;
-  } else if (uCutType == 1) {
+  } else if (uCutType == ${CUT_INDEX.princess}) {
     shinBase = 800.0;  shinRange = 500.0; spkThresh = 0.55; spkIntensity = 40.0;
-  } else if (uCutType == 2) {
+  } else if (uCutType == ${CUT_INDEX.jubilee}) {
+    shinBase = 700.0;  shinRange = 360.0; spkThresh = 0.53; spkIntensity = 24.0;
+  } else if (uCutType == ${CUT_INDEX.rose}) {
+    shinBase = 560.0;  shinRange = 280.0; spkThresh = 0.56; spkIntensity = 20.0;
+  } else if (uCutType == ${CUT_INDEX.cushion}) {
     shinBase = 500.0;  shinRange = 300.0; spkThresh = 0.50; spkIntensity = 28.0;
   } else {
     shinBase = 300.0;  shinRange = 150.0; spkThresh = 0.72; spkIntensity = 12.0;
