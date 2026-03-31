@@ -1,5 +1,6 @@
+import { get } from "@vercel/blob";
 import type { Rarity } from "@m3000/hashed-gems";
-import { getGemColors, getGemProperties } from "@m3000/hashed-gems";
+import { getGemProperties } from "@m3000/hashed-gems";
 import { ImageResponse } from "next/og";
 import { getGemAssetUrl } from "@/lib/gemAssetUrl";
 
@@ -15,23 +16,25 @@ const RARITY_BADGE_COLORS: Record<Rarity, { bg: string; text: string }> = {
   legendary: { bg: "#78350f", text: "#fde68a" },
 };
 
-const RARITY_GLOW_ALPHA: Record<Rarity, number> = {
-  common: 0,
-  uncommon: 0.3,
-  rare: 0.5,
-  epic: 0.65,
-  legendary: 0.8,
-};
+async function getGemImageSrc(seed: string): Promise<string> {
+  if (process.env.NODE_ENV === "production") {
+    return getGemAssetUrl(seed);
+  }
 
-function hexToRgb(hex: string): [number, number, number] {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? [
-        parseInt(result[1], 16),
-        parseInt(result[2], 16),
-        parseInt(result[3], 16),
-      ]
-    : [255, 255, 255];
+  const pathname = `gems/${encodeURIComponent(seed)}.png`;
+
+  try {
+    const result = await get(pathname, { access: "public" });
+    if (result?.statusCode === 200 && result.stream) {
+      const bytes = await new Response(result.stream).arrayBuffer();
+      const base64 = Buffer.from(bytes).toString("base64");
+      return `data:${result.blob.contentType};base64,${base64}`;
+    }
+  } catch {
+    // Fall back to the public URL when authenticated blob fetch is unavailable.
+  }
+
+  return getGemAssetUrl(seed);
 }
 
 export default async function Image({
@@ -41,15 +44,25 @@ export default async function Image({
 }) {
   const { seed: raw } = await params;
   const seed = decodeURIComponent(raw);
+  const gemImageSrc = await getGemImageSrc(seed);
 
   const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
-  const { inner } = getGemColors(gemTypeName);
   const badge = RARITY_BADGE_COLORS[rarityName];
-  const glowAlpha = RARITY_GLOW_ALPHA[rarityName];
-  const [r, g, b] = hexToRgb(inner);
 
   const displaySeed = seed.length > 20 ? `${seed.slice(0, 20)}…` : seed;
-  const seedFontSize = seed.length > 16 ? (seed.length > 20 ? 44 : 52) : 68;
+  const seedFontSize = seed.length > 16 ? (seed.length > 20 ? 34 : 40) : 48;
+  const gemSize = 208;
+  const pillStyle = {
+    display: "flex",
+    alignItems: "center",
+    borderRadius: 999,
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+    fontSize: 22,
+    lineHeight: 1,
+  } as const;
 
   return new ImageResponse(
     <div
@@ -58,12 +71,15 @@ export default async function Image({
         height: 630,
         display: "flex",
         alignItems: "center",
+        justifyContent: "space-between",
         background: "#0a0a0a",
-        paddingLeft: 160,
-        paddingRight: 104,
+        paddingLeft: 108,
+        paddingRight: 96,
+        paddingTop: 72,
+        paddingBottom: 72,
       }}
     >
-      {/* Gem with glow */}
+      {/* Gem */}
       <div
         style={{
           position: "relative",
@@ -71,24 +87,16 @@ export default async function Image({
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
+          width: 360,
+          height: 360,
         }}
       >
-        {glowAlpha > 0 && (
-          <div
-            style={{
-              position: "absolute",
-              width: 200,
-              height: 200,
-              background: `radial-gradient(circle at center, rgba(${r},${g},${b},${glowAlpha}) 0%, transparent 65%)`,
-            }}
-          />
-        )}
-        <div style={{ display: "flex", width: 128, height: 128 }}>
+        <div style={{ display: "flex", width: gemSize, height: gemSize }}>
           {/* biome-ignore lint/performance/noImgElement: next/og context, <Image> not available */}
           <img
-            src={getGemAssetUrl(seed)}
-            width={128}
-            height={128}
+            src={gemImageSrc}
+            width={gemSize}
+            height={gemSize}
             alt={seed}
           />
         </div>
@@ -100,96 +108,87 @@ export default async function Image({
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          marginLeft: 88,
+          alignSelf: "center",
+          flex: 1,
+          maxWidth: 620,
+          gap: 36,
         }}
       >
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            lineHeight: 1.1,
-            marginBottom: 36,
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 24,
           }}
         >
-          <span
+          <div
             style={{
-              fontSize: seedFontSize,
-              fontWeight: 700,
-              color: "#525252",
+              display: "flex",
+              alignItems: "center",
+              lineHeight: 1,
             }}
           >
-            @
-          </span>
-          <span
-            style={{
-              fontSize: seedFontSize,
-              fontWeight: 700,
-              color: "#ffffff",
-            }}
-          >
-            {displaySeed}
-          </span>
-        </div>
+            <span
+              style={{
+                fontSize: seedFontSize - 8,
+                fontWeight: 600,
+                color: "#404040",
+                marginRight: 4,
+              }}
+            >
+              @
+            </span>
+            <span
+              style={{
+                fontSize: seedFontSize,
+                fontWeight: 600,
+                color: "#f5f5f5",
+              }}
+            >
+              {displaySeed}
+            </span>
+          </div>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            marginBottom: 44,
-          }}
-        >
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              background: badge.bg,
-              color: badge.text,
-              borderRadius: 999,
-              paddingLeft: 18,
-              paddingRight: 18,
-              paddingTop: 7,
-              paddingBottom: 7,
-              fontSize: 24,
-              fontWeight: 600,
-              textTransform: "capitalize",
+              gap: 10,
+              flexWrap: "wrap",
             }}
           >
-            {rarityName}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "#262626",
-              color: "#a3a3a3",
-              borderRadius: 999,
-              paddingLeft: 18,
-              paddingRight: 18,
-              paddingTop: 7,
-              paddingBottom: 7,
-              fontSize: 24,
-              textTransform: "capitalize",
-            }}
-          >
-            {gemTypeName}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              background: "#262626",
-              color: "#a3a3a3",
-              borderRadius: 999,
-              paddingLeft: 18,
-              paddingRight: 18,
-              paddingTop: 7,
-              paddingBottom: 7,
-              fontSize: 24,
-              textTransform: "lowercase",
-            }}
-          >
-            {cutTypeName} cut
+            <div
+              style={{
+                ...pillStyle,
+                background: badge.bg,
+                color: badge.text,
+                fontWeight: 600,
+                textTransform: "capitalize",
+              }}
+            >
+              {rarityName}
+            </div>
+            <div
+              style={{
+                ...pillStyle,
+                background: "#262626",
+                color: "#a3a3a3",
+                textTransform: "capitalize",
+              }}
+            >
+              {gemTypeName}
+            </div>
+            <div
+              style={{
+                ...pillStyle,
+                background: "#262626",
+                color: "#a3a3a3",
+                textTransform: "lowercase",
+              }}
+            >
+              {cutTypeName} cut
+            </div>
           </div>
         </div>
 
@@ -198,7 +197,8 @@ export default async function Image({
             display: "flex",
             alignItems: "center",
             color: "#525252",
-            fontSize: 24,
+            fontSize: 22,
+            lineHeight: 1,
           }}
         >
           Get yours → gems.m3000.io
