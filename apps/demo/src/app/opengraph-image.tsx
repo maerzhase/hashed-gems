@@ -28,6 +28,7 @@ export default async function Image() {
         position: "relative",
       }}
     >
+      {/* biome-ignore lint/performance/noImgElement: next/og context, <Image> not available */}
       <img
         src={dataUrl}
         alt="Gem"

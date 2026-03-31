@@ -1,9 +1,11 @@
 import type { Rarity } from "@m3000/hashed-gems";
 import { getGemColors, getGemProperties } from "@m3000/hashed-gems";
 import { ImageResponse } from "next/og";
+import { getGemAssetUrl } from "@/lib/gemAssetUrl";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+export const revalidate = 86400;
 
 const RARITY_BADGE_COLORS: Record<Rarity, { bg: string; text: string }> = {
   common: { bg: "#262626", text: "#a3a3a3" },
@@ -41,7 +43,7 @@ export default async function Image({
   const seed = decodeURIComponent(raw);
 
   const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
-  const { inner, outer } = getGemColors(gemTypeName);
+  const { inner } = getGemColors(gemTypeName);
   const badge = RARITY_BADGE_COLORS[rarityName];
   const glowAlpha = RARITY_GLOW_ALPHA[rarityName];
   const [r, g, b] = hexToRgb(inner);
@@ -84,7 +86,7 @@ export default async function Image({
         <div style={{ display: "flex", width: 128, height: 128 }}>
           {/* biome-ignore lint/performance/noImgElement: next/og context, <Image> not available */}
           <img
-            src={`https://c36zhng9zp5ehtzj.public.blob.vercel-storage.com/gems/${encodeURIComponent(seed)}.png`}
+            src={getGemAssetUrl(seed)}
             width={128}
             height={128}
             alt={seed}
@@ -203,6 +205,11 @@ export default async function Image({
         </div>
       </div>
     </div>,
-    { ...size },
+    {
+      ...size,
+      headers: {
+        "Cache-Control": "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800",
+      },
+    },
   );
 }

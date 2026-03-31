@@ -4,8 +4,7 @@ import type { Rarity } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
 import { useEffect, useRef, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
-
-const GEM_URL_BASE = "https://gems.m3000.io/gem";
+import { getGemShareUrl } from "@/lib/gemShareUrl";
 
 const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
@@ -15,7 +14,6 @@ interface Props {
   gemTypeName: string;
   cutTypeName: string;
   rarityName: Rarity;
-  hasBlobImage: boolean;
 }
 
 export function GemPageClient({
@@ -23,23 +21,21 @@ export function GemPageClient({
   gemTypeName,
   cutTypeName,
   rarityName,
-  hasBlobImage,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
 
-  const gemUrl = `${GEM_URL_BASE}/${encodeURIComponent(seed)}`;
+  const gemUrl = getGemShareUrl(seed);
   const tweetText = `Check out ${seed}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
+  const uploadKey = `hashed-gems:uploaded:${seed}`;
 
   useEffect(() => {
     setCanShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
 
-  // Auto-upload blob on mount so OG is ready when anyone shares the URL.
-  // Skip if the server already confirmed the blob exists.
   useEffect(() => {
-    if (hasBlobImage) return;
+    if (sessionStorage.getItem(uploadKey) === "1") return;
 
     const upload = async () => {
       const srcCanvas = containerRef.current?.querySelector(
@@ -66,6 +62,7 @@ export function GemPageClient({
       form.append("file", blob, `${seed}.png`);
       form.append("seed", seed);
       await fetch("/api/gem-image", { method: "POST", body: form });
+      sessionStorage.setItem(uploadKey, "1");
     };
 
     // Wait a frame so the WebGL gem has rendered at least once
@@ -73,7 +70,7 @@ export function GemPageClient({
       upload().catch(() => {});
     });
     return () => cancelAnimationFrame(id);
-  }, [seed, hasBlobImage]);
+  }, [seed, uploadKey]);
 
   const captureBlob = async (): Promise<Blob | null> => {
     const srcCanvas = containerRef.current?.querySelector(
@@ -101,6 +98,7 @@ export function GemPageClient({
     form.append("file", blob, `${seed}.png`);
     form.append("seed", seed);
     await fetch("/api/gem-image", { method: "POST", body: form });
+    sessionStorage.setItem(uploadKey, "1");
   };
 
   const handleCopyLink = async () => {

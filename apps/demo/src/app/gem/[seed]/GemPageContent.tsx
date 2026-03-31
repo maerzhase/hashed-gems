@@ -10,7 +10,6 @@ interface Props {
   gemTypeName: string;
   cutTypeName: string;
   rarityName: Rarity;
-  hasBlobImage: boolean;
 }
 
 export function GemPageContent({
@@ -18,7 +17,6 @@ export function GemPageContent({
   gemTypeName,
   cutTypeName,
   rarityName,
-  hasBlobImage,
 }: Props) {
   return (
     <main className="flex min-h-screen flex-col items-center px-6">
@@ -37,7 +35,6 @@ export function GemPageContent({
           gemTypeName={gemTypeName}
           cutTypeName={cutTypeName}
           rarityName={rarityName}
-          hasBlobImage={hasBlobImage}
         />
 
         <a

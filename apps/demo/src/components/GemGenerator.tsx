@@ -3,8 +3,7 @@
 import { getGemProperties, HashedGem } from "@m3000/hashed-gems";
 import { useEffect, useRef, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
-
-const GEM_URL_BASE = "https://gems.m3000.io/gem";
+import { getGemShareUrl } from "@/lib/gemShareUrl";
 
 export const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
@@ -20,7 +19,7 @@ export function XShareButton({
   rarityName: string;
   onClick?: () => void;
 }) {
-  const gemUrl = `${GEM_URL_BASE}/${encodeURIComponent(seed)}`;
+  const gemUrl = getGemShareUrl(seed);
   const tweetText = `Check out ${seed}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
 
   return (
@@ -44,7 +43,7 @@ export function CopyLinkButton({
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
-  const gemUrl = `${GEM_URL_BASE}/${encodeURIComponent(seed)}`;
+  const gemUrl = getGemShareUrl(seed);
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(gemUrl);
@@ -74,7 +73,7 @@ export function NativeShareButton({
   rarityName: string;
   className?: string;
 }) {
-  const gemUrl = `${GEM_URL_BASE}/${encodeURIComponent(seed)}`;
+  const gemUrl = getGemShareUrl(seed);
 
   const handleNativeShare = async () => {
     try {
@@ -157,7 +156,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   };
 
   const tweetText = `My gem is a ${rarityName} ${gemTypeName}! What's yours? 💎`;
-  const gemUrl = `${GEM_URL_BASE}/${encodeURIComponent(seed)}`;
+  const gemUrl = getGemShareUrl(seed);
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(gemUrl)}`;
 
   return (

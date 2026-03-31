@@ -1,6 +1,5 @@
 import type { Rarity } from "@m3000/hashed-gems";
 import { getGemProperties } from "@m3000/hashed-gems";
-import { list } from "@vercel/blob";
 import type { Metadata } from "next";
 import { GemPageContent } from "./GemPageContent";
 
@@ -11,18 +10,7 @@ async function getSeedData(params: Promise<{ seed: string }>) {
   const seed = decodeURIComponent(raw);
   const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
 
-  let hasBlobImage = false;
-  try {
-    const { blobs } = await list({
-      prefix: `gems/${encodeURIComponent(seed)}.png`,
-      limit: 1,
-    });
-    hasBlobImage = blobs.length > 0;
-  } catch {
-    hasBlobImage = false;
-  }
-
-  return { seed, gemTypeName, cutTypeName, rarityName, hasBlobImage };
+  return { seed, gemTypeName, cutTypeName, rarityName };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -52,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function GemPage({ params }: Props) {
-  const { seed, gemTypeName, cutTypeName, rarityName, hasBlobImage } =
+  const { seed, gemTypeName, cutTypeName, rarityName } =
     await getSeedData(params);
 
   return (
@@ -61,7 +49,6 @@ export default async function GemPage({ params }: Props) {
       gemTypeName={gemTypeName}
       cutTypeName={cutTypeName}
       rarityName={rarityName as Rarity}
-      hasBlobImage={hasBlobImage}
     />
   );
 }
