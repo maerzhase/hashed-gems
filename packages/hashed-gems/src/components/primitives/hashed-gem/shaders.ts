@@ -371,9 +371,13 @@ void main() {
   float centerMask = 1.0 - smoothstep(0.06, 0.32, radNorm);
   float centerStructure = clamp(length(crownNormal.xy) * 1.8 + length(internalNormal.xy) + edgeMask * 0.6, 0.0, 1.0);
   float centerFlatten = centerMask * (1.0 - smoothstep(0.16, 0.48, centerStructure));
+  float centerAnim = centerMask * (0.35 + 0.65 * centerStructure);
+  float centerBlinkContrast = mix(0.86, 1.18, smoothstep(0.20, 0.80, fBlink));
   surfaceLight *= 1.0 - centerFlatten * 0.12;
   internalLight *= 1.0 - centerFlatten * 0.26;
   internalLight += gemBodyColor * centerFlatten * 0.035;
+  surfaceLight *= mix(1.0, mix(0.94, 1.10, centerBlinkContrast), centerAnim * 0.22);
+  internalLight *= mix(1.0, centerBlinkContrast, centerAnim * 0.38);
 
   /* ── 9. Combine ────────────────────────────────────────────────────────── */
   vec3 rawColor = surfaceLight + internalLight;
