@@ -1,3 +1,5 @@
+import { ALL_CUT_GLSL } from "./cuts/index";
+
 export const VERTEX_SHADER = /* glsl */ `#version 300 es
 precision highp float;
 
@@ -10,7 +12,13 @@ void main() {
 }
 `;
 
-export const FRAGMENT_SHADER = /* glsl */ `#version 300 es
+// ── Fragment shader is assembled from three parts: ────────────────────────────
+//   FRAGMENT_PREAMBLE  — version, uniforms, utility functions, CutResult struct
+//   ALL_CUT_GLSL       — one GLSL function per cut type (from cuts/ modules)
+//   FRAGMENT_MAIN      — dispatcher + void main() body
+// Adding a new cut: create cuts/<name>.ts, register in cuts/index.ts. Done.
+
+const FRAGMENT_PREAMBLE = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
 
@@ -110,6 +118,27 @@ vec3 tonemap(vec3 x) {
 
 /* ══════════════════════════════════════════════════════════════════════════════ */
 
+/* ── Cut result struct — returned by every per-cut geometry function ────────── */
+struct CutResult {
+  vec3  normal;    /* facet surface normal                          */
+  int   facetId;   /* unique ID per facet (drives per-facet blink)  */
+  float edgeMask;  /* 0-1 facet boundary intensity                  */
+};
+`;
+
+// ── Dispatcher — calls the appropriate per-cut function by index ──────────────
+// Keep in sync with CUT_TYPES order in gem.ts:
+//   0=round-brilliant  1=princess  2=cushion  3=emerald-step
+const FRAGMENT_DISPATCHER = /* glsl */ `
+CutResult computeCut(int cutType, vec2 uv, float seed) {
+  if (cutType == 1) return computePrincess(uv, seed);
+  if (cutType == 2) return computeCushion(uv, seed);
+  if (cutType == 3) return computeEmeraldStep(uv, seed);
+  return computeRoundBrilliant(uv, seed);
+}
+`;
+
+const FRAGMENT_MAIN = /* glsl */ `
 void main() {
 
   /* ── 1. Coordinates ──────────────────────────────────────────────────── */
@@ -169,262 +198,11 @@ void main() {
   else if (uRarity == 3) { raritySparkle = 1.2; rarityGlow = 0.06; }
   else if (uRarity == 4) { raritySparkle = 1.35; rarityGlow = 0.10; }
 
-  /* ── 3. Crown facet geometry ───────────────────────────────────────────── */
-  /* Each cut has a fundamentally different facet layout:                     */
-  /* Round Brilliant: 16-fold radial symmetry, many small triangular facets  */
-  /* Princess: 4-fold with chevron/V patterns pointing to corners            */
-  /* Cushion: 8-fold with broad, chunky "pillow" facets                      */
-  /* Emerald Step: concentric rectangular bands (hall-of-mirrors)             */
-
-  int   facetId     = 0;
-  vec3  crownNormal = vec3(0.0, 0.0, 1.0);
-  float edgeMask    = 0.0;
-
-  float angle = atan(uv.y, uv.x);
-  float radius = r / 0.90;
-
-  if (uCutType == 3) {
-    // ── EMERALD STEP CUT — concentric rectangular bands ──
-    float asp  = 1.0 + 0.28 * fract(uSeed * 0.031);
-    vec2  aUv  = abs(uv);
-    vec2  sUv  = aUv / vec2(0.90 * asp, 0.90);
-    float lInf = max(sUv.x, sUv.y);
-    bool  isX  = (sUv.x >= sUv.y);
-    float fDir = isX ? sign(uv.x) : sign(uv.y);
-    float tilX = isX ? fDir : 0.0;
-    float tilY = isX ? 0.0  : fDir;
-    float diagDist = abs(sUv.x - sUv.y) / max(lInf, 0.001);
-    float diagT    = smoothstep(0.0, 0.18, diagDist);
-
-    // 8 concentric step bands — many more than before for finer detail
-    float sb0=0.12, sb1=0.24, sb2=0.36, sb3=0.48, sb4=0.58, sb5=0.68, sb6=0.78, sb7=0.87;
-    float tilt = 0.0;
-
-    if (lInf < sb0) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else {
-      if      (lInf < sb1) { tilt = 0.12 + 0.03*sin(uSeed*1.7); facetId = 10; }
-      else if (lInf < sb2) { tilt = 0.22 + 0.03*sin(uSeed*2.3); facetId = 20; }
-      else if (lInf < sb3) { tilt = 0.33 + 0.04*sin(uSeed*3.1); facetId = 30; }
-      else if (lInf < sb4) { tilt = 0.44 + 0.04*sin(uSeed*2.7); facetId = 40; }
-      else if (lInf < sb5) { tilt = 0.55 + 0.03*sin(uSeed*1.9); facetId = 50; }
-      else if (lInf < sb6) { tilt = 0.65 + 0.03*sin(uSeed*2.1); facetId = 55; }
-      else if (lInf < sb7) { tilt = 0.75 + 0.03*sin(uSeed*1.5); facetId = 58; }
-      else                 { tilt = 0.85;                         facetId = 60; }
-
-      vec3 faceN = normalize(vec3(tilX*tilt, tilY*tilt, 1.0-tilt));
-      vec3 cornN = normalize(vec3(sign(uv.x)*tilt*0.7071, sign(uv.y)*tilt*0.7071, 1.0-tilt));
-      crownNormal = normalize(mix(cornN, faceN, diagT));
-    }
-
-    float drStp = min(min(min(abs(lInf-sb0), abs(lInf-sb1)), min(abs(lInf-sb2), abs(lInf-sb3))),
-                      min(min(abs(lInf-sb4), abs(lInf-sb5)), min(abs(lInf-sb6), abs(lInf-sb7))));
-    edgeMask = max(1.0 - smoothstep(0.0, 0.012, drStp),
-                   (1.0 - smoothstep(0.0, 0.03, diagDist)) * 0.6);
-
-  } else if (uCutType == 1) {
-    // ── PRINCESS CUT — 4-fold with chevron/V patterns ──
-    // Distinctive: diagonal V-lines radiating from center to corners
-    // Plus concentric square bands — creates a grid/cross pattern
-    float ax = abs(uv.x), ay = abs(uv.y);
-    float diagR = (ax + ay) / (0.90 * 1.414);  // diagonal distance
-    float sqR   = max(ax, ay) / 0.90;           // square distance
-
-    // Chevron angle: which quadrant diagonal are we near?
-    float chevAng = atan(ay, ax);  // 0 to PI/2 within each quadrant
-    float chevOa  = abs(chevAng - PI * 0.25);  // distance from diagonal
-    float quadrant = floor(angle / (PI * 0.5) + 0.5);  // which quadrant
-
-    // Concentric square zones (7 zones for fine detail)
-    float zj = 0.02 * sin(uSeed * 5.7 + quadrant * 1.4);
-    float z0=0.10+zj, z1=0.22+zj, z2=0.34+zj, z3=0.46+zj, z4=0.58+zj, z5=0.70+zj, z6=0.82+zj;
-
-    // Chevron subdivision: split each zone along the diagonal
-    bool nearDiag = chevOa < 0.22;
-    float chevSide = chevAng > PI*0.25 ? 1.0 : -1.0;
-
-    if (sqR < z0) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else {
-      float tilt;
-      float outA = quadrant * PI * 0.5 + PI * 0.25; // toward corner
-      float sideA = quadrant * PI * 0.5;              // toward edge
-
-      if (sqR < z1) {
-        tilt = 0.15 + 0.05*sin(uSeed*1.7);
-        facetId = nearDiag ? 10 : 11;
-        float a = nearDiag ? outA : sideA + chevSide * 0.3;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z2) {
-        tilt = 0.25 + 0.06*sin(uSeed*2.3);
-        facetId = nearDiag ? 20 : 21;
-        float a = nearDiag ? outA : sideA + chevSide * 0.25;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z3) {
-        tilt = 0.35 + 0.06*sin(uSeed*3.1);
-        facetId = nearDiag ? 30 : (chevSide > 0.0 ? 31 : 32);
-        float a = nearDiag ? outA : sideA + chevSide * 0.2;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z4) {
-        tilt = 0.45 + 0.05*sin(uSeed*2.7);
-        facetId = nearDiag ? 40 : (chevSide > 0.0 ? 41 : 42);
-        float a = nearDiag ? outA + 0.1*sin(uSeed) : sideA + chevSide * 0.15;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z5) {
-        tilt = 0.55 + 0.05*sin(uSeed*1.9);
-        facetId = nearDiag ? 50 : (chevSide > 0.0 ? 51 : 52);
-        float a = nearDiag ? outA : sideA + chevSide * 0.12;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z6) {
-        tilt = 0.65 + 0.04*sin(uSeed*2.1);
-        facetId = nearDiag ? 55 : (chevSide > 0.0 ? 56 : 57);
-        float a = nearDiag ? outA : sideA + chevSide * 0.10;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else {
-        tilt = 0.72 + 0.03*sin(uSeed*1.5);
-        facetId = 60;
-        float a = nearDiag ? outA : sideA;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      }
-    }
-
-    // Edge mask: square zone boundaries + diagonal chevron lines
-    float drP = min(min(min(abs(sqR-z0), abs(sqR-z1)), min(abs(sqR-z2), abs(sqR-z3))),
-                    min(min(abs(sqR-z4), abs(sqR-z5)), abs(sqR-z6)));
-    float diagEdge = abs(chevOa - 0.22);
-    edgeMask = max(1.0 - smoothstep(0.0, 0.012, drP),
-                   (1.0 - smoothstep(0.0, 0.015, diagEdge)) * 0.7);
-
-  } else if (uCutType == 2) {
-    // ── CUSHION CUT — 8-fold with broad chunky facets ──
-    // Distinctive: larger, fewer facets with rounded transitions
-    // Looks like a pillow — softer, broader facet areas
-    float p = 2.5;
-    float cshR = pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0 / p) / 0.90;
-
-    float sw = PI / 4.0;  // 8-fold
-    float oa = mod(angle + sw*0.5, sw) - sw*0.5;
-    float oi = floor((angle + sw*0.5) / sw);
-
-    // Fewer, wider radial zones — creates the "chunky" look
-    float zj = 0.025 * sin(uSeed * 7.3 + oi * 1.4);
-    float z0=0.18+zj, z1=0.38+zj, z2=0.56+zj, z3=0.72+zj*0.7, z4=0.85+zj*0.4;
-
-    // Each zone is split into 2 sub-facets by the angular midpoint
-    bool upperHalf = oa > 0.0;
-    float subOi = oi * 2.0 + (upperHalf ? 1.0 : 0.0);
-
-    if (cshR < z0) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else if (cshR < z1) {
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.20 + 0.08*sin(uSeed*1.7 + subOi*0.9);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 1 + int(subOi);
-    } else if (cshR < z2) {
-      float outA = oi*sw + (upperHalf ? sw*0.7 : sw*0.3);
-      float tilt = 0.38 + 0.10*cos(uSeed*2.3 + subOi*0.7);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 17 + int(subOi);
-    } else if (cshR < z3) {
-      float outA = oi*sw + (upperHalf ? sw*0.75 : sw*0.25);
-      float tilt = 0.52 + 0.08*sin(uSeed*3.1 + subOi*0.8);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 33 + int(subOi);
-    } else if (cshR < z4) {
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.65 + 0.06*sin(uSeed*2.7 + oi*0.9);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 49 + int(oi);
-    } else {
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.75 + 0.04*sin(uSeed*1.9 + oi*1.1);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 57 + int(oi);
-    }
-
-    float dr  = min(min(min(abs(cshR-z0), abs(cshR-z1)), abs(cshR-z2)),
-                    min(abs(cshR-z3), abs(cshR-z4)));
-    float da  = min(sw*0.5 - abs(oa), abs(oa));
-    edgeMask  = max(1.0 - smoothstep(0.0, 0.014, min(da * 0.7, dr)),
-                    0.0);
-
-  } else {
-    // ── ROUND BRILLIANT — 16-fold, many small triangular facets ──
-    float sw  = PI / 8.0;  // 16-fold
-    float oa  = mod(angle + sw*0.5, sw) - sw*0.5;
-    float oi  = floor((angle + sw*0.5) / sw);
-    float tu  = (oa + sw*0.5) / sw;
-
-    // Sub-facet angular subdivision
-    float twist = 0.50 + 0.25 * fract(uSeed * 0.017);
-    float sang  = angle + radius * twist;
-    float sw2   = TWO_PI / 32.0;  // 32 sub-facets
-    float oa2   = mod(sang + sw2*0.5, sw2) - sw2*0.5;
-    float oi2f  = floor((sang + sw2*0.5) / sw2);
-
-    // 7 radial zones for fine detail (more than before)
-    float zj = 0.025 * sin(uSeed * 7.3 + oi * 1.4);
-    float z1=0.12+zj, z2=0.26+zj, z3=0.40+zj, z4=0.54+zj, z5=0.66+zj*0.7, z6=0.78+zj*0.4, z7=0.88;
-
-    if (radius < z1) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else if (radius < z2) {
-      // Star facets
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.18 + 0.06*sin(uSeed*1.7+oi*0.78) + 0.03*sin(oi2f*2.1+uSeed*3.3);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 1 + int(oi);
-    } else if (radius < z3) {
-      // Upper bezel
-      float outA = oi*sw + sw*0.5;
-      float subA = 0.06 * cos(oi2f*1.9 + uSeed*1.4);
-      float tilt = 0.30 + 0.08*cos(uSeed*2.3+oi*0.79) + 0.04*sin(oi2f*1.5+uSeed);
-      crownNormal = normalize(vec3(cos(outA+subA)*tilt, sin(outA+subA)*tilt, 1.0-tilt));
-      facetId = 17 + int(oi) + (int(oi2f) % 2) * 16;
-    } else if (radius < z4) {
-      // Main kite facets
-      float sOff = tu < 0.5 ? sw*0.25 : sw*0.75;
-      float outA = oi*sw + sOff;
-      float tilt = 0.42 + 0.08*sin(uSeed*3.1+oi*0.81);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 49 + int(oi) + (tu < 0.5 ? 0 : 16);
-    } else if (radius < z5) {
-      // Upper girdle A
-      float sOff = tu < 0.5 ? sw*0.20 : sw*0.80;
-      float outA = oi*sw + sOff;
-      float subA = 0.05 * sin(oi2f*1.7 + uSeed*2.8);
-      float tilt = 0.55 + 0.07*sin(uSeed*2.7+oi*0.93);
-      crownNormal = normalize(vec3(cos(outA+subA)*tilt, sin(outA+subA)*tilt, 1.0-tilt));
-      facetId = 81 + int(oi) + (tu < 0.5 ? 0 : 16);
-    } else if (radius < z6) {
-      // Upper girdle B
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.65 + 0.05*sin(uSeed*1.9+oi*1.1);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 113 + int(oi);
-    } else if (radius < z7) {
-      // Lower girdle
-      float sOff = tu < 0.5 ? sw*0.30 : sw*0.70;
-      float outA = oi*sw + sOff;
-      float tilt = 0.73 + 0.04*sin(uSeed*2.1+oi*0.87);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 129 + int(oi) + (tu < 0.5 ? 0 : 16);
-    } else {
-      // Girdle edge
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.80 + 0.03*sin(uSeed*1.5+oi*0.73);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 161 + int(oi);
-    }
-
-    float dr  = min(min(min(abs(radius-z1), abs(radius-z2)), min(abs(radius-z3), abs(radius-z4))),
-                    min(min(abs(radius-z5), abs(radius-z6)), abs(radius-z7)));
-    float da  = min(sw*0.5 - abs(oa), abs(oa));
-    float da2 = sw2*0.5 - abs(oa2);
-    edgeMask  = max(1.0 - smoothstep(0.0, 0.010, min(da, dr)),
-                    (1.0 - smoothstep(0.0, 0.005, da2)) * 0.5);
-  }
+  /* ── 3. Crown facet geometry — dispatched to per-cut module ─────────────── */
+  CutResult cut     = computeCut(uCutType, uv, uSeed);
+  vec3  crownNormal = cut.normal;
+  int   facetId     = cut.facetId;
+  float edgeMask    = cut.edgeMask;
 
   /* ── 4. Internal facet layer ───────────────────────────────────────────── */
   float iFolds = 24.0;
@@ -438,8 +216,20 @@ void main() {
 
   vec3  innerNormal  = vec3(0.0, 0.0, 1.0);
   int   innerFacetId = 100;
+  float innerTableEdge = 0.0;
 
-  if (iRad >= iz1) {
+  if (iRad < iz1) {
+    float cSw = PI / 4.0;
+    float cOa = mod(iAng + cSw*0.5, cSw) - cSw*0.5;
+    float cOi = floor((iAng + cSw*0.5) / cSw);
+    float cA = cOi * cSw + cSw * 0.5 + 0.10 * sin(uSeed * 1.3 + cOi * 0.8);
+    float cTilt = 0.065 + 0.022 * sin(uSeed * 2.0 + cOi * 1.1);
+    cTilt *= 0.78 + 0.22 * (1.0 - smoothstep(0.0, iz1, iRad));
+    innerNormal = normalize(vec3(cos(cA) * cTilt, sin(cA) * cTilt, 1.0 - cTilt));
+    innerFacetId = 400 + int(cOi);
+    float cDa = cSw*0.5 - abs(cOa);
+    innerTableEdge = (1.0 - smoothstep(0.0, 0.020, cDa)) * smoothstep(0.012, iz1, iRad) * 0.40;
+  } else {
     float outA = iOi * iSw + iSw * 0.5;
     float tilt;
     if      (iRad < iz2) { tilt = 0.30+0.09*sin(uSeed*2.1+iOi*0.83); innerFacetId = 101+int(iOi); }
@@ -452,7 +242,7 @@ void main() {
   float iDr = min(min(min(abs(iRad-iz1), abs(iRad-iz2)), abs(iRad-iz3)),
                   min(abs(iRad-iz4), abs(iRad-iz5)));
   float iDa = min(iSw*0.5 - abs(iOa), abs(iOa));
-  float innerEdge = 1.0 - smoothstep(0.0, 0.008, min(iDa, iDr));
+  float innerEdge = max(1.0 - smoothstep(0.0, 0.008, min(iDa, iDr)), innerTableEdge);
 
   /* ── 5. Deep internal layer ────────────────────────────────────────────── */
   float dFolds = 32.0;
@@ -466,8 +256,20 @@ void main() {
 
   vec3  deepNormal  = vec3(0.0, 0.0, 1.0);
   int   deepFacetId = 200;
+  float deepTableEdge = 0.0;
 
-  if (dRad >= dz1) {
+  if (dRad < dz1) {
+    float cSw = PI / 6.0;
+    float cOa = mod(dAng + cSw*0.5, cSw) - cSw*0.5;
+    float cOi = floor((dAng + cSw*0.5) / cSw);
+    float cA = cOi * cSw + cSw * 0.5 - 0.12 * cos(uSeed * 1.7 + cOi * 0.6);
+    float cTilt = 0.082 + 0.026 * cos(uSeed * 2.4 + cOi * 0.9);
+    cTilt *= 0.76 + 0.24 * (1.0 - smoothstep(0.0, dz1, dRad));
+    deepNormal = normalize(vec3(cos(cA) * cTilt, sin(cA) * cTilt, 1.0 - cTilt));
+    deepFacetId = 500 + int(cOi);
+    float cDa = cSw*0.5 - abs(cOa);
+    deepTableEdge = (1.0 - smoothstep(0.0, 0.018, cDa)) * smoothstep(0.010, dz1, dRad) * 0.34;
+  } else {
     float outA = dOi * dSw + dSw * 0.5;
     float tilt;
     if      (dRad < dz2) { tilt = 0.26+0.08*sin(uSeed*1.9+dOi*0.67); deepFacetId = 201+int(dOi); }
@@ -480,7 +282,7 @@ void main() {
   float dDr = min(min(min(abs(dRad-dz1), abs(dRad-dz2)), abs(dRad-dz3)),
                   min(abs(dRad-dz4), abs(dRad-dz5)));
   float dDa = min(dSw*0.5 - abs(dOa), abs(dOa));
-  float deepEdge = 1.0 - smoothstep(0.0, 0.006, min(dDa, dDr));
+  float deepEdge = max(1.0 - smoothstep(0.0, 0.006, min(dDa, dDr)), deepTableEdge);
 
   /* ── 6. Fresnel + layer compositing ────────────────────────────────────── */
   float cosTheta = max(dot(crownNormal, viewDir), 0.0);
@@ -565,6 +367,13 @@ void main() {
   }
 
   vec3 internalLight = internalEnv * internalTint * extinction * (1.0 - fresnel);
+
+  float centerMask = 1.0 - smoothstep(0.06, 0.32, radNorm);
+  float centerStructure = clamp(length(crownNormal.xy) * 1.8 + length(internalNormal.xy) + edgeMask * 0.6, 0.0, 1.0);
+  float centerFlatten = centerMask * (1.0 - smoothstep(0.16, 0.48, centerStructure));
+  surfaceLight *= 1.0 - centerFlatten * 0.12;
+  internalLight *= 1.0 - centerFlatten * 0.26;
+  internalLight += gemBodyColor * centerFlatten * 0.035;
 
   /* ── 9. Combine ────────────────────────────────────────────────────────── */
   vec3 rawColor = surfaceLight + internalLight;
@@ -671,3 +480,6 @@ void main() {
   outColor = vec4(color, 1.0);
 }
 `;
+
+export const FRAGMENT_SHADER: string =
+  FRAGMENT_PREAMBLE + ALL_CUT_GLSL + FRAGMENT_DISPATCHER + FRAGMENT_MAIN;
