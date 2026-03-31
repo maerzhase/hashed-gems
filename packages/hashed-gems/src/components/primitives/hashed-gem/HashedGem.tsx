@@ -73,6 +73,7 @@ export function HashedGem({
       }}
     >
       <HashedGemGradient
+        size={size}
         seed={seed}
         gemType={gemType}
         cutType={cutType}

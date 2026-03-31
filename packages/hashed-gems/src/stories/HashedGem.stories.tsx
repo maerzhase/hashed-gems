@@ -238,7 +238,7 @@ export const GradientVsWebGL: Story = {
     seed: "alice",
     size: 96,
   },
-  render: (args) => (
+  render: ({ seed, size = 96, gemType, cutType }) => (
     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
       <div
         style={{
@@ -248,7 +248,12 @@ export const GradientVsWebGL: Story = {
           gap: 4,
         }}
       >
-        <HashedGemGradient {...args} />
+        <HashedGemGradient
+          seed={seed}
+          size={size}
+          gemType={gemType}
+          cutType={cutType}
+        />
         <span style={{ fontSize: 10, opacity: 0.5 }}>Gradient</span>
       </div>
       <div
@@ -259,7 +264,12 @@ export const GradientVsWebGL: Story = {
           gap: 4,
         }}
       >
-        <HashedGem {...args} />
+        <HashedGem
+          seed={seed}
+          size={size}
+          gemType={gemType}
+          cutType={cutType}
+        />
         <span style={{ fontSize: 10, opacity: 0.5 }}>WebGL</span>
       </div>
     </div>

@@ -5,6 +5,8 @@ import { getGemProperties } from "@/lib/gem";
 import { CUT_MODULES } from "./cuts/index";
 
 export interface HashedGemGradientProps {
+  /** CSS display size in pixels for standalone rendering. Defaults to 64. */
+  size?: number;
   seed: string;
   gemType?: GemType;
   cutType?: CutType;
@@ -102,6 +104,7 @@ function getOpalRainbowOverlay(
 }
 
 export function HashedGemGradient({
+  size,
   seed,
   gemType,
   cutType,
@@ -122,7 +125,9 @@ export function HashedGemGradient({
     colors = { ...colors, ...getAlexandriteColors(props.seed) };
   }
   const glow = getRarityGlow(rarityName, gemTypeName);
-  const borderRadius = CUT_MODULES[cutTypeName].borderRadius;
+  // Let the container or className define the silhouette.
+  // Cut type should only affect the internal gradient detail, not the outer shape.
+  const borderRadius = "inherit";
 
   // Use the same seed value and light angle formula as the WebGL shader
   const { angle1, angle2 } = shaderLightAngles(props.seed);
@@ -146,10 +151,11 @@ export function HashedGemGradient({
     radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 40%)
   `;
 
+  const resolvedSize = size ?? (position === "absolute" ? "100%" : 64);
+
   const gradientStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    borderRadius,
+    width: resolvedSize,
+    height: resolvedSize,
     background: `${baseGradient}, ${sparkleGradient}`,
     backgroundBlendMode: isLightGem ? "screen" : "normal",
     boxShadow: glow,
