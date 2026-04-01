@@ -201,8 +201,8 @@ export function HashedGemGradient({
     height: "100%",
     borderRadius,
     background:
-      "radial-gradient(circle at center, transparent 52%, rgba(0,0,0,0.65) 100%)",
-    boxShadow: "inset 0 0 25px rgba(255,255,255,0.12)",
+      "radial-gradient(circle at center, transparent 68%, rgba(0,0,0,0.4) 100%)",
+    boxShadow: "inset 0 0 18px rgba(255,255,255,0.1)",
     pointerEvents: "none",
   };
 

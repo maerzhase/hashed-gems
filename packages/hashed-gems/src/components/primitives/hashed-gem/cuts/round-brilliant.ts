@@ -24,7 +24,7 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
   float ringWarp = 1.0
     + lobeStrength * cos(angle * 8.0 + seed * 0.63)
     + 0.012 * sin(angle * 16.0 + seed * 1.1);
-  float radius = clamp(length(uv) / (0.90 * ringWarp), 0.0, 1.0);
+  float radius = clamp(length(uv) / (GEM_CANVAS_SCALE * ringWarp), 0.0, 1.0);
 
   float sw  = PI / 8.0;  // 16-fold
   float oa  = mod(angle + sw*0.5, sw) - sw*0.5;
@@ -46,7 +46,15 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
   float z4 = z3 + mainSpan * mix(sectorScale, subScale, 0.50);
   float z5 = z4 + upperGirdleSpan * mix(1.0, sectorScale, 0.35);
   float z6 = z5 + lowerGirdleSpan * mix(1.0, subScale, 0.30);
-  float z7 = min(0.90, z6 + girdleSpan);
+  float z7 = min(GEM_CANVAS_SCALE, z6 + girdleSpan);
+  float outerScale = GEM_FILL_TARGET / max(z7, 0.001);
+  z1 *= outerScale;
+  z2 *= outerScale;
+  z3 *= outerScale;
+  z4 *= outerScale;
+  z5 *= outerScale;
+  z6 *= outerScale;
+  z7 *= outerScale;
 
   if (radius < z1) {
     // Subdivide table into 8 sectors matching the cut's symmetry.

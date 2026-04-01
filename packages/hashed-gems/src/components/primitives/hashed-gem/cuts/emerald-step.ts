@@ -23,7 +23,7 @@ CutResult computeEmeraldStep(vec2 uv, float seed) {
   float asp  = seededSpan(seed, 60.0, 1.22, 1.44);
   vec2  aUv  = abs(uv);
   // Normalized so lInf == 1.0 at the gem edge
-  vec2  sUv  = aUv / vec2(0.90 * asp, 0.90);
+  vec2  sUv  = aUv / vec2(GEM_CANVAS_SCALE * asp, GEM_CANVAS_SCALE);
   float lInf = max(sUv.x, sUv.y);
 
   // Octagonal clipping: corners are cut at 45°
@@ -63,7 +63,16 @@ CutResult computeEmeraldStep(vec2 uv, float seed) {
   float sb4 = sb3 + w4;
   float sb5 = sb4 + w5;
   float sb6 = sb5 + w6;
-  float sb7 = min(0.90, sb6 + w7);
+  float sb7 = min(GEM_CANVAS_SCALE, sb6 + w7);
+  float outerScale = (GEM_FILL_TARGET * 0.95) / max(sb7, 0.001);
+  sb0 *= outerScale;
+  sb1 *= outerScale;
+  sb2 *= outerScale;
+  sb3 *= outerScale;
+  sb4 *= outerScale;
+  sb5 *= outerScale;
+  sb6 *= outerScale;
+  sb7 *= outerScale;
 
   float tilt = 0.0;
   float cornerCut = cornerCutBase;

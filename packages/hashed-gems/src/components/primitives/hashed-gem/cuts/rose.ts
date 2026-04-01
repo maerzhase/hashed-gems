@@ -15,7 +15,7 @@ CutResult computeRose(vec2 uv, float seed) {
   float angle  = atan(uv.y, uv.x);
   float bloomStrength = seededSpan(seed, 100.0, 0.035, 0.075);
   float radius = clamp(
-    length(uv) / (0.90 * (1.0 + bloomStrength * cos(angle * 6.0 + seed * 0.41))),
+    length(uv) / (GEM_CANVAS_SCALE * (1.0 + bloomStrength * cos(angle * 6.0 + seed * 0.41))),
     0.0,
     1.0
   );
@@ -30,7 +30,7 @@ CutResult computeRose(vec2 uv, float seed) {
   float splitOi = floor((angle + splitSw*0.5) / splitSw);
 
   float bloom = 0.5 + 0.5 * cos(angle * 6.0 + seed * 0.41);
-  float roseR = radius / (0.92 + 0.06 * bloom);
+  float roseR = radius / (0.97 + 0.04 * bloom);
 
   float zj = 0.010 * sin(seed * 4.9 + petalOi * 1.1);
   float w0 = seededSpan(seed, 101.0, 0.06, 0.09);
@@ -44,7 +44,14 @@ CutResult computeRose(vec2 uv, float seed) {
   float z2 = z1 + w2;
   float z3 = z2 + w3;
   float z4 = z3 + w4;
-  float z5 = min(0.91, z4 + w5);
+  float z5 = min(GEM_CANVAS_SCALE, z4 + w5);
+  float outerScale = (GEM_FILL_TARGET * 1.03) / max(z5, 0.001);
+  z0 *= outerScale;
+  z1 *= outerScale;
+  z2 *= outerScale;
+  z3 *= outerScale;
+  z4 *= outerScale;
+  z5 *= outerScale;
 
   if (roseR < z0) {
     float apexA = petalOi * petalSw + (petalTu < 0.5 ? petalSw * 0.35 : petalSw * 0.65);

@@ -17,7 +17,7 @@ CutResult computeFirework(vec2 uv, float seed) {
   float ringWarp = 1.0
     + burstRadius * cos(angle * 6.0 + seed * 0.75)
     + 0.016 * sin(angle * 12.0 + seed * 1.2);
-  float radius = clamp(length(uv) / (0.90 * ringWarp), 0.0, 1.0);
+  float radius = clamp(length(uv) / (GEM_CANVAS_SCALE * ringWarp), 0.0, 1.0);
 
   float majorSpokes = 12.0;
   float majorSw = TWO_PI / majorSpokes;
@@ -36,7 +36,7 @@ CutResult computeFirework(vec2 uv, float seed) {
   float microOi = floor((angle + microSw * 0.5) / microSw);
 
   float burstWave = 0.5 + 0.5 * cos(angle * majorSpokes + seed * 0.75);
-  float flareMetric = radius / (0.93 + 0.10 * burstWave);
+  float flareMetric = radius / (0.97 + 0.06 * burstWave);
 
   float zj = 0.010 * sin(seed * 5.9 + majorOi * 1.2);
   float burstScale = 0.95 + 0.10 * hash11(seed * 0.39 + majorOi * 0.81);
@@ -46,7 +46,15 @@ CutResult computeFirework(vec2 uv, float seed) {
   float z3 = z2 + seededSpan(seed, 84.0, 0.12, 0.17);
   float z4 = z3 + seededSpan(seed, 85.0, 0.10, 0.15);
   float z5 = z4 + seededSpan(seed, 86.0, 0.08, 0.13);
-  float z6 = min(0.92, z5 + seededSpan(seed, 87.0, 0.05, 0.09));
+  float z6 = min(GEM_CANVAS_SCALE, z5 + seededSpan(seed, 87.0, 0.05, 0.09));
+  float outerScale = (GEM_FILL_TARGET * 1.03) / max(z6, 0.001);
+  z0 *= outerScale;
+  z1 *= outerScale;
+  z2 *= outerScale;
+  z3 *= outerScale;
+  z4 *= outerScale;
+  z5 *= outerScale;
+  z6 *= outerScale;
 
   if (flareMetric < z0) {
     float tableA = majorOi * majorSw + majorSw * 0.5;

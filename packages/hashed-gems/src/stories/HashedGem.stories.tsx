@@ -417,7 +417,6 @@ export const CutSeedVariance: Story = {
                   seed={seed}
                   gemType="diamond"
                   cutType={cutType}
-                  className="rounded-full"
                 />
                 <span style={{ fontSize: 10, opacity: 0.55 }}>{seed}</span>
               </div>
@@ -472,7 +471,7 @@ export const MotionByCutFamily: Story = {
 export const MotionVariantComparison: Story = {
   render: () => (
     <div
-      style={{ display: "flex", flexDirection: "column", gap: 24, width: 760 }}
+      style={{ display: "flex", flexDirection: "column", gap: 24, width: 860 }}
     >
       {[
         {
@@ -507,7 +506,7 @@ export const MotionVariantComparison: Story = {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              gap: 14,
+              gap: 18,
             }}
           >
             {samples.map(({ variant, seed }) => (
@@ -517,15 +516,14 @@ export const MotionVariantComparison: Story = {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: 8,
+                  gap: 10,
                 }}
               >
                 <HashedGem
                   seed={seed}
                   gemType="diamond"
                   cutType={cutType}
-                  size={88}
-                  className="rounded-full"
+                  size={112}
                 />
                 <strong style={{ fontSize: 12, textTransform: "capitalize" }}>
                   {getCutVariantLabel(getCutVariant(seed, cutType))}

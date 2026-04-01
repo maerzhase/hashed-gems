@@ -19,7 +19,7 @@ CutResult computeCushion(vec2 uv, float seed) {
     + pillowBulge * cos(angle * 4.0 + seed * 0.53)
     + 0.012 * sin(angle * 8.0 + seed * 1.1);
   float cshR = clamp(
-    pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0/p) / (0.90 * shoulderWave),
+    pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0/p) / (GEM_CANVAS_SCALE * shoulderWave),
     0.0,
     1.0
   );
@@ -41,7 +41,13 @@ CutResult computeCushion(vec2 uv, float seed) {
   float z1 = z0 + w1;
   float z2 = z1 + w2;
   float z3 = z2 + w3;
-  float z4 = min(0.90, z3 + w4);
+  float z4 = min(GEM_CANVAS_SCALE, z3 + w4);
+  float outerScale = GEM_FILL_TARGET / max(z4, 0.001);
+  z0 *= outerScale;
+  z1 *= outerScale;
+  z2 *= outerScale;
+  z3 *= outerScale;
+  z4 *= outerScale;
 
   if (cshR < z0) {
     // Subdivide table into 8 sectors matching the cushion's 8-fold symmetry.

@@ -51,6 +51,8 @@ precision highp int;
 
 #define PI     3.14159265359
 #define TWO_PI 6.28318530718
+#define GEM_CANVAS_SCALE 1.0
+#define GEM_FILL_TARGET 0.985
 
 uniform float uTime;
 uniform float uSeed;
@@ -208,10 +210,10 @@ void main() {
   /* ── 1. Coordinates ──────────────────────────────────────────────────── */
   vec2 uv = vUv;
   uv.x *= uResolution.x / uResolution.y;
-  uv *= 0.90;
+  uv *= GEM_CANVAS_SCALE;
 
   float r = max(abs(uv.x), abs(uv.y));
-  float radNorm = clamp(r / 0.90, 0.0, 1.0);
+  float radNorm = clamp(r / GEM_CANVAS_SCALE, 0.0, 1.0);
 
   vec3 viewDir = normalize(vec3(-uv * 0.12, 1.0));
 
@@ -280,7 +282,7 @@ void main() {
   float iFolds = floor(seededSpan(uSeed, 1.0, 22.0, 30.999));
   float iAng = atan(uv.y, uv.x) + 0.43 + uSeed * 0.29;
   float iWarp = seededSpan(uSeed, 2.0, 0.010, 0.040) * cos(iAng * seededSpan(uSeed, 3.0, 4.0, 8.0) + uSeed * 0.91);
-  float iRad = clamp((r / 0.90) / (1.0 + iWarp), 0.0, 1.0);
+  float iRad = clamp((r / GEM_CANVAS_SCALE) / (1.0 + iWarp), 0.0, 1.0);
   float iSw  = PI / iFolds;
   float iOa  = mod(iAng + iSw*0.5, iSw) - iSw*0.5;
   float iOi  = floor((iAng + iSw*0.5) / iSw);
@@ -295,7 +297,7 @@ void main() {
   float iz2 = iz1 + iw2;
   float iz3 = iz2 + iw3;
   float iz4 = iz3 + iw4;
-  float iz5 = min(0.90, iz4 + iw5);
+  float iz5 = min(GEM_CANVAS_SCALE, iz4 + iw5);
 
   vec3  innerNormal  = vec3(0.0, 0.0, 1.0);
   int   innerFacetId = 100;
@@ -331,7 +333,7 @@ void main() {
   float dFolds = floor(seededSpan(uSeed, 9.0, 28.0, 38.999));
   float dAng = atan(uv.y, uv.x) - 0.67 + uSeed * 0.41;
   float dWarp = seededSpan(uSeed, 10.0, 0.012, 0.050) * sin(dAng * seededSpan(uSeed, 11.0, 5.0, 11.0) - uSeed * 0.73);
-  float dRad = clamp((r / 0.90) / (1.0 + dWarp), 0.0, 1.0);
+  float dRad = clamp((r / GEM_CANVAS_SCALE) / (1.0 + dWarp), 0.0, 1.0);
   float dSw  = PI / dFolds;
   float dOa  = mod(dAng + dSw*0.5, dSw) - dSw*0.5;
   float dOi  = floor((dAng + dSw*0.5) / dSw);
@@ -650,8 +652,8 @@ void main() {
 
   // Rare+: subtle outer glow
   float canvasDist = length(uv);
-  float gemRimMask = smoothstep(0.18, 0.34, canvasDist)
-    * smoothstep(0.76, 0.46, canvasDist);
+  float gemRimMask = smoothstep(0.22, 0.42, canvasDist)
+    * smoothstep(0.92, 0.58, canvasDist);
   if (rarityGlow > 0.0) {
     float glow = gemRimMask * rarityGlow;
     float glowPulse = 0.7 + 0.3 * sin(glowTime * 0.8 + uSeed * 1.5);
@@ -663,8 +665,8 @@ void main() {
       * uGlowIntensity;
   }
 
-  float outerCanvasFade = smoothstep(0.48, 0.9, canvasDist);
-  rawColor *= 1.0 - outerCanvasFade * 0.42;
+  float outerCanvasFade = smoothstep(0.82, 1.08, canvasDist);
+  rawColor *= 1.0 - outerCanvasFade * 0.18;
 
   /* ── 14. Tonemap ───────────────────────────────────────────────────────── */
   vec3 color = tonemap(rawColor);

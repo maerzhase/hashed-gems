@@ -19,7 +19,7 @@ CutResult computePrincess(vec2 uv, float seed) {
   float cornerPressure = seededSpan(seed, 30.0, 0.02, 0.08);
   float shoulderLift = seededSpan(seed, 31.0, 0.01, 0.05);
   float sqMetric = max(ax, ay) + min(ax, ay) * cornerPressure;
-  float sqR = sqMetric / (0.89 + shoulderLift * cos((quadrant + 0.5) * 1.7 + seed * 0.37));
+  float sqR = sqMetric / (GEM_CANVAS_SCALE + shoulderLift * cos((quadrant + 0.5) * 1.7 + seed * 0.37));
   float diagWidth = seededSpan(seed, 32.0, 0.12, 0.20);
   float quadrantDiag = diagWidth + 0.03 * hash11(seed * 0.63 + quadrant * 0.71);
   float chevOa  = abs(chevAng - PI * 0.25); // distance from 45° diagonal
@@ -39,7 +39,15 @@ CutResult computePrincess(vec2 uv, float seed) {
   float z3 = z2 + w3;
   float z4 = z3 + w4;
   float z5 = z4 + w5;
-  float z6 = min(0.90, z5 + w6);
+  float z6 = min(GEM_CANVAS_SCALE, z5 + w6);
+  float outerScale = (GEM_FILL_TARGET * 0.955) / max(z6, 0.001);
+  z0 *= outerScale;
+  z1 *= outerScale;
+  z2 *= outerScale;
+  z3 *= outerScale;
+  z4 *= outerScale;
+  z5 *= outerScale;
+  z6 *= outerScale;
 
   bool  nearDiag  = chevOa < quadrantDiag;
   float chevSide  = chevAng > PI*0.25 ? 1.0 : -1.0;

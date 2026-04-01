@@ -15,7 +15,7 @@ CutResult computeJubilee(vec2 uv, float seed) {
   float angle  = atan(uv.y, uv.x);
   float domeWave = seededSpan(seed, 90.0, 0.018, 0.045);
   float radius = clamp(
-    length(uv) / (0.90 * (1.0 + domeWave * cos(angle * 8.0 + seed * 0.31))),
+    length(uv) / (GEM_CANVAS_SCALE * (1.0 + domeWave * cos(angle * 8.0 + seed * 0.31))),
     0.0,
     1.0
   );
@@ -45,7 +45,14 @@ CutResult computeJubilee(vec2 uv, float seed) {
   float z2 = z1 + w2;
   float z3 = z2 + w3;
   float z4 = z3 + w4;
-  float z5 = min(0.89, z4 + w5);
+  float z5 = min(GEM_CANVAS_SCALE, z4 + w5);
+  float outerScale = (GEM_FILL_TARGET * 1.02) / max(z5, 0.001);
+  z0 *= outerScale;
+  z1 *= outerScale;
+  z2 *= outerScale;
+  z3 *= outerScale;
+  z4 *= outerScale;
+  z5 *= outerScale;
 
   if (radius < z0) {
     float split = bezelTu < 0.5 ? -1.0 : 1.0;
