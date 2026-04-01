@@ -1,9 +1,12 @@
 import type * as React from "react";
-import { getCutBorderRadius, getGemColors, getRarityGlow } from "@/lib/colors";
+import { getGemColors, getRarityGlow } from "@/lib/colors";
 import type { CutType, GemType, Rarity } from "@/lib/gem";
-import { getGemProperties } from "@/lib/gem";
+import { getGemProperties, getShaderSeed } from "@/lib/gem";
+import { CUT_MODULES } from "./cuts/index";
 
 export interface HashedGemGradientProps {
+  /** CSS display size in pixels for standalone rendering. Defaults to 64. */
+  size?: number;
   seed: string;
   gemType?: GemType;
   cutType?: CutType;
@@ -46,97 +49,7 @@ function getFacetOverlay(
   seedNum: number,
   borderRadius: string,
 ): React.CSSProperties {
-  const rotOffset = seedNum % 360;
-
-  switch (cutType) {
-    case "round-brilliant": {
-      const fromAngle = rotOffset % 22.5;
-      // 8 bright soft wedges (every other 22.5° slot), rest stays transparent
-      const stops = Array.from({ length: 8 }, (_, i) => {
-        const s = i * 45;
-        const mid = s + 11.25;
-        const e = s + 22.5;
-        return `transparent ${s}deg, rgba(255,255,255,0.1) ${mid}deg, transparent ${e}deg`;
-      }).join(", ");
-      return {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        borderRadius,
-        background: `conic-gradient(from ${fromAngle}deg at 50% 50%, ${stops}, transparent 360deg)`,
-        mixBlendMode: "screen",
-        pointerEvents: "none",
-      };
-    }
-
-    case "princess": {
-      // CSS can't replicate WebGL's smooth angular facets without harsh line artifacts — skip overlay
-      return {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        borderRadius,
-        pointerEvents: "none",
-      };
-    }
-
-    case "cushion": {
-      const fromAngle = 22.5 + (rotOffset % 45);
-      // 4 broad soft wedges (every other 45° slot), rest transparent
-      const stops = Array.from({ length: 4 }, (_, i) => {
-        const s = i * 90;
-        const mid = s + 22.5;
-        const e = s + 45;
-        return `transparent ${s}deg, rgba(255,255,255,0.09) ${mid}deg, transparent ${e}deg`;
-      }).join(", ");
-      return {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        borderRadius,
-        background: `conic-gradient(from ${fromAngle}deg at 50% 50%, ${stops}, transparent 360deg)`,
-        mixBlendMode: "screen",
-        pointerEvents: "none",
-      };
-    }
-
-    case "emerald-step": {
-      return {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        borderRadius,
-        background: `
-          linear-gradient(to bottom,
-            rgba(255,255,255,0.08) 0%, transparent 10%,
-            rgba(255,255,255,0.05) 18%, transparent 28%,
-            rgba(255,255,255,0.03) 36%, transparent 44%,
-            transparent 56%, rgba(255,255,255,0.03) 64%,
-            transparent 72%, rgba(255,255,255,0.05) 80%,
-            transparent 90%, rgba(255,255,255,0.08) 100%
-          ),
-          linear-gradient(to right,
-            rgba(255,255,255,0.08) 0%, transparent 10%,
-            rgba(255,255,255,0.05) 18%, transparent 28%,
-            rgba(255,255,255,0.03) 36%, transparent 44%,
-            transparent 56%, rgba(255,255,255,0.03) 64%,
-            transparent 72%, rgba(255,255,255,0.05) 80%,
-            transparent 90%, rgba(255,255,255,0.08) 100%
-          )
-        `,
-        mixBlendMode: "screen",
-        pointerEvents: "none",
-      };
-    }
-  }
+  return CUT_MODULES[cutType].cssGradient(seedNum, borderRadius);
 }
 
 function getAsterismOverlay(
@@ -191,6 +104,7 @@ function getOpalRainbowOverlay(
 }
 
 export function HashedGemGradient({
+  size,
   seed,
   gemType,
   cutType,
@@ -198,6 +112,7 @@ export function HashedGemGradient({
   position = "relative",
 }: HashedGemGradientProps): React.ReactElement {
   const props = getGemProperties(seed);
+  const shaderSeed = getShaderSeed(seed);
 
   const gemTypeName = gemType ?? props.gemTypeName;
   const cutTypeName = cutType ?? props.cutTypeName;
@@ -208,13 +123,15 @@ export function HashedGemGradient({
 
   let colors = getGemColors(gemTypeName);
   if (isAlexandrite) {
-    colors = { ...colors, ...getAlexandriteColors(props.seed) };
+    colors = { ...colors, ...getAlexandriteColors(shaderSeed) };
   }
   const glow = getRarityGlow(rarityName, gemTypeName);
-  const borderRadius = getCutBorderRadius(cutTypeName);
+  // Let the container or className define the silhouette.
+  // Cut type should only affect the internal gradient detail, not the outer shape.
+  const borderRadius = "inherit";
 
   // Use the same seed value and light angle formula as the WebGL shader
-  const { angle1, angle2 } = shaderLightAngles(props.seed);
+  const { angle1, angle2 } = shaderLightAngles(shaderSeed);
   const sparkleX = Math.round(50 + Math.cos(angle1) * 22);
   const sparkleY = Math.round(50 - Math.sin(angle1) * 22);
   // Secondary highlight from shader's second light
@@ -235,10 +152,11 @@ export function HashedGemGradient({
     radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 40%)
   `;
 
+  const resolvedSize = size ?? (position === "absolute" ? "100%" : 64);
+
   const gradientStyle: React.CSSProperties = {
-    width: "100%",
-    height: "100%",
-    borderRadius,
+    width: resolvedSize,
+    height: resolvedSize,
     background: `${baseGradient}, ${sparkleGradient}`,
     backgroundBlendMode: isLightGem ? "screen" : "normal",
     boxShadow: glow,
@@ -283,12 +201,12 @@ export function HashedGemGradient({
     height: "100%",
     borderRadius,
     background:
-      "radial-gradient(circle at center, transparent 52%, rgba(0,0,0,0.65) 100%)",
-    boxShadow: "inset 0 0 25px rgba(255,255,255,0.12)",
+      "radial-gradient(circle at center, transparent 68%, rgba(0,0,0,0.4) 100%)",
+    boxShadow: "inset 0 0 18px rgba(255,255,255,0.1)",
     pointerEvents: "none",
   };
 
-  const facetOverlay = getFacetOverlay(cutTypeName, props.seed, borderRadius);
+  const facetOverlay = getFacetOverlay(cutTypeName, shaderSeed, borderRadius);
   const asterismOverlay = getAsterismOverlay(rarityName, borderRadius);
   const opalRainbow = getOpalRainbowOverlay(gemTypeName, borderRadius);
 

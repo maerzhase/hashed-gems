@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface UseWebGLOptions {
   vertexShader: string;
@@ -12,6 +12,16 @@ export interface UseWebGLOptions {
     uGemType: number;
     uCutType: number;
     uRarity: number;
+    uMotionStyle: number;
+    uMotionCadence: number;
+    uLightCadence: number;
+    uSparkleCadence: number;
+    uGlowCadence: number;
+    uColorCadence: number;
+    uMotionIntensity: number;
+    uSparkleIntensity: number;
+    uGlowIntensity: number;
+    uMotionPhase: number;
     size: number;
     /** Explicit canvas pixel resolution. When omitted, defaults to size × devicePixelRatio. */
     resolution?: number;
@@ -55,6 +65,16 @@ interface SharedRenderer {
     uGemType: WebGLUniformLocation | null;
     uCutType: WebGLUniformLocation | null;
     uRarity: WebGLUniformLocation | null;
+    uMotionStyle: WebGLUniformLocation | null;
+    uMotionCadence: WebGLUniformLocation | null;
+    uLightCadence: WebGLUniformLocation | null;
+    uSparkleCadence: WebGLUniformLocation | null;
+    uGlowCadence: WebGLUniformLocation | null;
+    uColorCadence: WebGLUniformLocation | null;
+    uMotionIntensity: WebGLUniformLocation | null;
+    uSparkleIntensity: WebGLUniformLocation | null;
+    uGlowIntensity: WebGLUniformLocation | null;
+    uMotionPhase: WebGLUniformLocation | null;
   };
 }
 
@@ -132,6 +152,16 @@ function getShared(
       uGemType: gl.getUniformLocation(program, "uGemType"),
       uCutType: gl.getUniformLocation(program, "uCutType"),
       uRarity: gl.getUniformLocation(program, "uRarity"),
+      uMotionStyle: gl.getUniformLocation(program, "uMotionStyle"),
+      uMotionCadence: gl.getUniformLocation(program, "uMotionCadence"),
+      uLightCadence: gl.getUniformLocation(program, "uLightCadence"),
+      uSparkleCadence: gl.getUniformLocation(program, "uSparkleCadence"),
+      uGlowCadence: gl.getUniformLocation(program, "uGlowCadence"),
+      uColorCadence: gl.getUniformLocation(program, "uColorCadence"),
+      uMotionIntensity: gl.getUniformLocation(program, "uMotionIntensity"),
+      uSparkleIntensity: gl.getUniformLocation(program, "uSparkleIntensity"),
+      uGlowIntensity: gl.getUniformLocation(program, "uGlowIntensity"),
+      uMotionPhase: gl.getUniformLocation(program, "uMotionPhase"),
     },
   };
   sharedRefCount = 1;
@@ -167,6 +197,16 @@ interface GemInstance {
   uGemType: number;
   uCutType: number;
   uRarity: number;
+  uMotionStyle: number;
+  uMotionCadence: number;
+  uLightCadence: number;
+  uSparkleCadence: number;
+  uGlowCadence: number;
+  uColorCadence: number;
+  uMotionIntensity: number;
+  uSparkleIntensity: number;
+  uGlowIntensity: number;
+  uMotionPhase: number;
   startTime: number;
   isVisible: boolean;
 }
@@ -204,6 +244,16 @@ function renderInstance(
   gl.uniform1i(locs.uGemType, inst.uGemType);
   gl.uniform1i(locs.uCutType, inst.uCutType);
   gl.uniform1i(locs.uRarity, inst.uRarity);
+  gl.uniform1i(locs.uMotionStyle, inst.uMotionStyle);
+  gl.uniform1f(locs.uMotionCadence, inst.uMotionCadence);
+  gl.uniform1f(locs.uLightCadence, inst.uLightCadence);
+  gl.uniform1f(locs.uSparkleCadence, inst.uSparkleCadence);
+  gl.uniform1f(locs.uGlowCadence, inst.uGlowCadence);
+  gl.uniform1f(locs.uColorCadence, inst.uColorCadence);
+  gl.uniform1f(locs.uMotionIntensity, inst.uMotionIntensity);
+  gl.uniform1f(locs.uSparkleIntensity, inst.uSparkleIntensity);
+  gl.uniform1f(locs.uGlowIntensity, inst.uGlowIntensity);
+  gl.uniform1f(locs.uMotionPhase, inst.uMotionPhase);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindVertexArray(null);
 
@@ -298,6 +348,12 @@ export function useWebGL(
   options: UseWebGLOptions,
 ): React.RefObject<HTMLCanvasElement | null> {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(
+    () =>
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
   const { vertexShader, fragmentShader, uniforms, isStatic = false } = options;
   const {
     uSeed,
@@ -305,9 +361,42 @@ export function useWebGL(
     uGemType,
     uCutType,
     uRarity,
+    uMotionStyle,
+    uMotionCadence,
+    uLightCadence,
+    uSparkleCadence,
+    uGlowCadence,
+    uColorCadence,
+    uMotionIntensity,
+    uSparkleIntensity,
+    uGlowIntensity,
+    uMotionPhase,
     size,
     resolution,
   } = uniforms;
+  const shouldRenderStatic = isStatic || prefersReducedMotion;
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
+      return () => undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    handleChange();
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -329,7 +418,7 @@ export function useWebGL(
     const now = performance.now();
 
     // ── Static mode: render one frame and stop ──
-    if (isStatic) {
+    if (shouldRenderStatic) {
       renderInstance(
         renderer,
         {
@@ -342,6 +431,16 @@ export function useWebGL(
           uGemType,
           uCutType,
           uRarity,
+          uMotionStyle,
+          uMotionCadence,
+          uLightCadence,
+          uSparkleCadence,
+          uGlowCadence,
+          uColorCadence,
+          uMotionIntensity,
+          uSparkleIntensity,
+          uGlowIntensity,
+          uMotionPhase,
           startTime: now,
           isVisible: true,
         },
@@ -363,6 +462,16 @@ export function useWebGL(
       uGemType,
       uCutType,
       uRarity,
+      uMotionStyle,
+      uMotionCadence,
+      uLightCadence,
+      uSparkleCadence,
+      uGlowCadence,
+      uColorCadence,
+      uMotionIntensity,
+      uSparkleIntensity,
+      uGlowIntensity,
+      uMotionPhase,
       startTime: now,
       isVisible: true,
     };
@@ -392,9 +501,19 @@ export function useWebGL(
     uGemType,
     uCutType,
     uRarity,
+    uMotionStyle,
+    uMotionCadence,
+    uLightCadence,
+    uSparkleCadence,
+    uGlowCadence,
+    uColorCadence,
+    uMotionIntensity,
+    uSparkleIntensity,
+    uGlowIntensity,
+    uMotionPhase,
     size,
     resolution,
-    isStatic,
+    shouldRenderStatic,
   ]);
 
   return canvasRef;

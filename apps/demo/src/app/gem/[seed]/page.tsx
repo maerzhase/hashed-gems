@@ -1,5 +1,9 @@
 import type { Rarity } from "@m3000/hashed-gems";
-import { getGemProperties } from "@m3000/hashed-gems";
+import {
+  getCutVariant,
+  getCutVariantLabel,
+  getGemProperties,
+} from "@m3000/hashed-gems";
 import type { Metadata } from "next";
 import { GemPageContent } from "./GemPageContent";
 
@@ -9,8 +13,9 @@ async function getSeedData(params: Promise<{ seed: string }>) {
   const { seed: raw } = await params;
   const seed = decodeURIComponent(raw);
   const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
+  const cutVariantName = getCutVariantLabel(getCutVariant(seed, cutTypeName));
 
-  return { seed, gemTypeName, cutTypeName, rarityName };
+  return { seed, gemTypeName, cutTypeName, cutVariantName, rarityName };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -40,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function GemPage({ params }: Props) {
-  const { seed, gemTypeName, cutTypeName, rarityName } =
+  const { seed, gemTypeName, cutTypeName, cutVariantName, rarityName } =
     await getSeedData(params);
 
   return (
@@ -48,6 +53,7 @@ export default async function GemPage({ params }: Props) {
       seed={seed}
       gemTypeName={gemTypeName}
       cutTypeName={cutTypeName}
+      cutVariantName={cutVariantName}
       rarityName={rarityName as Rarity}
     />
   );

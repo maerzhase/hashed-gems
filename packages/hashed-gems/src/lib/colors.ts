@@ -1,4 +1,4 @@
-import type { CutType, GemType, Rarity } from "./gem";
+import type { GemType, Rarity } from "./gem";
 import { CUT_TYPES, GEM_TYPES, RARITIES } from "./gem";
 
 export interface GemColors {
@@ -71,10 +71,6 @@ export function getRarityGlow(rarity: Rarity, gemType: GemType): string {
 
 export function getRarityIntensity(rarity: Rarity): number {
   return rarityIntensityMap[rarity];
-}
-
-export function getCutBorderRadius(_cutType: CutType): string {
-  return "0px";
 }
 
 export { GEM_TYPES, CUT_TYPES, RARITIES };

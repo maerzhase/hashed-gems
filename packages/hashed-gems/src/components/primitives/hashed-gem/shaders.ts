@@ -1,3 +1,7 @@
+import type { CutType } from "@/lib/gem";
+import { CUT_TYPES } from "@/lib/gem";
+import { ALL_CUT_GLSL } from "./cuts/index";
+
 export const VERTEX_SHADER = /* glsl */ `#version 300 es
 precision highp float;
 
@@ -10,12 +14,45 @@ void main() {
 }
 `;
 
-export const FRAGMENT_SHADER = /* glsl */ `#version 300 es
+// ── Fragment shader is assembled from three parts: ────────────────────────────
+//   FRAGMENT_PREAMBLE  — version, uniforms, utility functions, CutResult struct
+//   ALL_CUT_GLSL       — one GLSL function per cut type (from cuts/ modules)
+//   FRAGMENT_MAIN      — dispatcher + void main() body
+// Adding a new cut: create cuts/<name>.ts, register in cuts/index.ts. Done.
+
+const CUT_TYPE_LABELS = CUT_TYPES.map((cut, index) => `${index}=${cut}`).join(
+  " ",
+);
+
+const CUT_FUNCTIONS: Record<CutType, string> = {
+  "round-brilliant": "computeRoundBrilliant",
+  princess: "computePrincess",
+  cushion: "computeCushion",
+  "emerald-step": "computeEmeraldStep",
+  firework: "computeFirework",
+  jubilee: "computeJubilee",
+  rose: "computeRose",
+};
+
+const CUT_INDEX = Object.fromEntries(
+  CUT_TYPES.map((cut, index) => [cut, index]),
+) as Record<CutType, number>;
+
+const CUT_DISPATCH_LINES = CUT_TYPES.slice(1)
+  .map(
+    (cut, index) =>
+      `  if (cutType == ${index + 1}) return ${CUT_FUNCTIONS[cut]}(uv, seed);`,
+  )
+  .join("\n");
+
+const FRAGMENT_PREAMBLE = /* glsl */ `#version 300 es
 precision highp float;
 precision highp int;
 
 #define PI     3.14159265359
 #define TWO_PI 6.28318530718
+#define GEM_CANVAS_SCALE 1.0
+#define GEM_FILL_TARGET 0.985
 
 uniform float uTime;
 uniform float uSeed;
@@ -23,8 +60,18 @@ uniform int   uCausticCount;
 uniform vec2  uResolution;
 uniform int   uGemType;  // 0=diamond 1=ruby 2=sapphire 3=emerald 4=topaz 5=amethyst 6=aquamarine
                          // 7=rose-quartz 8=citrine 9=onyx 10=alexandrite 11=opal
-uniform int   uCutType;  // 0=round-brilliant 1=princess 2=cushion 3=emerald-step
+uniform int   uCutType;  // ${CUT_TYPE_LABELS}
 uniform int   uRarity;   // 0=common 1=uncommon 2=rare 3=epic 4=legendary
+uniform int   uMotionStyle; // 0=crisp 1=sweep 2=bloom 3=burst
+uniform float uMotionCadence;
+uniform float uLightCadence;
+uniform float uSparkleCadence;
+uniform float uGlowCadence;
+uniform float uColorCadence;
+uniform float uMotionIntensity;
+uniform float uSparkleIntensity;
+uniform float uGlowIntensity;
+uniform float uMotionPhase;
 
 in  vec2 vUv;
 out vec4 outColor;
@@ -37,11 +84,22 @@ vec3 hue2rgb(float h) {
 
 float hash11(float p) { return fract(sin(p * 127.1) * 43758.5453); }
 float hash21(vec2 p)  { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float seededSpan(float seed, float salt, float minValue, float maxValue) {
+  return mix(minValue, maxValue, hash11(seed * 0.173 + salt * 13.1));
+}
 
 float f0FromIOR(float n) { float x = (1.0 - n) / (1.0 + n); return x * x; }
 
 float fresnelSchlick(float f0v, float cosT) {
   return f0v + (1.0 - f0v) * pow(clamp(1.0 - cosT, 0.0, 1.0), 5.0);
+}
+
+float motionClock(float cadence, float offset) {
+  return uTime * cadence + uMotionPhase + offset;
+}
+
+float styleWeight(int style) {
+  return float(uMotionStyle == style);
 }
 
 /* ── Spectral: wavelength → RGB ───────────────────────────────────────────── */
@@ -66,28 +124,48 @@ vec3 spectralColor(float wl) {
 /* ── HDR Studio Environment ───────────────────────────────────────────────── */
 
 float sampleEnv(vec3 d) {
+  float crispStyle = styleWeight(0);
+  float sweepStyle = styleWeight(1);
+  float bloomStyle = styleWeight(2);
+  float burstStyle = styleWeight(3);
   float env = 0.02;
   env += max(0.0, d.z) * 0.06;
 
-  float lt = uTime * 0.18;
+  float lt = motionClock(uLightCadence * 0.18, 0.0);
 
-  vec3 w1 = normalize(vec3(cos(lt * 0.7 + uSeed) * 0.5, sin(lt * 0.4) * 0.3, 0.82));
-  env += pow(max(0.0, dot(d, w1)), 8.0) * 8.0;
+  vec3 w1 = normalize(vec3(
+    cos(lt * mix(0.78, 0.58, sweepStyle) + uSeed) * mix(0.5, 0.72, sweepStyle),
+    sin(lt * mix(0.42, 0.32, crispStyle) + sweepStyle * 0.6) * mix(0.3, 0.38, bloomStyle),
+    mix(0.82, 0.88, bloomStyle)
+  ));
+  env += pow(max(0.0, dot(d, w1)), mix(8.0, 10.0, crispStyle)) * mix(8.0, 6.8, bloomStyle) * (0.92 + 0.16 * uMotionIntensity);
 
-  vec3 w2 = normalize(vec3(-cos(lt * 0.5 + uSeed * 0.7) * 0.4, cos(lt * 0.3) * 0.5, 0.72));
-  env += pow(max(0.0, dot(d, w2)), 12.0) * 3.0;
+  vec3 w2 = normalize(vec3(
+    -cos(lt * mix(0.56, 0.4, bloomStyle) + uSeed * 0.7) * mix(0.4, 0.56, sweepStyle),
+    cos(lt * mix(0.34, 0.26, crispStyle) + burstStyle * 0.5) * mix(0.5, 0.36, bloomStyle),
+    mix(0.72, 0.8, sweepStyle)
+  ));
+  env += pow(max(0.0, dot(d, w2)), mix(12.0, 9.0, bloomStyle)) * mix(3.0, 3.8, burstStyle) * (0.94 + 0.12 * uMotionIntensity);
 
-  vec3 s1 = normalize(vec3(sin(lt * 1.1 + uSeed * 1.3) * 0.7, cos(lt * 0.9) * 0.7, 0.5));
-  env += pow(max(0.0, dot(d, s1)), 80.0) * 45.0;
+  vec3 s1 = normalize(vec3(
+    sin(lt * mix(1.18, 0.92, bloomStyle) + uSeed * 1.3) * mix(0.7, 0.5, bloomStyle),
+    cos(lt * mix(0.96, 0.72, bloomStyle) + crispStyle * 0.4) * mix(0.7, 0.52, bloomStyle),
+    mix(0.5, 0.62, sweepStyle)
+  ));
+  env += pow(max(0.0, dot(d, s1)), mix(80.0, 68.0, bloomStyle)) * mix(45.0, 54.0, burstStyle) * (0.9 + 0.18 * uMotionIntensity);
 
-  vec3 s2 = normalize(vec3(cos(lt * 0.8 - uSeed * 0.9) * 0.6, -sin(lt * 1.2) * 0.6, 0.58));
-  env += pow(max(0.0, dot(d, s2)), 64.0) * 30.0;
+  vec3 s2 = normalize(vec3(
+    cos(lt * mix(0.84, 0.66, bloomStyle) - uSeed * 0.9) * mix(0.6, 0.76, burstStyle),
+    -sin(lt * mix(1.28, 1.0, bloomStyle) + sweepStyle * 0.7) * mix(0.6, 0.5, bloomStyle),
+    mix(0.58, 0.66, burstStyle)
+  ));
+  env += pow(max(0.0, dot(d, s2)), mix(64.0, 74.0, crispStyle)) * mix(30.0, 38.0, burstStyle) * (0.9 + 0.16 * uMotionIntensity);
 
   float equator = 1.0 - abs(d.z);
   env += pow(equator, 3.0) * 1.2;
 
-  env += 0.06 * max(0.0, sin(d.x*7.0 + d.y*5.0 + uSeed*0.7) * cos(d.y*6.0 - d.x*4.0 + lt*0.5));
-  env += 0.04 * max(0.0, sin(d.x*13.0 + d.z*9.0 + uSeed*1.3) * cos(d.y*11.0 - d.z*7.0 + lt*0.3));
+  env += 0.06 * max(0.0, sin(d.x*7.0 + d.y*5.0 + uSeed*0.7) * cos(d.y*6.0 - d.x*4.0 + motionClock(uColorCadence * 0.5, 0.31)));
+  env += 0.04 * max(0.0, sin(d.x*13.0 + d.z*9.0 + uSeed*1.3) * cos(d.y*11.0 - d.z*7.0 + motionClock(uColorCadence * 0.3, 0.79)));
 
   env += max(0.0, -d.z) * 0.06;
   return env;
@@ -110,15 +188,32 @@ vec3 tonemap(vec3 x) {
 
 /* ══════════════════════════════════════════════════════════════════════════════ */
 
+/* ── Cut result struct — returned by every per-cut geometry function ────────── */
+struct CutResult {
+  vec3  normal;    /* facet surface normal                          */
+  int   facetId;   /* unique ID per facet (drives per-facet blink)  */
+  float edgeMask;  /* 0-1 facet boundary intensity                  */
+};
+`;
+
+// ── Dispatcher — generated from CUT_TYPES order in gem.ts ─────────────────────
+const FRAGMENT_DISPATCHER = /* glsl */ `
+CutResult computeCut(int cutType, vec2 uv, float seed) {
+${CUT_DISPATCH_LINES}
+  return ${CUT_FUNCTIONS[CUT_TYPES[0]]}(uv, seed);
+}
+`;
+
+const FRAGMENT_MAIN = /* glsl */ `
 void main() {
 
   /* ── 1. Coordinates ──────────────────────────────────────────────────── */
   vec2 uv = vUv;
   uv.x *= uResolution.x / uResolution.y;
-  uv *= 0.90;
+  uv *= GEM_CANVAS_SCALE;
 
   float r = max(abs(uv.x), abs(uv.y));
-  float radNorm = clamp(r / 0.90, 0.0, 1.0);
+  float radNorm = clamp(r / GEM_CANVAS_SCALE, 0.0, 1.0);
 
   vec3 viewDir = normalize(vec3(-uv * 0.12, 1.0));
 
@@ -128,6 +223,14 @@ void main() {
   vec3  gemBodyColor;
   bool  isAlexandrite = false;
   bool  isOpal        = false;
+  float crispStyle = styleWeight(0);
+  float sweepStyle = styleWeight(1);
+  float bloomStyle = styleWeight(2);
+  float burstStyle = styleWeight(3);
+  float motionTime = motionClock(uMotionCadence, 0.0);
+  float sparkleTime = motionClock(uSparkleCadence, 0.37);
+  float glowTime = motionClock(uGlowCadence, 0.83);
+  float colorTime = motionClock(uColorCadence, 1.21);
 
   if      (uGemType == 0) { ior=2.42; dispAmt=0.044; absorbCoeff=vec3(0.0);
     gemBodyColor = mix(vec3(0.96,0.97,1.0), vec3(1.0,0.96,0.90), 0.5+0.5*sin(uSeed*0.137)); }
@@ -152,7 +255,7 @@ void main() {
     gemBodyColor = vec3(0.03, 0.03, 0.04); } // Onyx — near-black, surface-dominant
   else if (uGemType == 10) { ior=1.746; dispAmt=0.015; isAlexandrite=true;
     // Alexandrite: time-varying absorption shifts green ↔ red
-    float alexT = 0.5 + 0.5 * sin(uTime * 0.12 + uSeed * 0.7);
+    float alexT = 0.5 + 0.5 * sin(colorTime * 0.12 + uSeed * 0.7);
     absorbCoeff = mix(vec3(2.8, 0.15, 1.2), vec3(0.18, 2.8, 2.5), alexT);
     gemBodyColor = mix(vec3(0.08, 0.85, 0.35), vec3(0.90, 0.10, 0.45), alexT); }
   else { ior=1.45; dispAmt=0.012; isOpal=true;
@@ -169,277 +272,49 @@ void main() {
   else if (uRarity == 3) { raritySparkle = 1.2; rarityGlow = 0.06; }
   else if (uRarity == 4) { raritySparkle = 1.35; rarityGlow = 0.10; }
 
-  /* ── 3. Crown facet geometry ───────────────────────────────────────────── */
-  /* Each cut has a fundamentally different facet layout:                     */
-  /* Round Brilliant: 16-fold radial symmetry, many small triangular facets  */
-  /* Princess: 4-fold with chevron/V patterns pointing to corners            */
-  /* Cushion: 8-fold with broad, chunky "pillow" facets                      */
-  /* Emerald Step: concentric rectangular bands (hall-of-mirrors)             */
-
-  int   facetId     = 0;
-  vec3  crownNormal = vec3(0.0, 0.0, 1.0);
-  float edgeMask    = 0.0;
-
-  float angle = atan(uv.y, uv.x);
-  float radius = r / 0.90;
-
-  if (uCutType == 3) {
-    // ── EMERALD STEP CUT — concentric rectangular bands ──
-    float asp  = 1.0 + 0.28 * fract(uSeed * 0.031);
-    vec2  aUv  = abs(uv);
-    vec2  sUv  = aUv / vec2(0.90 * asp, 0.90);
-    float lInf = max(sUv.x, sUv.y);
-    bool  isX  = (sUv.x >= sUv.y);
-    float fDir = isX ? sign(uv.x) : sign(uv.y);
-    float tilX = isX ? fDir : 0.0;
-    float tilY = isX ? 0.0  : fDir;
-    float diagDist = abs(sUv.x - sUv.y) / max(lInf, 0.001);
-    float diagT    = smoothstep(0.0, 0.18, diagDist);
-
-    // 8 concentric step bands — many more than before for finer detail
-    float sb0=0.12, sb1=0.24, sb2=0.36, sb3=0.48, sb4=0.58, sb5=0.68, sb6=0.78, sb7=0.87;
-    float tilt = 0.0;
-
-    if (lInf < sb0) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else {
-      if      (lInf < sb1) { tilt = 0.12 + 0.03*sin(uSeed*1.7); facetId = 10; }
-      else if (lInf < sb2) { tilt = 0.22 + 0.03*sin(uSeed*2.3); facetId = 20; }
-      else if (lInf < sb3) { tilt = 0.33 + 0.04*sin(uSeed*3.1); facetId = 30; }
-      else if (lInf < sb4) { tilt = 0.44 + 0.04*sin(uSeed*2.7); facetId = 40; }
-      else if (lInf < sb5) { tilt = 0.55 + 0.03*sin(uSeed*1.9); facetId = 50; }
-      else if (lInf < sb6) { tilt = 0.65 + 0.03*sin(uSeed*2.1); facetId = 55; }
-      else if (lInf < sb7) { tilt = 0.75 + 0.03*sin(uSeed*1.5); facetId = 58; }
-      else                 { tilt = 0.85;                         facetId = 60; }
-
-      vec3 faceN = normalize(vec3(tilX*tilt, tilY*tilt, 1.0-tilt));
-      vec3 cornN = normalize(vec3(sign(uv.x)*tilt*0.7071, sign(uv.y)*tilt*0.7071, 1.0-tilt));
-      crownNormal = normalize(mix(cornN, faceN, diagT));
-    }
-
-    float drStp = min(min(min(abs(lInf-sb0), abs(lInf-sb1)), min(abs(lInf-sb2), abs(lInf-sb3))),
-                      min(min(abs(lInf-sb4), abs(lInf-sb5)), min(abs(lInf-sb6), abs(lInf-sb7))));
-    edgeMask = max(1.0 - smoothstep(0.0, 0.012, drStp),
-                   (1.0 - smoothstep(0.0, 0.03, diagDist)) * 0.6);
-
-  } else if (uCutType == 1) {
-    // ── PRINCESS CUT — 4-fold with chevron/V patterns ──
-    // Distinctive: diagonal V-lines radiating from center to corners
-    // Plus concentric square bands — creates a grid/cross pattern
-    float ax = abs(uv.x), ay = abs(uv.y);
-    float diagR = (ax + ay) / (0.90 * 1.414);  // diagonal distance
-    float sqR   = max(ax, ay) / 0.90;           // square distance
-
-    // Chevron angle: which quadrant diagonal are we near?
-    float chevAng = atan(ay, ax);  // 0 to PI/2 within each quadrant
-    float chevOa  = abs(chevAng - PI * 0.25);  // distance from diagonal
-    float quadrant = floor(angle / (PI * 0.5) + 0.5);  // which quadrant
-
-    // Concentric square zones (7 zones for fine detail)
-    float zj = 0.02 * sin(uSeed * 5.7 + quadrant * 1.4);
-    float z0=0.10+zj, z1=0.22+zj, z2=0.34+zj, z3=0.46+zj, z4=0.58+zj, z5=0.70+zj, z6=0.82+zj;
-
-    // Chevron subdivision: split each zone along the diagonal
-    bool nearDiag = chevOa < 0.22;
-    float chevSide = chevAng > PI*0.25 ? 1.0 : -1.0;
-
-    if (sqR < z0) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else {
-      float tilt;
-      float outA = quadrant * PI * 0.5 + PI * 0.25; // toward corner
-      float sideA = quadrant * PI * 0.5;              // toward edge
-
-      if (sqR < z1) {
-        tilt = 0.15 + 0.05*sin(uSeed*1.7);
-        facetId = nearDiag ? 10 : 11;
-        float a = nearDiag ? outA : sideA + chevSide * 0.3;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z2) {
-        tilt = 0.25 + 0.06*sin(uSeed*2.3);
-        facetId = nearDiag ? 20 : 21;
-        float a = nearDiag ? outA : sideA + chevSide * 0.25;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z3) {
-        tilt = 0.35 + 0.06*sin(uSeed*3.1);
-        facetId = nearDiag ? 30 : (chevSide > 0.0 ? 31 : 32);
-        float a = nearDiag ? outA : sideA + chevSide * 0.2;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z4) {
-        tilt = 0.45 + 0.05*sin(uSeed*2.7);
-        facetId = nearDiag ? 40 : (chevSide > 0.0 ? 41 : 42);
-        float a = nearDiag ? outA + 0.1*sin(uSeed) : sideA + chevSide * 0.15;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z5) {
-        tilt = 0.55 + 0.05*sin(uSeed*1.9);
-        facetId = nearDiag ? 50 : (chevSide > 0.0 ? 51 : 52);
-        float a = nearDiag ? outA : sideA + chevSide * 0.12;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else if (sqR < z6) {
-        tilt = 0.65 + 0.04*sin(uSeed*2.1);
-        facetId = nearDiag ? 55 : (chevSide > 0.0 ? 56 : 57);
-        float a = nearDiag ? outA : sideA + chevSide * 0.10;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      } else {
-        tilt = 0.72 + 0.03*sin(uSeed*1.5);
-        facetId = 60;
-        float a = nearDiag ? outA : sideA;
-        crownNormal = normalize(vec3(cos(a)*tilt, sin(a)*tilt, 1.0-tilt));
-      }
-    }
-
-    // Edge mask: square zone boundaries + diagonal chevron lines
-    float drP = min(min(min(abs(sqR-z0), abs(sqR-z1)), min(abs(sqR-z2), abs(sqR-z3))),
-                    min(min(abs(sqR-z4), abs(sqR-z5)), abs(sqR-z6)));
-    float diagEdge = abs(chevOa - 0.22);
-    edgeMask = max(1.0 - smoothstep(0.0, 0.012, drP),
-                   (1.0 - smoothstep(0.0, 0.015, diagEdge)) * 0.7);
-
-  } else if (uCutType == 2) {
-    // ── CUSHION CUT — 8-fold with broad chunky facets ──
-    // Distinctive: larger, fewer facets with rounded transitions
-    // Looks like a pillow — softer, broader facet areas
-    float p = 2.5;
-    float cshR = pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0 / p) / 0.90;
-
-    float sw = PI / 4.0;  // 8-fold
-    float oa = mod(angle + sw*0.5, sw) - sw*0.5;
-    float oi = floor((angle + sw*0.5) / sw);
-
-    // Fewer, wider radial zones — creates the "chunky" look
-    float zj = 0.025 * sin(uSeed * 7.3 + oi * 1.4);
-    float z0=0.18+zj, z1=0.38+zj, z2=0.56+zj, z3=0.72+zj*0.7, z4=0.85+zj*0.4;
-
-    // Each zone is split into 2 sub-facets by the angular midpoint
-    bool upperHalf = oa > 0.0;
-    float subOi = oi * 2.0 + (upperHalf ? 1.0 : 0.0);
-
-    if (cshR < z0) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else if (cshR < z1) {
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.20 + 0.08*sin(uSeed*1.7 + subOi*0.9);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 1 + int(subOi);
-    } else if (cshR < z2) {
-      float outA = oi*sw + (upperHalf ? sw*0.7 : sw*0.3);
-      float tilt = 0.38 + 0.10*cos(uSeed*2.3 + subOi*0.7);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 17 + int(subOi);
-    } else if (cshR < z3) {
-      float outA = oi*sw + (upperHalf ? sw*0.75 : sw*0.25);
-      float tilt = 0.52 + 0.08*sin(uSeed*3.1 + subOi*0.8);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 33 + int(subOi);
-    } else if (cshR < z4) {
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.65 + 0.06*sin(uSeed*2.7 + oi*0.9);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 49 + int(oi);
-    } else {
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.75 + 0.04*sin(uSeed*1.9 + oi*1.1);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 57 + int(oi);
-    }
-
-    float dr  = min(min(min(abs(cshR-z0), abs(cshR-z1)), abs(cshR-z2)),
-                    min(abs(cshR-z3), abs(cshR-z4)));
-    float da  = min(sw*0.5 - abs(oa), abs(oa));
-    edgeMask  = max(1.0 - smoothstep(0.0, 0.014, min(da * 0.7, dr)),
-                    0.0);
-
-  } else {
-    // ── ROUND BRILLIANT — 16-fold, many small triangular facets ──
-    float sw  = PI / 8.0;  // 16-fold
-    float oa  = mod(angle + sw*0.5, sw) - sw*0.5;
-    float oi  = floor((angle + sw*0.5) / sw);
-    float tu  = (oa + sw*0.5) / sw;
-
-    // Sub-facet angular subdivision
-    float twist = 0.50 + 0.25 * fract(uSeed * 0.017);
-    float sang  = angle + radius * twist;
-    float sw2   = TWO_PI / 32.0;  // 32 sub-facets
-    float oa2   = mod(sang + sw2*0.5, sw2) - sw2*0.5;
-    float oi2f  = floor((sang + sw2*0.5) / sw2);
-
-    // 7 radial zones for fine detail (more than before)
-    float zj = 0.025 * sin(uSeed * 7.3 + oi * 1.4);
-    float z1=0.12+zj, z2=0.26+zj, z3=0.40+zj, z4=0.54+zj, z5=0.66+zj*0.7, z6=0.78+zj*0.4, z7=0.88;
-
-    if (radius < z1) {
-      facetId = 0; crownNormal = vec3(0.0, 0.0, 1.0);
-    } else if (radius < z2) {
-      // Star facets
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.18 + 0.06*sin(uSeed*1.7+oi*0.78) + 0.03*sin(oi2f*2.1+uSeed*3.3);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 1 + int(oi);
-    } else if (radius < z3) {
-      // Upper bezel
-      float outA = oi*sw + sw*0.5;
-      float subA = 0.06 * cos(oi2f*1.9 + uSeed*1.4);
-      float tilt = 0.30 + 0.08*cos(uSeed*2.3+oi*0.79) + 0.04*sin(oi2f*1.5+uSeed);
-      crownNormal = normalize(vec3(cos(outA+subA)*tilt, sin(outA+subA)*tilt, 1.0-tilt));
-      facetId = 17 + int(oi) + (int(oi2f) % 2) * 16;
-    } else if (radius < z4) {
-      // Main kite facets
-      float sOff = tu < 0.5 ? sw*0.25 : sw*0.75;
-      float outA = oi*sw + sOff;
-      float tilt = 0.42 + 0.08*sin(uSeed*3.1+oi*0.81);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 49 + int(oi) + (tu < 0.5 ? 0 : 16);
-    } else if (radius < z5) {
-      // Upper girdle A
-      float sOff = tu < 0.5 ? sw*0.20 : sw*0.80;
-      float outA = oi*sw + sOff;
-      float subA = 0.05 * sin(oi2f*1.7 + uSeed*2.8);
-      float tilt = 0.55 + 0.07*sin(uSeed*2.7+oi*0.93);
-      crownNormal = normalize(vec3(cos(outA+subA)*tilt, sin(outA+subA)*tilt, 1.0-tilt));
-      facetId = 81 + int(oi) + (tu < 0.5 ? 0 : 16);
-    } else if (radius < z6) {
-      // Upper girdle B
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.65 + 0.05*sin(uSeed*1.9+oi*1.1);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 113 + int(oi);
-    } else if (radius < z7) {
-      // Lower girdle
-      float sOff = tu < 0.5 ? sw*0.30 : sw*0.70;
-      float outA = oi*sw + sOff;
-      float tilt = 0.73 + 0.04*sin(uSeed*2.1+oi*0.87);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 129 + int(oi) + (tu < 0.5 ? 0 : 16);
-    } else {
-      // Girdle edge
-      float outA = oi*sw + sw*0.5;
-      float tilt = 0.80 + 0.03*sin(uSeed*1.5+oi*0.73);
-      crownNormal = normalize(vec3(cos(outA)*tilt, sin(outA)*tilt, 1.0-tilt));
-      facetId = 161 + int(oi);
-    }
-
-    float dr  = min(min(min(abs(radius-z1), abs(radius-z2)), min(abs(radius-z3), abs(radius-z4))),
-                    min(min(abs(radius-z5), abs(radius-z6)), abs(radius-z7)));
-    float da  = min(sw*0.5 - abs(oa), abs(oa));
-    float da2 = sw2*0.5 - abs(oa2);
-    edgeMask  = max(1.0 - smoothstep(0.0, 0.010, min(da, dr)),
-                    (1.0 - smoothstep(0.0, 0.005, da2)) * 0.5);
-  }
+  /* ── 3. Crown facet geometry — dispatched to per-cut module ─────────────── */
+  CutResult cut     = computeCut(uCutType, uv, uSeed);
+  vec3  crownNormal = cut.normal;
+  int   facetId     = cut.facetId;
+  float edgeMask    = cut.edgeMask;
 
   /* ── 4. Internal facet layer ───────────────────────────────────────────── */
-  float iFolds = 24.0;
+  float iFolds = floor(seededSpan(uSeed, 1.0, 22.0, 30.999));
   float iAng = atan(uv.y, uv.x) + 0.43 + uSeed * 0.29;
-  float iRad = r / 0.90;
+  float iWarp = seededSpan(uSeed, 2.0, 0.010, 0.040) * cos(iAng * seededSpan(uSeed, 3.0, 4.0, 8.0) + uSeed * 0.91);
+  float iRad = clamp((r / GEM_CANVAS_SCALE) / (1.0 + iWarp), 0.0, 1.0);
   float iSw  = PI / iFolds;
   float iOa  = mod(iAng + iSw*0.5, iSw) - iSw*0.5;
   float iOi  = floor((iAng + iSw*0.5) / iSw);
-  float ij   = 0.025 * sin(uSeed*5.1 + iOi*1.8);
-  float iz1 = 0.14+ij, iz2 = 0.34+ij, iz3 = 0.54+ij*0.7, iz4 = 0.72+ij*0.4, iz5 = 0.88;
+  float ij   = 0.018 * sin(uSeed*5.1 + iOi*1.8);
+  float iBandScale = 0.95 + 0.12 * hash11(uSeed * 0.31 + iOi * 0.67);
+  float iw1 = seededSpan(uSeed, 4.0, 0.11, 0.16) * iBandScale;
+  float iw2 = seededSpan(uSeed, 5.0, 0.12, 0.20) * (0.94 + 0.10 * hash11(uSeed * 0.37 + iOi * 0.43));
+  float iw3 = seededSpan(uSeed, 6.0, 0.12, 0.18) * (0.96 + 0.10 * hash11(uSeed * 0.41 + iOi * 0.53));
+  float iw4 = seededSpan(uSeed, 7.0, 0.10, 0.16) * (0.94 + 0.08 * hash11(uSeed * 0.47 + iOi * 0.59));
+  float iw5 = seededSpan(uSeed, 8.0, 0.10, 0.14);
+  float iz1 = iw1 + ij;
+  float iz2 = iz1 + iw2;
+  float iz3 = iz2 + iw3;
+  float iz4 = iz3 + iw4;
+  float iz5 = min(GEM_CANVAS_SCALE, iz4 + iw5);
 
   vec3  innerNormal  = vec3(0.0, 0.0, 1.0);
   int   innerFacetId = 100;
+  float innerTableEdge = 0.0;
 
-  if (iRad >= iz1) {
+  if (iRad < iz1) {
+    float cSw = PI / 4.0;
+    float cOa = mod(iAng + cSw*0.5, cSw) - cSw*0.5;
+    float cOi = floor((iAng + cSw*0.5) / cSw);
+    float cA = cOi * cSw + cSw * 0.5 + 0.10 * sin(uSeed * 1.3 + cOi * 0.8);
+    float cTilt = 0.065 + 0.022 * sin(uSeed * 2.0 + cOi * 1.1);
+    cTilt *= 0.78 + 0.22 * (1.0 - smoothstep(0.0, iz1, iRad));
+    innerNormal = normalize(vec3(cos(cA) * cTilt, sin(cA) * cTilt, 1.0 - cTilt));
+    innerFacetId = 400 + int(cOi);
+    float cDa = cSw*0.5 - abs(cOa);
+    innerTableEdge = (1.0 - smoothstep(0.0, 0.020, cDa)) * smoothstep(0.012, iz1, iRad) * 0.40;
+  } else {
     float outA = iOi * iSw + iSw * 0.5;
     float tilt;
     if      (iRad < iz2) { tilt = 0.30+0.09*sin(uSeed*2.1+iOi*0.83); innerFacetId = 101+int(iOi); }
@@ -452,22 +327,45 @@ void main() {
   float iDr = min(min(min(abs(iRad-iz1), abs(iRad-iz2)), abs(iRad-iz3)),
                   min(abs(iRad-iz4), abs(iRad-iz5)));
   float iDa = min(iSw*0.5 - abs(iOa), abs(iOa));
-  float innerEdge = 1.0 - smoothstep(0.0, 0.008, min(iDa, iDr));
+  float innerEdge = max(1.0 - smoothstep(0.0, 0.008, min(iDa, iDr)), innerTableEdge);
 
   /* ── 5. Deep internal layer ────────────────────────────────────────────── */
-  float dFolds = 32.0;
+  float dFolds = floor(seededSpan(uSeed, 9.0, 28.0, 38.999));
   float dAng = atan(uv.y, uv.x) - 0.67 + uSeed * 0.41;
-  float dRad = r / 0.90;
+  float dWarp = seededSpan(uSeed, 10.0, 0.012, 0.050) * sin(dAng * seededSpan(uSeed, 11.0, 5.0, 11.0) - uSeed * 0.73);
+  float dRad = clamp((r / GEM_CANVAS_SCALE) / (1.0 + dWarp), 0.0, 1.0);
   float dSw  = PI / dFolds;
   float dOa  = mod(dAng + dSw*0.5, dSw) - dSw*0.5;
   float dOi  = floor((dAng + dSw*0.5) / dSw);
-  float dj   = 0.020 * sin(uSeed*3.7 + dOi*2.1);
-  float dz1 = 0.12+dj, dz2 = 0.30+dj, dz3 = 0.50+dj*0.7, dz4 = 0.68+dj*0.4, dz5 = 0.84;
+  float dj   = 0.016 * sin(uSeed*3.7 + dOi*2.1);
+  float dBandScale = 0.94 + 0.12 * hash11(uSeed * 0.29 + dOi * 0.71);
+  float dw1 = seededSpan(uSeed, 12.0, 0.10, 0.15) * dBandScale;
+  float dw2 = seededSpan(uSeed, 13.0, 0.11, 0.18) * (0.94 + 0.10 * hash11(uSeed * 0.43 + dOi * 0.37));
+  float dw3 = seededSpan(uSeed, 14.0, 0.11, 0.17) * (0.96 + 0.08 * hash11(uSeed * 0.51 + dOi * 0.47));
+  float dw4 = seededSpan(uSeed, 15.0, 0.10, 0.15) * (0.94 + 0.08 * hash11(uSeed * 0.57 + dOi * 0.41));
+  float dw5 = seededSpan(uSeed, 16.0, 0.09, 0.13);
+  float dz1 = dw1 + dj;
+  float dz2 = dz1 + dw2;
+  float dz3 = dz2 + dw3;
+  float dz4 = dz3 + dw4;
+  float dz5 = min(0.86, dz4 + dw5);
 
   vec3  deepNormal  = vec3(0.0, 0.0, 1.0);
   int   deepFacetId = 200;
+  float deepTableEdge = 0.0;
 
-  if (dRad >= dz1) {
+  if (dRad < dz1) {
+    float cSw = PI / 6.0;
+    float cOa = mod(dAng + cSw*0.5, cSw) - cSw*0.5;
+    float cOi = floor((dAng + cSw*0.5) / cSw);
+    float cA = cOi * cSw + cSw * 0.5 - 0.12 * cos(uSeed * 1.7 + cOi * 0.6);
+    float cTilt = 0.082 + 0.026 * cos(uSeed * 2.4 + cOi * 0.9);
+    cTilt *= 0.76 + 0.24 * (1.0 - smoothstep(0.0, dz1, dRad));
+    deepNormal = normalize(vec3(cos(cA) * cTilt, sin(cA) * cTilt, 1.0 - cTilt));
+    deepFacetId = 500 + int(cOi);
+    float cDa = cSw*0.5 - abs(cOa);
+    deepTableEdge = (1.0 - smoothstep(0.0, 0.018, cDa)) * smoothstep(0.010, dz1, dRad) * 0.34;
+  } else {
     float outA = dOi * dSw + dSw * 0.5;
     float tilt;
     if      (dRad < dz2) { tilt = 0.26+0.08*sin(uSeed*1.9+dOi*0.67); deepFacetId = 201+int(dOi); }
@@ -480,7 +378,7 @@ void main() {
   float dDr = min(min(min(abs(dRad-dz1), abs(dRad-dz2)), abs(dRad-dz3)),
                   min(abs(dRad-dz4), abs(dRad-dz5)));
   float dDa = min(dSw*0.5 - abs(dOa), abs(dOa));
-  float deepEdge = 1.0 - smoothstep(0.0, 0.006, min(dDa, dDr));
+  float deepEdge = max(1.0 - smoothstep(0.0, 0.006, min(dDa, dDr)), deepTableEdge);
 
   /* ── 6. Fresnel + layer compositing ────────────────────────────────────── */
   float cosTheta = max(dot(crownNormal, viewDir), 0.0);
@@ -536,7 +434,7 @@ void main() {
   // Per-facet extinction
   float fid    = float(facetId);
   float fHash  = hash11(fid * 1.731 + uSeed * 3.117);
-  float fBlink = 0.5 + 0.5 * sin(uTime * 0.7 + fHash * TWO_PI + fid * 0.59);
+  float fBlink = 0.5 + 0.5 * sin(sparkleTime * 0.7 + fHash * TWO_PI + fid * 0.59);
   float extMix = pow(fHash * 0.50 + fBlink * 0.50, 0.6);
   float extinction = mix(0.01, 4.0, extMix);
 
@@ -554,9 +452,9 @@ void main() {
     internalTint = gemBodyColor;
   } else if (isOpal) {
     // Opal: play-of-color — shifting spectral patches across the surface
-    float oN1 = sin(uv.x*4.0 + uv.y*2.5 + uSeed*0.7 + uTime*0.15);
-    float oN2 = sin(uv.x*2.5 - uv.y*4.5 + uSeed*1.3 + uTime*0.08);
-    float oN3 = sin(uv.x*6.0 + uv.y*3.5 + uSeed*2.1 - uTime*0.12);
+    float oN1 = sin(uv.x*4.0 + uv.y*2.5 + uSeed*0.7 + colorTime*0.15);
+    float oN2 = sin(uv.x*2.5 - uv.y*4.5 + uSeed*1.3 + colorTime*0.08);
+    float oN3 = sin(uv.x*6.0 + uv.y*3.5 + uSeed*2.1 - colorTime*0.12);
     float opalHue = fract(oN1 * 0.3 + oN2 * 0.25 + oN3 * 0.15 + uSeed * 0.1);
     vec3 opalPlay = hue2rgb(opalHue) * 0.5 + vec3(0.2);
     internalTint = opalPlay * absorption;
@@ -566,11 +464,37 @@ void main() {
 
   vec3 internalLight = internalEnv * internalTint * extinction * (1.0 - fresnel);
 
+  float centerMask = 1.0 - smoothstep(0.06, 0.32, radNorm);
+  float centerStructure = clamp(length(crownNormal.xy) * 1.8 + length(internalNormal.xy) + edgeMask * 0.6, 0.0, 1.0);
+  float centerFlatten = centerMask * (1.0 - smoothstep(0.16, 0.48, centerStructure));
+  float centerAnim = centerMask * (0.35 + 0.65 * centerStructure);
+  float centerBlinkContrast = mix(0.86, 1.18, smoothstep(0.20, 0.80, fBlink));
+  surfaceLight *= 1.0 - centerFlatten * 0.12;
+  internalLight *= 1.0 - centerFlatten * 0.26;
+  internalLight += gemBodyColor * centerFlatten * 0.035;
+  surfaceLight *= mix(1.0, mix(0.94, 1.10, centerBlinkContrast), centerAnim * 0.22);
+  internalLight *= mix(1.0, centerBlinkContrast, centerAnim * 0.38);
+
   /* ── 9. Combine ────────────────────────────────────────────────────────── */
   vec3 rawColor = surfaceLight + internalLight;
+  float motionPulse = 1.0;
+  if (uMotionStyle == 0) {
+    float crispPulse = 0.5 + 0.5 * sin(sparkleTime * 1.35 + fid * 0.21 + uSeed * 0.4);
+    motionPulse = 0.96 + 0.1 * pow(crispPulse, 3.0);
+  } else if (uMotionStyle == 1) {
+    float sweepPulse = 0.5 + 0.5 * sin(motionTime * 0.85 + uv.x * 2.8 + uSeed * 0.6);
+    motionPulse = 0.95 + 0.1 * sweepPulse;
+  } else if (uMotionStyle == 2) {
+    float bloomPulse = 0.5 + 0.5 * sin(glowTime * 0.58 + radNorm * 3.2 + uSeed * 0.4);
+    motionPulse = 0.96 + 0.08 * bloomPulse;
+  } else {
+    float burstPulse = 0.5 + 0.5 * sin(glowTime * 0.95 + fid * 0.17 + uSeed * 0.8);
+    motionPulse = 0.94 + 0.14 * pow(burstPulse, 2.0);
+  }
+  rawColor *= mix(1.0, motionPulse, 0.24 * uMotionIntensity);
 
   /* ── 10. Cut-specific light patterns ───────────────────────────────────── */
-  if (uCutType == 0) {
+  if (uCutType == ${CUT_INDEX["round-brilliant"]}) {
     float arrowAng  = atan(uv.y, uv.x);
     float arrowOa   = mod(arrowAng + PI/8.0, PI/4.0) - PI/8.0;
     float arrowMask = smoothstep(0.05, 0.13, abs(arrowOa));
@@ -578,7 +502,7 @@ void main() {
     rawColor *= 1.0 - (1.0 - arrowMask) * arrowRad * 0.35;
   }
 
-  if (uCutType == 1) {
+  if (uCutType == ${CUT_INDEX.princess}) {
     float crossAng  = atan(uv.y, uv.x);
     float crossOa   = mod(crossAng + PI/4.0, PI/2.0) - PI/4.0;
     float crossMask = smoothstep(0.06, 0.18, abs(crossOa));
@@ -586,33 +510,76 @@ void main() {
     rawColor *= 1.0 - (1.0 - crossMask) * crossRad * 0.25;
   }
 
+  if (uCutType == ${CUT_INDEX.jubilee}) {
+    float jubAng = atan(uv.y, uv.x);
+    float bezelDist = abs(mod(jubAng + PI/8.0, PI/4.0) - PI/8.0);
+    float starDist  = abs(mod(jubAng + PI/16.0, PI/8.0) - PI/16.0);
+    float apexGlow = smoothstep(0.09, 0.0, radNorm);
+    float bezelBloom = (1.0 - smoothstep(0.04, 0.14, bezelDist))
+      * smoothstep(0.10, 0.22, radNorm)
+      * smoothstep(0.48, 0.20, radNorm);
+    float crossContrast = (1.0 - smoothstep(0.016, 0.060, starDist))
+      * smoothstep(0.28, 0.42, radNorm)
+      * smoothstep(0.86, 0.54, radNorm);
+    rawColor += vec3(apexGlow * 0.22);
+    rawColor += gemBodyColor * bezelBloom * 0.12;
+    rawColor *= 1.0 - crossContrast * 0.16;
+  }
+
+  if (uCutType == ${CUT_INDEX.rose}) {
+    float roseAng = atan(uv.y, uv.x);
+    float petalDist = abs(mod(roseAng + PI/12.0, PI/6.0) - PI/12.0);
+    float petalMask = 1.0 - smoothstep(0.03, 0.11, petalDist);
+    float petalRing = smoothstep(0.10, 0.22, radNorm) * smoothstep(0.72, 0.46, radNorm);
+    float apexGlow = smoothstep(0.16, 0.0, radNorm);
+    rawColor += vec3(apexGlow * 0.16);
+    rawColor += gemBodyColor * petalMask * petalRing * 0.10;
+    rawColor *= 1.0 - (1.0 - petalMask) * petalRing * 0.10;
+  }
+
   /* ── 11. Scintillation ─────────────────────────────────────────────────── */
-  float lt = uTime * 0.18;
-  vec3 l1 = normalize(vec3(cos(lt*0.7+uSeed)*0.5, sin(lt*0.4)*0.3, 0.82));
-  vec3 l2 = normalize(vec3(sin(lt*1.1+uSeed*1.3)*0.7, cos(lt*0.9)*0.7, 0.5));
-  vec3 l3 = normalize(vec3(cos(lt*0.8-uSeed*0.9)*0.6, -sin(lt*1.2)*0.6, 0.58));
+  float lt = motionClock(uLightCadence * 0.18, 0.41);
+  vec3 l1 = normalize(vec3(
+    cos(lt*mix(0.72, 0.58, sweepStyle)+uSeed)*mix(0.5, 0.68, sweepStyle),
+    sin(lt*mix(0.42, 0.32, crispStyle))*mix(0.3, 0.38, bloomStyle),
+    mix(0.82, 0.88, bloomStyle)
+  ));
+  vec3 l2 = normalize(vec3(
+    sin(lt*mix(1.12, 0.9, bloomStyle)+uSeed*1.3)*mix(0.7, 0.54, bloomStyle),
+    cos(lt*mix(0.94, 0.7, bloomStyle))*mix(0.7, 0.54, bloomStyle),
+    mix(0.5, 0.62, sweepStyle)
+  ));
+  vec3 l3 = normalize(vec3(
+    cos(lt*mix(0.82, 0.68, bloomStyle)-uSeed*0.9)*mix(0.6, 0.76, burstStyle),
+    -sin(lt*mix(1.22, 0.96, bloomStyle))*mix(0.6, 0.5, bloomStyle),
+    mix(0.58, 0.66, burstStyle)
+  ));
 
   vec3 h1 = normalize(l1 + viewDir);
   vec3 h2 = normalize(l2 + viewDir);
   vec3 h3 = normalize(l3 + viewDir);
 
   float shinBase, shinRange, spkThresh, spkIntensity;
-  if (uCutType == 0) {
+  if (uCutType == ${CUT_INDEX["round-brilliant"]}) {
     shinBase = 1200.0; shinRange = 800.0; spkThresh = 0.60; spkIntensity = 35.0;
-  } else if (uCutType == 1) {
+  } else if (uCutType == ${CUT_INDEX.princess}) {
     shinBase = 800.0;  shinRange = 500.0; spkThresh = 0.55; spkIntensity = 40.0;
-  } else if (uCutType == 2) {
+  } else if (uCutType == ${CUT_INDEX.jubilee}) {
+    shinBase = 700.0;  shinRange = 360.0; spkThresh = 0.53; spkIntensity = 24.0;
+  } else if (uCutType == ${CUT_INDEX.rose}) {
+    shinBase = 560.0;  shinRange = 280.0; spkThresh = 0.56; spkIntensity = 20.0;
+  } else if (uCutType == ${CUT_INDEX.cushion}) {
     shinBase = 500.0;  shinRange = 300.0; spkThresh = 0.50; spkIntensity = 28.0;
   } else {
     shinBase = 300.0;  shinRange = 150.0; spkThresh = 0.72; spkIntensity = 12.0;
   }
 
   // Rarity boosts sparkle intensity
-  spkIntensity *= raritySparkle;
+  spkIntensity *= raritySparkle * uSparkleIntensity;
 
-  float shin1 = max(shinBase + shinRange*cos(uTime*1.1 + fid*2.4 + uSeed*0.7), 1.0);
-  float shin2 = max(shinBase*0.75 + shinRange*0.8*sin(uTime*0.8 + fid*1.7 + uSeed*1.3), 1.0);
-  float shin3 = max(shinBase*0.85 + shinRange*0.6*cos(uTime*0.6 + fid*3.1), 1.0);
+  float shin1 = max(shinBase + shinRange*cos(sparkleTime*1.1 + fid*2.4 + uSeed*0.7), 1.0);
+  float shin2 = max(shinBase*0.75 + shinRange*0.8*sin(sparkleTime*0.8 + fid*1.7 + uSeed*1.3), 1.0);
+  float shin3 = max(shinBase*0.85 + shinRange*0.6*cos(sparkleTime*0.6 + fid*3.1), 1.0);
 
   float spk1 = pow(max(0.0, dot(crownNormal, h1)), shin1);
   float spk2 = pow(max(0.0, dot(crownNormal, h2)), shin2);
@@ -625,7 +592,7 @@ void main() {
   // Spectral sparkle — rainbow fire flashes
   float dispAngle = fract(fid * 0.618 + uSeed * 0.137);
   vec3 spkColor = (uGemType == 0 || uGemType == 9 || isOpal)
-    ? hue2rgb(fract(dispAngle + uTime * 0.02))
+    ? hue2rgb(fract(dispAngle + colorTime * 0.02))
     : vec3(1.0);
   float spkTotal = step(spkThresh, spk1) + step(spkThresh + 0.05, spk2) * 0.7;
   rawColor += spkColor * spkTotal * spkIntensity * 0.04;
@@ -634,8 +601,8 @@ void main() {
   edgeMask *= 0.85 + 0.30 * hash21(uv * 47.0 + vec2(uSeed * 0.3));
 
   float edgeLit  = smoothstep(0.15, 0.6, (spectralAccum.g / 3.5) * extinction);
-  float edgeGlow = edgeMask * edgeLit * (0.4 + 0.4 * sin(uTime * 1.0 + fid * 0.9));
-  float edgeHue  = fract(atan(uv.y, uv.x) / TWO_PI * 3.0 + radNorm * 0.4 + uTime * 0.05);
+  float edgeGlow = edgeMask * edgeLit * (0.4 + 0.4 * sin(glowTime * 1.0 + fid * 0.9)) * uGlowIntensity;
+  float edgeHue  = fract(atan(uv.y, uv.x) / TWO_PI * 3.0 + radNorm * 0.4 + colorTime * 0.05);
   vec3  edgeColor = (uGemType == 0 || uGemType == 9) ? hue2rgb(edgeHue) : gemBodyColor * 1.2;
   rawColor += edgeColor * edgeGlow * 0.25;
   rawColor *= 1.0 - edgeMask * 0.10;
@@ -647,23 +614,59 @@ void main() {
     float starBright = 0.0;
     float ang = atan(uv.y, uv.x);
     float dist = length(uv);
+    float legendaryBoost = float(uRarity == 4);
+    float lightFront1 = smoothstep(0.18, 0.92, l1.z);
+    float lightFront2 = smoothstep(0.12, 0.86, l2.z);
+    float lightFront3 = smoothstep(0.08, 0.82, l3.z);
+    vec2 asterismLightAxis = l1.xy * (0.75 + 0.25 * lightFront1)
+      + l2.xy * (0.28 + 0.18 * lightFront2)
+      + l3.xy * (0.12 + 0.1 * lightFront3);
+    asterismLightAxis /= max(length(asterismLightAxis), 0.0001);
+    float starCause = clamp(
+      lightFront1 * 0.72 + lightFront2 * 0.26 + lightFront3 * 0.12,
+      0.0,
+      1.0
+    );
+    float starPresence = mix(0.24, 0.34, legendaryBoost);
+    float starRotation = (l1.x * 0.018 + l1.y * 0.012) * (0.7 + 0.3 * starCause)
+      + sin(glowTime * 0.18 + uSeed * 1.1) * (0.006 + legendaryBoost * 0.004);
     for (int si = 0; si < 3; si++) {
-      float starAng = float(si) * PI / 3.0 + uSeed * 0.3;
+      float starAng = float(si) * PI / 3.0 + uSeed * 0.3 + starRotation;
+      vec2 starDir = vec2(cos(starAng), sin(starAng));
+      float axisAlign = pow(abs(dot(starDir, asterismLightAxis)), 6.0 + legendaryBoost);
+      float axisEnergy = smoothstep(0.16, 0.8, axisAlign) * mix(starPresence, 1.0, starCause);
+      float lineThickness = mix(0.0045, 0.012, axisEnergy);
+      float lineReach = mix(0.18, 0.58 + legendaryBoost * 0.1, axisEnergy);
+      float lineStrength = mix(0.12, 0.5 + legendaryBoost * 0.14, axisEnergy);
       float lineDist = abs(sin(ang - starAng)) * dist;
-      float starLine = smoothstep(0.025, 0.005, lineDist) * smoothstep(0.90, 0.10, dist);
-      starBright += starLine;
+      float lineCore = smoothstep(lineThickness, lineThickness * 0.18, lineDist);
+      float radialMask = 1.0 - smoothstep(lineReach * 0.42, lineReach, dist);
+      float centerBoost = 1.0 - smoothstep(0.0, 0.1, dist);
+      float starLine = lineCore * mix(centerBoost, radialMask, 0.88);
+      starBright += starLine * lineStrength;
     }
-    float starPulse = 0.6 + 0.4 * sin(uTime * 0.5 + uSeed);
-    rawColor += vec3(starBright * starPulse * 2.5);
+    float starPulse = 0.94 + 0.06 * sin(glowTime * 0.22 + uSeed * 0.6);
+    float starStrength = mix(0.82, 1.04, legendaryBoost);
+    rawColor += vec3(starBright * starPulse * starStrength * uGlowIntensity);
   }
 
   // Rare+: subtle outer glow
+  float canvasDist = length(uv);
+  float gemRimMask = smoothstep(0.22, 0.42, canvasDist)
+    * smoothstep(0.92, 0.58, canvasDist);
   if (rarityGlow > 0.0) {
-    float glowR = max(abs(uv.x), abs(uv.y));
-    float glow = smoothstep(0.60, 0.90, glowR) * rarityGlow;
-    float glowPulse = 0.7 + 0.3 * sin(uTime * 0.8 + uSeed * 1.5);
-    rawColor += gemBodyColor * glow * glowPulse * 3.0;
+    float glow = gemRimMask * rarityGlow;
+    float glowPulse = 0.7 + 0.3 * sin(glowTime * 0.8 + uSeed * 1.5);
+    float edgePresence = smoothstep(0.04, 0.22, edgeMask);
+    rawColor += gemBodyColor
+      * glow
+      * glowPulse
+      * mix(1.2, 1.9, edgePresence)
+      * uGlowIntensity;
   }
+
+  float outerCanvasFade = smoothstep(0.82, 1.08, canvasDist);
+  rawColor *= 1.0 - outerCanvasFade * 0.18;
 
   /* ── 14. Tonemap ───────────────────────────────────────────────────────── */
   vec3 color = tonemap(rawColor);
@@ -671,3 +674,6 @@ void main() {
   outColor = vec4(color, 1.0);
 }
 `;
+
+export const FRAGMENT_SHADER: string =
+  FRAGMENT_PREAMBLE + ALL_CUT_GLSL + FRAGMENT_DISPATCHER + FRAGMENT_MAIN;
