@@ -93,12 +93,7 @@ export default async function Image({
       >
         <div style={{ display: "flex", width: gemSize, height: gemSize }}>
           {/* biome-ignore lint/performance/noImgElement: next/og context, <Image> not available */}
-          <img
-            src={gemImageSrc}
-            width={gemSize}
-            height={gemSize}
-            alt={seed}
-          />
+          <img src={gemImageSrc} width={gemSize} height={gemSize} alt={seed} />
         </div>
       </div>
 
@@ -208,7 +203,8 @@ export default async function Image({
     {
       ...size,
       headers: {
-        "Cache-Control": "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800",
+        "Cache-Control":
+          "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800",
       },
     },
   );

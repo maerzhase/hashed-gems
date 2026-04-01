@@ -12,12 +12,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL("https://gems.m3000.io"),
   title: "@m3000/hashed-gems",
-  description:
-    "Deterministic gemstone avatars. Infinitely shimmering.",
+  description: "Deterministic gemstone avatars. Infinitely shimmering.",
   openGraph: {
     title: "@m3000/hashed-gems",
-    description:
-      "Deterministic gemstone avatars. Infinitely shimmering.",
+    description: "Deterministic gemstone avatars. Infinitely shimmering.",
     type: "website",
     url: "https://gems.m3000.io",
     images: [{ url: "/opengraph-image" }],
@@ -25,8 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "@m3000/hashed-gems",
-    description:
-      "Deterministic gemstone avatars. Infinitely shimmering.",
+    description: "Deterministic gemstone avatars. Infinitely shimmering.",
     images: ["/opengraph-image"],
   },
 };

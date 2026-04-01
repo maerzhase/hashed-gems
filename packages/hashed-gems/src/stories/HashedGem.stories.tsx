@@ -540,7 +540,9 @@ export const MotionVariantComparison: Story = {
 
 export const MotionRarityComparison: Story = {
   render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14, width: 760 }}>
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 14, width: 760 }}
+    >
       <span style={{ fontSize: 12, opacity: 0.62 }}>
         Inspection setup: Sapphire + Jubilee cut, to keep the asterism readable
         while rarity increases.
