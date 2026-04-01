@@ -18,6 +18,7 @@ const EXAMPLES = [
 import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="alice" />`,
+    lang: "tsx",
     seed: "alice",
   },
   {
@@ -28,6 +29,7 @@ import { HashedGem } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="bob" size={48} />`,
+    lang: "tsx",
     seed: "bob",
     size: 48,
   },
@@ -40,6 +42,7 @@ import { HashedGem } from "@m3000/hashed-gems";
 
 // Displays at 96px, renders internally at 512px — sharp capture
 <HashedGem seed="frank" size={96} resolution={512} />`,
+    lang: "tsx",
     seed: "frank",
     size: 96,
     resolution: 512,
@@ -52,6 +55,7 @@ import { HashedGem } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="carol" static />`,
+    lang: "tsx",
     seed: "carol",
     static: true,
   },
@@ -63,6 +67,7 @@ import { HashedGem } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="dave" gemType="emerald" />`,
+    lang: "tsx",
     seed: "dave",
     gemType: "emerald" as const,
   },
@@ -73,6 +78,7 @@ import { HashedGem } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="eve" cutType="rose" />`,
+    lang: "tsx",
     seed: "eve",
     cutType: "rose" as const,
   },
@@ -84,8 +90,47 @@ import { HashedGem } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
 
 <HashedGem seed="hashed-gem" className="rounded-full border border-neutral-500 shadow-lg" />`,
+    lang: "tsx",
     seed: "hashed-gem",
     className: "rounded-full border border-neutral-500 shadow-lg",
+  },
+];
+
+const API_EXAMPLES = [
+  {
+    label: "Direct image URL",
+    description:
+      "Request the canonical gem PNG for any seed. The API always resolves to a fixed 512x512 image.",
+    code: `GET https://gems.m3000.io/api/gems/marina`,
+    lang: "bash",
+  },
+  {
+    label: "Use in HTML",
+    description:
+      "Drop the endpoint straight into an img tag when you want a stable avatar URL for profiles, tables, or comments.",
+    code: `<img
+  src="https://gems.m3000.io/api/gems/marina"
+  alt="marina gem"
+  width="64"
+  height="64"
+/>`,
+    lang: "tsx",
+  },
+  {
+    label: "Use in React",
+    description:
+      "The endpoint works well as a static asset layer when the consumer does not need the live WebGL component.",
+    code: `function UserAvatar({ seed }: { seed: string }) {
+  return (
+    <img
+      src={\`https://gems.m3000.io/api/gems/\${encodeURIComponent(seed)}\`}
+      alt={\`\${seed} gem\`}
+      width={64}
+      height={64}
+    />
+  );
+}`,
+    lang: "tsx",
   },
 ];
 
@@ -131,12 +176,12 @@ export default function Home() {
     import("shiki").then(async ({ createHighlighter }) => {
       const highlighter = await createHighlighter({
         themes: ["github-dark", "github-light"],
-        langs: ["tsx"],
+        langs: ["bash", "tsx"],
       });
       const highlighted: Record<string, string> = {};
-      for (const example of EXAMPLES) {
+      for (const example of [...EXAMPLES, ...API_EXAMPLES]) {
         highlighted[example.label] = highlighter.codeToHtml(example.code, {
-          lang: "tsx",
+          lang: example.lang,
           theme: theme === "dark" ? "github-dark" : "github-light",
         });
       }
@@ -236,10 +281,11 @@ export default function Home() {
                   key={pm.id}
                   type="button"
                   onClick={() => setSelectedPm(pm.id)}
-                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${selectedPm === pm.id
+                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
+                    selectedPm === pm.id
                       ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
                       : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                    }`}
+                  }`}
                 >
                   {pm.label}
                 </button>
@@ -255,10 +301,11 @@ export default function Home() {
                 {currentCommand}
               </span>
               <span
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${copied
+                className={`rounded px-2 py-0.5 text-xs transition-colors ${
+                  copied
                     ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
                     : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                  }`}
+                }`}
               >
                 {copied ? "copied!" : "copy"}
               </span>
@@ -299,6 +346,56 @@ export default function Home() {
                       {example.description}
                     </span>
                   </div>
+                </div>
+                <div className="relative overflow-hidden p-4">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => copyExample(example.code, example.label)}
+                      className="absolute top-0 right-0 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                    >
+                      {copiedExample === example.label ? "copied!" : "copy"}
+                    </button>
+                    <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
+                      {highlightedExamples[example.label] ? (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: highlightedExamples[example.label],
+                          }}
+                        />
+                      ) : (
+                        <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
+                          {example.code}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <h2 className="mt-16 mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            Image API
+          </h2>
+          <p className="mb-6 text-sm text-neutral-500">
+            Use the hosted PNG API when you want a static gem image instead of
+            the live WebGL component. Each seed resolves to one canonical
+            `512x512` image.
+          </p>
+          <div className="flex flex-col gap-6">
+            {API_EXAMPLES.map((example) => (
+              <div
+                key={example.label}
+                className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
+              >
+                <div className="border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+                  <span className="block font-medium text-neutral-900 dark:text-neutral-100">
+                    {example.label}
+                  </span>
+                  <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                    {example.description}
+                  </span>
                 </div>
                 <div className="relative overflow-hidden p-4">
                   <div className="relative">
