@@ -60,6 +60,16 @@ uniform int   uGemType;  // 0=diamond 1=ruby 2=sapphire 3=emerald 4=topaz 5=amet
                          // 7=rose-quartz 8=citrine 9=onyx 10=alexandrite 11=opal
 uniform int   uCutType;  // ${CUT_TYPE_LABELS}
 uniform int   uRarity;   // 0=common 1=uncommon 2=rare 3=epic 4=legendary
+uniform int   uMotionStyle; // 0=crisp 1=sweep 2=bloom 3=burst
+uniform float uMotionCadence;
+uniform float uLightCadence;
+uniform float uSparkleCadence;
+uniform float uGlowCadence;
+uniform float uColorCadence;
+uniform float uMotionIntensity;
+uniform float uSparkleIntensity;
+uniform float uGlowIntensity;
+uniform float uMotionPhase;
 
 in  vec2 vUv;
 out vec4 outColor;
@@ -80,6 +90,14 @@ float f0FromIOR(float n) { float x = (1.0 - n) / (1.0 + n); return x * x; }
 
 float fresnelSchlick(float f0v, float cosT) {
   return f0v + (1.0 - f0v) * pow(clamp(1.0 - cosT, 0.0, 1.0), 5.0);
+}
+
+float motionClock(float cadence, float offset) {
+  return uTime * cadence + uMotionPhase + offset;
+}
+
+float styleWeight(int style) {
+  return float(uMotionStyle == style);
 }
 
 /* ── Spectral: wavelength → RGB ───────────────────────────────────────────── */
@@ -104,28 +122,48 @@ vec3 spectralColor(float wl) {
 /* ── HDR Studio Environment ───────────────────────────────────────────────── */
 
 float sampleEnv(vec3 d) {
+  float crispStyle = styleWeight(0);
+  float sweepStyle = styleWeight(1);
+  float bloomStyle = styleWeight(2);
+  float burstStyle = styleWeight(3);
   float env = 0.02;
   env += max(0.0, d.z) * 0.06;
 
-  float lt = uTime * 0.18;
+  float lt = motionClock(uLightCadence * 0.18, 0.0);
 
-  vec3 w1 = normalize(vec3(cos(lt * 0.7 + uSeed) * 0.5, sin(lt * 0.4) * 0.3, 0.82));
-  env += pow(max(0.0, dot(d, w1)), 8.0) * 8.0;
+  vec3 w1 = normalize(vec3(
+    cos(lt * mix(0.78, 0.58, sweepStyle) + uSeed) * mix(0.5, 0.72, sweepStyle),
+    sin(lt * mix(0.42, 0.32, crispStyle) + sweepStyle * 0.6) * mix(0.3, 0.38, bloomStyle),
+    mix(0.82, 0.88, bloomStyle)
+  ));
+  env += pow(max(0.0, dot(d, w1)), mix(8.0, 10.0, crispStyle)) * mix(8.0, 6.8, bloomStyle) * (0.92 + 0.16 * uMotionIntensity);
 
-  vec3 w2 = normalize(vec3(-cos(lt * 0.5 + uSeed * 0.7) * 0.4, cos(lt * 0.3) * 0.5, 0.72));
-  env += pow(max(0.0, dot(d, w2)), 12.0) * 3.0;
+  vec3 w2 = normalize(vec3(
+    -cos(lt * mix(0.56, 0.4, bloomStyle) + uSeed * 0.7) * mix(0.4, 0.56, sweepStyle),
+    cos(lt * mix(0.34, 0.26, crispStyle) + burstStyle * 0.5) * mix(0.5, 0.36, bloomStyle),
+    mix(0.72, 0.8, sweepStyle)
+  ));
+  env += pow(max(0.0, dot(d, w2)), mix(12.0, 9.0, bloomStyle)) * mix(3.0, 3.8, burstStyle) * (0.94 + 0.12 * uMotionIntensity);
 
-  vec3 s1 = normalize(vec3(sin(lt * 1.1 + uSeed * 1.3) * 0.7, cos(lt * 0.9) * 0.7, 0.5));
-  env += pow(max(0.0, dot(d, s1)), 80.0) * 45.0;
+  vec3 s1 = normalize(vec3(
+    sin(lt * mix(1.18, 0.92, bloomStyle) + uSeed * 1.3) * mix(0.7, 0.5, bloomStyle),
+    cos(lt * mix(0.96, 0.72, bloomStyle) + crispStyle * 0.4) * mix(0.7, 0.52, bloomStyle),
+    mix(0.5, 0.62, sweepStyle)
+  ));
+  env += pow(max(0.0, dot(d, s1)), mix(80.0, 68.0, bloomStyle)) * mix(45.0, 54.0, burstStyle) * (0.9 + 0.18 * uMotionIntensity);
 
-  vec3 s2 = normalize(vec3(cos(lt * 0.8 - uSeed * 0.9) * 0.6, -sin(lt * 1.2) * 0.6, 0.58));
-  env += pow(max(0.0, dot(d, s2)), 64.0) * 30.0;
+  vec3 s2 = normalize(vec3(
+    cos(lt * mix(0.84, 0.66, bloomStyle) - uSeed * 0.9) * mix(0.6, 0.76, burstStyle),
+    -sin(lt * mix(1.28, 1.0, bloomStyle) + sweepStyle * 0.7) * mix(0.6, 0.5, bloomStyle),
+    mix(0.58, 0.66, burstStyle)
+  ));
+  env += pow(max(0.0, dot(d, s2)), mix(64.0, 74.0, crispStyle)) * mix(30.0, 38.0, burstStyle) * (0.9 + 0.16 * uMotionIntensity);
 
   float equator = 1.0 - abs(d.z);
   env += pow(equator, 3.0) * 1.2;
 
-  env += 0.06 * max(0.0, sin(d.x*7.0 + d.y*5.0 + uSeed*0.7) * cos(d.y*6.0 - d.x*4.0 + lt*0.5));
-  env += 0.04 * max(0.0, sin(d.x*13.0 + d.z*9.0 + uSeed*1.3) * cos(d.y*11.0 - d.z*7.0 + lt*0.3));
+  env += 0.06 * max(0.0, sin(d.x*7.0 + d.y*5.0 + uSeed*0.7) * cos(d.y*6.0 - d.x*4.0 + motionClock(uColorCadence * 0.5, 0.31)));
+  env += 0.04 * max(0.0, sin(d.x*13.0 + d.z*9.0 + uSeed*1.3) * cos(d.y*11.0 - d.z*7.0 + motionClock(uColorCadence * 0.3, 0.79)));
 
   env += max(0.0, -d.z) * 0.06;
   return env;
@@ -183,6 +221,14 @@ void main() {
   vec3  gemBodyColor;
   bool  isAlexandrite = false;
   bool  isOpal        = false;
+  float crispStyle = styleWeight(0);
+  float sweepStyle = styleWeight(1);
+  float bloomStyle = styleWeight(2);
+  float burstStyle = styleWeight(3);
+  float motionTime = motionClock(uMotionCadence, 0.0);
+  float sparkleTime = motionClock(uSparkleCadence, 0.37);
+  float glowTime = motionClock(uGlowCadence, 0.83);
+  float colorTime = motionClock(uColorCadence, 1.21);
 
   if      (uGemType == 0) { ior=2.42; dispAmt=0.044; absorbCoeff=vec3(0.0);
     gemBodyColor = mix(vec3(0.96,0.97,1.0), vec3(1.0,0.96,0.90), 0.5+0.5*sin(uSeed*0.137)); }
@@ -207,7 +253,7 @@ void main() {
     gemBodyColor = vec3(0.03, 0.03, 0.04); } // Onyx — near-black, surface-dominant
   else if (uGemType == 10) { ior=1.746; dispAmt=0.015; isAlexandrite=true;
     // Alexandrite: time-varying absorption shifts green ↔ red
-    float alexT = 0.5 + 0.5 * sin(uTime * 0.12 + uSeed * 0.7);
+    float alexT = 0.5 + 0.5 * sin(colorTime * 0.12 + uSeed * 0.7);
     absorbCoeff = mix(vec3(2.8, 0.15, 1.2), vec3(0.18, 2.8, 2.5), alexT);
     gemBodyColor = mix(vec3(0.08, 0.85, 0.35), vec3(0.90, 0.10, 0.45), alexT); }
   else { ior=1.45; dispAmt=0.012; isOpal=true;
@@ -386,7 +432,7 @@ void main() {
   // Per-facet extinction
   float fid    = float(facetId);
   float fHash  = hash11(fid * 1.731 + uSeed * 3.117);
-  float fBlink = 0.5 + 0.5 * sin(uTime * 0.7 + fHash * TWO_PI + fid * 0.59);
+  float fBlink = 0.5 + 0.5 * sin(sparkleTime * 0.7 + fHash * TWO_PI + fid * 0.59);
   float extMix = pow(fHash * 0.50 + fBlink * 0.50, 0.6);
   float extinction = mix(0.01, 4.0, extMix);
 
@@ -404,9 +450,9 @@ void main() {
     internalTint = gemBodyColor;
   } else if (isOpal) {
     // Opal: play-of-color — shifting spectral patches across the surface
-    float oN1 = sin(uv.x*4.0 + uv.y*2.5 + uSeed*0.7 + uTime*0.15);
-    float oN2 = sin(uv.x*2.5 - uv.y*4.5 + uSeed*1.3 + uTime*0.08);
-    float oN3 = sin(uv.x*6.0 + uv.y*3.5 + uSeed*2.1 - uTime*0.12);
+    float oN1 = sin(uv.x*4.0 + uv.y*2.5 + uSeed*0.7 + colorTime*0.15);
+    float oN2 = sin(uv.x*2.5 - uv.y*4.5 + uSeed*1.3 + colorTime*0.08);
+    float oN3 = sin(uv.x*6.0 + uv.y*3.5 + uSeed*2.1 - colorTime*0.12);
     float opalHue = fract(oN1 * 0.3 + oN2 * 0.25 + oN3 * 0.15 + uSeed * 0.1);
     vec3 opalPlay = hue2rgb(opalHue) * 0.5 + vec3(0.2);
     internalTint = opalPlay * absorption;
@@ -429,6 +475,21 @@ void main() {
 
   /* ── 9. Combine ────────────────────────────────────────────────────────── */
   vec3 rawColor = surfaceLight + internalLight;
+  float motionPulse = 1.0;
+  if (uMotionStyle == 0) {
+    float crispPulse = 0.5 + 0.5 * sin(sparkleTime * 1.35 + fid * 0.21 + uSeed * 0.4);
+    motionPulse = 0.96 + 0.1 * pow(crispPulse, 3.0);
+  } else if (uMotionStyle == 1) {
+    float sweepPulse = 0.5 + 0.5 * sin(motionTime * 0.85 + uv.x * 2.8 + uSeed * 0.6);
+    motionPulse = 0.95 + 0.1 * sweepPulse;
+  } else if (uMotionStyle == 2) {
+    float bloomPulse = 0.5 + 0.5 * sin(glowTime * 0.58 + radNorm * 3.2 + uSeed * 0.4);
+    motionPulse = 0.96 + 0.08 * bloomPulse;
+  } else {
+    float burstPulse = 0.5 + 0.5 * sin(glowTime * 0.95 + fid * 0.17 + uSeed * 0.8);
+    motionPulse = 0.94 + 0.14 * pow(burstPulse, 2.0);
+  }
+  rawColor *= mix(1.0, motionPulse, 0.24 * uMotionIntensity);
 
   /* ── 10. Cut-specific light patterns ───────────────────────────────────── */
   if (uCutType == ${CUT_INDEX["round-brilliant"]}) {
@@ -475,10 +536,22 @@ void main() {
   }
 
   /* ── 11. Scintillation ─────────────────────────────────────────────────── */
-  float lt = uTime * 0.18;
-  vec3 l1 = normalize(vec3(cos(lt*0.7+uSeed)*0.5, sin(lt*0.4)*0.3, 0.82));
-  vec3 l2 = normalize(vec3(sin(lt*1.1+uSeed*1.3)*0.7, cos(lt*0.9)*0.7, 0.5));
-  vec3 l3 = normalize(vec3(cos(lt*0.8-uSeed*0.9)*0.6, -sin(lt*1.2)*0.6, 0.58));
+  float lt = motionClock(uLightCadence * 0.18, 0.41);
+  vec3 l1 = normalize(vec3(
+    cos(lt*mix(0.72, 0.58, sweepStyle)+uSeed)*mix(0.5, 0.68, sweepStyle),
+    sin(lt*mix(0.42, 0.32, crispStyle))*mix(0.3, 0.38, bloomStyle),
+    mix(0.82, 0.88, bloomStyle)
+  ));
+  vec3 l2 = normalize(vec3(
+    sin(lt*mix(1.12, 0.9, bloomStyle)+uSeed*1.3)*mix(0.7, 0.54, bloomStyle),
+    cos(lt*mix(0.94, 0.7, bloomStyle))*mix(0.7, 0.54, bloomStyle),
+    mix(0.5, 0.62, sweepStyle)
+  ));
+  vec3 l3 = normalize(vec3(
+    cos(lt*mix(0.82, 0.68, bloomStyle)-uSeed*0.9)*mix(0.6, 0.76, burstStyle),
+    -sin(lt*mix(1.22, 0.96, bloomStyle))*mix(0.6, 0.5, bloomStyle),
+    mix(0.58, 0.66, burstStyle)
+  ));
 
   vec3 h1 = normalize(l1 + viewDir);
   vec3 h2 = normalize(l2 + viewDir);
@@ -500,11 +573,11 @@ void main() {
   }
 
   // Rarity boosts sparkle intensity
-  spkIntensity *= raritySparkle;
+  spkIntensity *= raritySparkle * uSparkleIntensity;
 
-  float shin1 = max(shinBase + shinRange*cos(uTime*1.1 + fid*2.4 + uSeed*0.7), 1.0);
-  float shin2 = max(shinBase*0.75 + shinRange*0.8*sin(uTime*0.8 + fid*1.7 + uSeed*1.3), 1.0);
-  float shin3 = max(shinBase*0.85 + shinRange*0.6*cos(uTime*0.6 + fid*3.1), 1.0);
+  float shin1 = max(shinBase + shinRange*cos(sparkleTime*1.1 + fid*2.4 + uSeed*0.7), 1.0);
+  float shin2 = max(shinBase*0.75 + shinRange*0.8*sin(sparkleTime*0.8 + fid*1.7 + uSeed*1.3), 1.0);
+  float shin3 = max(shinBase*0.85 + shinRange*0.6*cos(sparkleTime*0.6 + fid*3.1), 1.0);
 
   float spk1 = pow(max(0.0, dot(crownNormal, h1)), shin1);
   float spk2 = pow(max(0.0, dot(crownNormal, h2)), shin2);
@@ -517,7 +590,7 @@ void main() {
   // Spectral sparkle — rainbow fire flashes
   float dispAngle = fract(fid * 0.618 + uSeed * 0.137);
   vec3 spkColor = (uGemType == 0 || uGemType == 9 || isOpal)
-    ? hue2rgb(fract(dispAngle + uTime * 0.02))
+    ? hue2rgb(fract(dispAngle + colorTime * 0.02))
     : vec3(1.0);
   float spkTotal = step(spkThresh, spk1) + step(spkThresh + 0.05, spk2) * 0.7;
   rawColor += spkColor * spkTotal * spkIntensity * 0.04;
@@ -526,8 +599,8 @@ void main() {
   edgeMask *= 0.85 + 0.30 * hash21(uv * 47.0 + vec2(uSeed * 0.3));
 
   float edgeLit  = smoothstep(0.15, 0.6, (spectralAccum.g / 3.5) * extinction);
-  float edgeGlow = edgeMask * edgeLit * (0.4 + 0.4 * sin(uTime * 1.0 + fid * 0.9));
-  float edgeHue  = fract(atan(uv.y, uv.x) / TWO_PI * 3.0 + radNorm * 0.4 + uTime * 0.05);
+  float edgeGlow = edgeMask * edgeLit * (0.4 + 0.4 * sin(glowTime * 1.0 + fid * 0.9)) * uGlowIntensity;
+  float edgeHue  = fract(atan(uv.y, uv.x) / TWO_PI * 3.0 + radNorm * 0.4 + colorTime * 0.05);
   vec3  edgeColor = (uGemType == 0 || uGemType == 9) ? hue2rgb(edgeHue) : gemBodyColor * 1.2;
   rawColor += edgeColor * edgeGlow * 0.25;
   rawColor *= 1.0 - edgeMask * 0.10;
@@ -539,23 +612,59 @@ void main() {
     float starBright = 0.0;
     float ang = atan(uv.y, uv.x);
     float dist = length(uv);
+    float legendaryBoost = float(uRarity == 4);
+    float lightFront1 = smoothstep(0.18, 0.92, l1.z);
+    float lightFront2 = smoothstep(0.12, 0.86, l2.z);
+    float lightFront3 = smoothstep(0.08, 0.82, l3.z);
+    vec2 asterismLightAxis = l1.xy * (0.75 + 0.25 * lightFront1)
+      + l2.xy * (0.28 + 0.18 * lightFront2)
+      + l3.xy * (0.12 + 0.1 * lightFront3);
+    asterismLightAxis /= max(length(asterismLightAxis), 0.0001);
+    float starCause = clamp(
+      lightFront1 * 0.72 + lightFront2 * 0.26 + lightFront3 * 0.12,
+      0.0,
+      1.0
+    );
+    float starPresence = mix(0.24, 0.34, legendaryBoost);
+    float starRotation = (l1.x * 0.018 + l1.y * 0.012) * (0.7 + 0.3 * starCause)
+      + sin(glowTime * 0.18 + uSeed * 1.1) * (0.006 + legendaryBoost * 0.004);
     for (int si = 0; si < 3; si++) {
-      float starAng = float(si) * PI / 3.0 + uSeed * 0.3;
+      float starAng = float(si) * PI / 3.0 + uSeed * 0.3 + starRotation;
+      vec2 starDir = vec2(cos(starAng), sin(starAng));
+      float axisAlign = pow(abs(dot(starDir, asterismLightAxis)), 6.0 + legendaryBoost);
+      float axisEnergy = smoothstep(0.16, 0.8, axisAlign) * mix(starPresence, 1.0, starCause);
+      float lineThickness = mix(0.0045, 0.012, axisEnergy);
+      float lineReach = mix(0.18, 0.58 + legendaryBoost * 0.1, axisEnergy);
+      float lineStrength = mix(0.12, 0.5 + legendaryBoost * 0.14, axisEnergy);
       float lineDist = abs(sin(ang - starAng)) * dist;
-      float starLine = smoothstep(0.025, 0.005, lineDist) * smoothstep(0.90, 0.10, dist);
-      starBright += starLine;
+      float lineCore = smoothstep(lineThickness, lineThickness * 0.18, lineDist);
+      float radialMask = 1.0 - smoothstep(lineReach * 0.42, lineReach, dist);
+      float centerBoost = 1.0 - smoothstep(0.0, 0.1, dist);
+      float starLine = lineCore * mix(centerBoost, radialMask, 0.88);
+      starBright += starLine * lineStrength;
     }
-    float starPulse = 0.6 + 0.4 * sin(uTime * 0.5 + uSeed);
-    rawColor += vec3(starBright * starPulse * 2.5);
+    float starPulse = 0.94 + 0.06 * sin(glowTime * 0.22 + uSeed * 0.6);
+    float starStrength = mix(0.82, 1.04, legendaryBoost);
+    rawColor += vec3(starBright * starPulse * starStrength * uGlowIntensity);
   }
 
   // Rare+: subtle outer glow
+  float canvasDist = length(uv);
+  float gemRimMask = smoothstep(0.18, 0.34, canvasDist)
+    * smoothstep(0.76, 0.46, canvasDist);
   if (rarityGlow > 0.0) {
-    float glowR = max(abs(uv.x), abs(uv.y));
-    float glow = smoothstep(0.60, 0.90, glowR) * rarityGlow;
-    float glowPulse = 0.7 + 0.3 * sin(uTime * 0.8 + uSeed * 1.5);
-    rawColor += gemBodyColor * glow * glowPulse * 3.0;
+    float glow = gemRimMask * rarityGlow;
+    float glowPulse = 0.7 + 0.3 * sin(glowTime * 0.8 + uSeed * 1.5);
+    float edgePresence = smoothstep(0.04, 0.22, edgeMask);
+    rawColor += gemBodyColor
+      * glow
+      * glowPulse
+      * mix(1.2, 1.9, edgePresence)
+      * uGlowIntensity;
   }
+
+  float outerCanvasFade = smoothstep(0.48, 0.9, canvasDist);
+  rawColor *= 1.0 - outerCanvasFade * 0.42;
 
   /* ── 14. Tonemap ───────────────────────────────────────────────────────── */
   vec3 color = tonemap(rawColor);

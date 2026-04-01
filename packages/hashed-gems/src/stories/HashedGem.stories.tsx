@@ -6,10 +6,12 @@ import {
 import {
   CUT_TYPES,
   GEM_TYPES,
+  RARITIES,
   getCutVariant,
   getCutVariantLabel,
   getGemProperties,
 } from "@/lib/gem";
+import type { CutType, Rarity } from "@/lib/gem";
 
 const meta: Meta<typeof HashedGem> = {
   title: "Primitives/HashedGem",
@@ -66,6 +68,106 @@ const CUT_TYPES_DATA = CUT_TYPES.map((cutType) => ({
   label: cutType.charAt(0).toUpperCase() + cutType.slice(1).replace(/-/g, " "),
 }));
 
+const MOTION_STORY_CANDIDATES = [
+  ...SEED_NAMES,
+  ...VARIANCE_SEEDS,
+  ...Array.from({ length: 12000 }, (_, index) => `motion-${index}`),
+];
+
+function formatTitle(value: string): string {
+  return value
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function findStorySeed(
+  predicate: (
+    seed: string,
+    properties: ReturnType<typeof getGemProperties>,
+  ) => boolean,
+): string | null {
+  for (const seed of MOTION_STORY_CANDIDATES) {
+    const properties = getGemProperties(seed);
+    if (predicate(seed, properties)) {
+      return seed;
+    }
+  }
+
+  return null;
+}
+
+function getSeedForVariant(cutType: CutType, variantLabel: string): string {
+  return (
+    findStorySeed((seed) => getCutVariant(seed, cutType) === variantLabel) ??
+    "alice"
+  );
+}
+
+function getSeedForRarity(
+  rarity: Rarity,
+  cutType: CutType,
+  preferredVariant: string,
+): string {
+  return (
+    findStorySeed(
+      (seed, properties) =>
+        properties.rarityName === rarity &&
+        getCutVariant(seed, cutType) === preferredVariant,
+    ) ??
+    findStorySeed((_seed, properties) => properties.rarityName === rarity) ??
+    "alice"
+  );
+}
+
+const MOTION_FAMILY_NOTES: Record<CutType, string> = {
+  "round-brilliant": "Crisp sparkle with quicker scintillation.",
+  princess: "Crisp sparkle with a more angular pulse.",
+  "emerald-step": "Directional sweep with cleaner light travel.",
+  cushion: "Soft bloom with slower cadence.",
+  rose: "Soft bloom with petal-like breathing.",
+  firework: "Radiant pulse with brighter bursts.",
+  jubilee: "Radiant pulse with crown-heavy flashes.",
+};
+
+const ROUND_VARIANT_SEEDS = [
+  {
+    variant: "classic",
+    seed: getSeedForVariant("round-brilliant", "classic"),
+  },
+  {
+    variant: "open",
+    seed: getSeedForVariant("round-brilliant", "open"),
+  },
+  {
+    variant: "starburst",
+    seed: getSeedForVariant("round-brilliant", "starburst"),
+  },
+];
+
+const ROSE_VARIANT_SEEDS = [
+  {
+    variant: "tight",
+    seed: getSeedForVariant("rose", "tight"),
+  },
+  {
+    variant: "balanced",
+    seed: getSeedForVariant("rose", "balanced"),
+  },
+  {
+    variant: "bloom",
+    seed: getSeedForVariant("rose", "bloom"),
+  },
+];
+
+const RARITY_INSPECTION_CUT: CutType = "jubilee";
+const RARITY_INSPECTION_GEM_TYPE = "sapphire";
+
+const RARITY_COMPARISON_SEEDS = RARITIES.map((rarity) => ({
+  rarity,
+  seed: getSeedForRarity(rarity, RARITY_INSPECTION_CUT, "classic"),
+}));
+
 const HELPER_ATTRIBUTE_ROWS = [
   {
     label: "Gem type",
@@ -79,8 +181,11 @@ const HELPER_ATTRIBUTE_ROWS = [
   },
   {
     label: "Cut variant",
-    getValue: (properties: ReturnType<typeof getGemProperties> & { cutVariantName: string }) =>
-      properties.cutVariantName,
+    getValue: (
+      properties: ReturnType<typeof getGemProperties> & {
+        cutVariantName: string;
+      },
+    ) => properties.cutVariantName,
   },
   {
     label: "Rarity",
@@ -128,7 +233,14 @@ export const HelperAttributes: Story = {
     className: "rounded-3xl",
     static: true,
   },
-  render: ({ seed, size = 144, className, static: isStatic, gemType, cutType }) => {
+  render: ({
+    seed,
+    size = 144,
+    className,
+    static: isStatic,
+    gemType,
+    cutType,
+  }) => {
     const properties = getGemProperties(seed);
     const resolvedCutType = cutType ?? properties.cutTypeName;
     const helperProperties = {
@@ -278,7 +390,10 @@ export const CutSeedVariance: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
       {CUT_TYPES_DATA.map(({ cutType, label }) => (
-        <div key={cutType} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div
+          key={cutType}
+          style={{ display: "flex", flexDirection: "column", gap: 8 }}
+        >
           <p style={{ fontSize: 12, fontWeight: 600, margin: 0 }}>{label}</p>
           <div
             style={{
@@ -310,6 +425,168 @@ export const CutSeedVariance: Story = {
           </div>
         </div>
       ))}
+    </div>
+  ),
+};
+
+export const MotionByCutFamily: Story = {
+  render: () => (
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 18, width: 760 }}
+    >
+      {CUT_TYPES_DATA.map(({ cutType, label }) => (
+        <div
+          key={cutType}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "112px minmax(0, 1fr)",
+            alignItems: "center",
+            gap: 18,
+            padding: 16,
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: 18,
+            background: "rgba(255, 255, 255, 0.04)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <HashedGem
+              seed="motion-family"
+              gemType="diamond"
+              cutType={cutType}
+              size={88}
+              className="rounded-full"
+            />
+          </div>
+          <div style={{ display: "grid", gap: 4 }}>
+            <strong style={{ fontSize: 13 }}>{label}</strong>
+            <span style={{ fontSize: 12, opacity: 0.62 }}>
+              {MOTION_FAMILY_NOTES[cutType]}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const MotionVariantComparison: Story = {
+  render: () => (
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 24, width: 760 }}
+    >
+      {[
+        {
+          cutType: "round-brilliant" as const,
+          label: "Round Brilliant",
+          note: "Faster/tighter versus slower/broader crisp motion.",
+          samples: ROUND_VARIANT_SEEDS,
+        },
+        {
+          cutType: "rose" as const,
+          label: "Rose",
+          note: "Tight, balanced, and bloom variants within the softer family.",
+          samples: ROSE_VARIANT_SEEDS,
+        },
+      ].map(({ cutType, label, note, samples }) => (
+        <div
+          key={cutType}
+          style={{
+            display: "grid",
+            gap: 14,
+            padding: 16,
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            borderRadius: 18,
+            background: "rgba(255, 255, 255, 0.04)",
+          }}
+        >
+          <div style={{ display: "grid", gap: 4 }}>
+            <strong style={{ fontSize: 13 }}>{label}</strong>
+            <span style={{ fontSize: 12, opacity: 0.62 }}>{note}</span>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: 14,
+            }}
+          >
+            {samples.map(({ variant, seed }) => (
+              <div
+                key={`${cutType}-${variant}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <HashedGem
+                  seed={seed}
+                  gemType="diamond"
+                  cutType={cutType}
+                  size={88}
+                  className="rounded-full"
+                />
+                <strong style={{ fontSize: 12, textTransform: "capitalize" }}>
+                  {getCutVariantLabel(getCutVariant(seed, cutType))}
+                </strong>
+                <span style={{ fontSize: 10, opacity: 0.55 }}>{seed}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const MotionRarityComparison: Story = {
+  render: () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14, width: 760 }}>
+      <span style={{ fontSize: 12, opacity: 0.62 }}>
+        Inspection setup: Sapphire + Jubilee cut, to keep the asterism readable
+        while rarity increases.
+      </span>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+          gap: 16,
+        }}
+      >
+        {RARITY_COMPARISON_SEEDS.map(({ rarity, seed }) => (
+          <div
+            key={rarity}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              padding: 16,
+              border: "1px solid rgba(255, 255, 255, 0.12)",
+              borderRadius: 18,
+              background: "rgba(255, 255, 255, 0.04)",
+            }}
+          >
+            <HashedGem
+              seed={seed}
+              gemType={RARITY_INSPECTION_GEM_TYPE}
+              cutType={RARITY_INSPECTION_CUT}
+              size={104}
+              className="rounded-full"
+            />
+            <strong style={{ fontSize: 12, textTransform: "capitalize" }}>
+              {rarity}
+            </strong>
+            <span style={{ fontSize: 11, opacity: 0.6 }}>
+              {formatTitle(
+                getCutVariantLabel(getCutVariant(seed, RARITY_INSPECTION_CUT)),
+              )}
+            </span>
+            <span style={{ fontSize: 10, opacity: 0.55 }}>{seed}</span>
+          </div>
+        ))}
+      </div>
     </div>
   ),
 };

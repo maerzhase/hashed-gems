@@ -177,8 +177,7 @@ export default function Home() {
           Your users are gems. Show it.
         </h1>
         <p className="mb-8 max-w-xl text-center text-sm text-neutral-500 md:text-base">
-          Deterministic gemstone avatars, uniquely yours — infinitely
-          shimmering.
+          Deterministic gemstone avatars. Infinitely shimmering.
         </p>
 
         <div className="flex flex-wrap justify-center gap-2">

@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 export const alt =
-  "Hashed Gems - Deterministic gemstone avatars, uniquely yours — infinitely shimmering.";
+  "Hashed Gems - Deterministic gemstone avatars. Infinitely shimmering.";
 export const size = {
   width: 1200,
   height: 630,
@@ -60,7 +60,7 @@ export default async function Image() {
           bottom: 100,
         }}
       >
-        Deterministic gemstone avatars, uniquely yours — infinitely shimmering.
+        Deterministic gemstone avatars. Infinitely shimmering.
       </div>
       <div
         style={{

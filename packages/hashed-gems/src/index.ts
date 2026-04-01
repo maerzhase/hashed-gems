@@ -12,6 +12,12 @@ export {
   getShaderSeed,
   getGemProperties,
 } from "./lib";
-export type { CutType, CutVariant, GemProperties, GemType, Rarity } from "./lib/gem";
+export type {
+  CutType,
+  CutVariant,
+  GemProperties,
+  GemType,
+  Rarity,
+} from "./lib/gem";
 export { getGemColors } from "./lib/colors";
 export type { GemColors } from "./lib/colors";

@@ -1,6 +1,6 @@
 # @m3000/hashed-gems
 
-Deterministic gemstone avatars, uniquely yours — infinitely shimmering.
+Deterministic gemstone avatars. Infinitely shimmering.
 
 ## Packages
 

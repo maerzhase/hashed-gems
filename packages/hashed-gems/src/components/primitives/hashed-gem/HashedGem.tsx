@@ -2,7 +2,13 @@
 
 import type * as React from "react";
 import type { CutType, GemType } from "@/lib/gem";
-import { CUT_TYPES, GEM_TYPES, getGemProperties, getShaderSeed } from "@/lib/gem";
+import {
+  CUT_TYPES,
+  GEM_TYPES,
+  getGemProperties,
+  getShaderSeed,
+} from "@/lib/gem";
+import { resolveGemMotionProfile } from "./motion";
 import { HashedGemGradient } from "./HashedGemGradient";
 import { FRAGMENT_SHADER, VERTEX_SHADER } from "./shaders";
 import { useWebGL } from "./useWebGL";
@@ -38,12 +44,18 @@ export function HashedGem({
   className,
 }: HashedGemProps): React.ReactElement {
   const props = getGemProperties(seed);
+  const resolvedGemType = gemType ?? props.gemTypeName;
+  const resolvedCutType = cutType ?? props.cutTypeName;
+  const motionProfile = resolveGemMotionProfile({
+    seed,
+    gemType: resolvedGemType,
+    cutType: resolvedCutType,
+    rarity: props.rarityName,
+  });
 
   const uSeed = getShaderSeed(seed);
-  const uGemType =
-    gemType !== undefined ? GEM_TYPES.indexOf(gemType) : props.gemType;
-  const uCutType =
-    cutType !== undefined ? CUT_TYPES.indexOf(cutType) : props.cutType;
+  const uGemType = GEM_TYPES.indexOf(resolvedGemType);
+  const uCutType = CUT_TYPES.indexOf(resolvedCutType);
   const uCausticCount = props.causticCount;
   const uRarity = props.rarity;
 
@@ -56,6 +68,16 @@ export function HashedGem({
       uGemType,
       uCutType,
       uRarity,
+      uMotionStyle: motionProfile.motionStyle,
+      uMotionCadence: motionProfile.motionCadence,
+      uLightCadence: motionProfile.lightCadence,
+      uSparkleCadence: motionProfile.sparkleCadence,
+      uGlowCadence: motionProfile.glowCadence,
+      uColorCadence: motionProfile.colorCadence,
+      uMotionIntensity: motionProfile.motionIntensity,
+      uSparkleIntensity: motionProfile.sparkleIntensity,
+      uGlowIntensity: motionProfile.glowIntensity,
+      uMotionPhase: motionProfile.phaseOffset,
       size,
       resolution,
     },
