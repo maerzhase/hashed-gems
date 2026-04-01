@@ -11,13 +11,16 @@ CutResult computeFirework(vec2 uv, float seed) {
   res.normal = vec3(0.0, 0.0, 1.0);
   res.facetId = 0;
   res.edgeMask = 0.0;
+  res.boundary = 0.0;
+  res.silhouette = 0.0;
 
   float angle = atan(uv.y, uv.x);
   float burstRadius = seededSpan(seed, 80.0, 0.03, 0.08);
   float ringWarp = 1.0
     + burstRadius * cos(angle * 6.0 + seed * 0.75)
     + 0.016 * sin(angle * 12.0 + seed * 1.2);
-  float radius = clamp(length(uv) / (0.90 * ringWarp), 0.0, 1.0);
+  float boundaryRadius = length(uv) / (0.90 * ringWarp);
+  float radius = clamp(boundaryRadius, 0.0, 1.0);
 
   float majorSpokes = 12.0;
   float majorSw = TWO_PI / majorSpokes;
@@ -36,7 +39,8 @@ CutResult computeFirework(vec2 uv, float seed) {
   float microOi = floor((angle + microSw * 0.5) / microSw);
 
   float burstWave = 0.5 + 0.5 * cos(angle * majorSpokes + seed * 0.75);
-  float flareMetric = radius / (0.93 + 0.10 * burstWave);
+  float flareBoundary = boundaryRadius / (0.93 + 0.10 * burstWave);
+  float flareMetric = clamp(flareBoundary, 0.0, 1.0);
 
   float zj = 0.010 * sin(seed * 5.9 + majorOi * 1.2);
   float burstScale = 0.95 + 0.10 * hash11(seed * 0.39 + majorOi * 0.81);
@@ -112,6 +116,8 @@ CutResult computeFirework(vec2 uv, float seed) {
       (1.0 - smoothstep(0.0, 0.0035, daMicro)) * smoothstep(z1, z5, flareMetric) * 0.45
     )
   );
+  res.boundary = flareBoundary;
+  res.silhouette = smoothstep(z4, z5, flareMetric);
   return res;
 }
 `;

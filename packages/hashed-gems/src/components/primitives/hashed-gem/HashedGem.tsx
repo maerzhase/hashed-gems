@@ -1,6 +1,7 @@
 "use client";
 
 import type * as React from "react";
+import { useCallback, useState } from "react";
 import type { CutType, GemType } from "@/lib/gem";
 import { CUT_TYPES, GEM_TYPES, getGemProperties, getShaderSeed } from "@/lib/gem";
 import { HashedGemGradient } from "./HashedGemGradient";
@@ -38,6 +39,9 @@ export function HashedGem({
   className,
 }: HashedGemProps): React.ReactElement {
   const props = getGemProperties(seed);
+  const containerClassName = ["hashed-gem-container", className]
+    .filter(Boolean)
+    .join(" ");
 
   const uSeed = getShaderSeed(seed);
   const uGemType =
@@ -46,52 +50,94 @@ export function HashedGem({
     cutType !== undefined ? CUT_TYPES.indexOf(cutType) : props.cutType;
   const uCausticCount = props.causticCount;
   const uRarity = props.rarity;
+  const uniforms = {
+    uSeed,
+    uCausticCount,
+    uGemType,
+    uCutType,
+    uRarity,
+    size,
+    resolution,
+  };
 
-  const canvasRef = useWebGL({
+  const [webglReady, setWebglReady] = useState(false);
+  const onReady = useCallback(() => setWebglReady(true), []);
+
+  const glowCanvasRef = useWebGL({
     vertexShader: VERTEX_SHADER,
     fragmentShader: FRAGMENT_SHADER,
     uniforms: {
-      uSeed,
-      uCausticCount,
-      uGemType,
-      uCutType,
-      uRarity,
-      size,
-      resolution,
+      ...uniforms,
+      uPassType: 1,
     },
     isStatic,
   });
 
+  const coreCanvasRef = useWebGL({
+    vertexShader: VERTEX_SHADER,
+    fragmentShader: FRAGMENT_SHADER,
+    uniforms: {
+      ...uniforms,
+      uPassType: 0,
+    },
+    isStatic,
+    onReady,
+  });
+
   return (
     <div
-      className={`hashed-gem-container ${className}`}
+      className={containerClassName}
       style={{
         width: size,
         height: size,
         position: "relative",
-        overflow: "hidden",
+        overflow: "visible",
       }}
     >
-      <HashedGemGradient
-        size={size}
-        seed={seed}
-        gemType={gemType}
-        cutType={cutType}
-        position="absolute"
-      />
       <canvas
-        ref={canvasRef}
-        className="hashed-gem"
+        ref={glowCanvasRef}
+        className="hashed-gem-layer hashed-gem-glow"
         style={{
           width: "100%",
           height: "100%",
           position: "absolute",
           top: 0,
           left: 0,
+          pointerEvents: "none",
         }}
-        role="img"
-        aria-label="Hashed gem avatar"
       />
+      <div
+        className="hashed-gem-core"
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          borderRadius: "inherit",
+        }}
+      >
+        {!webglReady && (
+          <HashedGemGradient
+            size={size}
+            seed={seed}
+            gemType={gemType}
+            cutType={cutType}
+            position="absolute"
+          />
+        )}
+        <canvas
+          ref={coreCanvasRef}
+          className="hashed-gem hashed-gem-core-canvas hashed-gem-layer"
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+          role="img"
+          aria-label="Hashed gem avatar"
+        />
+      </div>
     </div>
   );
 }

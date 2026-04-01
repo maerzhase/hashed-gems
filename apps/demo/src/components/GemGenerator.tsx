@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
 import { getGemShareUrl } from "@/lib/gemShareUrl";
+import { captureGemLayers } from "@/lib/captureGemLayers";
 
 export const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
@@ -127,24 +128,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   }, []);
 
   const captureCanvas = async (): Promise<Blob | null> => {
-    const srcCanvas = containerRef.current?.querySelector(
-      "canvas.hashed-gem",
-    ) as HTMLCanvasElement | null;
-    if (!srcCanvas) return null;
-
-    const { width: w, height: h } = srcCanvas;
-    const out = document.createElement("canvas");
-    out.width = w;
-    out.height = h;
-    const ctx = out.getContext("2d");
-    if (!ctx) return null;
-
-    ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(srcCanvas, 0, 0);
-
-    return new Promise<Blob | null>((resolve) =>
-      out.toBlob(resolve, "image/png"),
-    );
+    return captureGemLayers(containerRef.current);
   };
 
   const uploadGem = async (blob: Blob): Promise<void> => {

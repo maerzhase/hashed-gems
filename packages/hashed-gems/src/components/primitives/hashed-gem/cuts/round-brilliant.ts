@@ -11,6 +11,8 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
   res.normal  = vec3(0.0, 0.0, 1.0);
   res.facetId = 0;
   res.edgeMask = 0.0;
+  res.boundary = 0.0;
+  res.silhouette = 0.0;
 
   float angle  = atan(uv.y, uv.x);
   float tableRatio = seededSpan(seed, 20.0, 0.10, 0.14);
@@ -24,7 +26,8 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
   float ringWarp = 1.0
     + lobeStrength * cos(angle * 8.0 + seed * 0.63)
     + 0.012 * sin(angle * 16.0 + seed * 1.1);
-  float radius = clamp(length(uv) / (0.90 * ringWarp), 0.0, 1.0);
+  float boundaryRadius = length(uv) / (0.90 * ringWarp);
+  float radius = clamp(boundaryRadius, 0.0, 1.0);
 
   float sw  = PI / 8.0;  // 16-fold
   float oa  = mod(angle + sw*0.5, sw) - sw*0.5;
@@ -111,6 +114,8 @@ CutResult computeRoundBrilliant(vec2 uv, float seed) {
   float da2 = sw2*0.5 - abs(oa2);
   res.edgeMask = max(1.0 - smoothstep(0.0, 0.010, min(da, dr)),
                      (1.0 - smoothstep(0.0, 0.005, da2)) * 0.5);
+  res.boundary = boundaryRadius;
+  res.silhouette = smoothstep(z5, z6, radius);
   return res;
 }
 `;

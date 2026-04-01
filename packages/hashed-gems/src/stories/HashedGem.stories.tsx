@@ -66,6 +66,35 @@ const CUT_TYPES_DATA = CUT_TYPES.map((cutType) => ({
   label: cutType.charAt(0).toUpperCase() + cutType.slice(1).replace(/-/g, " "),
 }));
 
+const SILHOUETTE_REVIEW_SURFACES = [
+  {
+    label: "Checkerboard",
+    style: {
+      backgroundColor: "#f8fafc",
+      backgroundImage: `
+        linear-gradient(45deg, rgba(148, 163, 184, 0.32) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(148, 163, 184, 0.32) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(148, 163, 184, 0.32) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(148, 163, 184, 0.32) 75%)
+      `,
+      backgroundPosition: "0 0, 0 12px, 12px -12px, -12px 0",
+      backgroundSize: "24px 24px",
+    },
+  },
+  {
+    label: "Light background",
+    style: {
+      background: "#f8fafc",
+    },
+  },
+  {
+    label: "Dark background",
+    style: {
+      background: "#020617",
+    },
+  },
+] as const;
+
 const HELPER_ATTRIBUTE_ROWS = [
   {
     label: "Gem type",
@@ -302,9 +331,86 @@ export const CutSeedVariance: Story = {
                   seed={seed}
                   gemType="diamond"
                   cutType={cutType}
-                  className="rounded-full"
                 />
                 <span style={{ fontSize: 10, opacity: 0.55 }}>{seed}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const SilhouetteReview: Story = {
+  render: () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 960 }}>
+      {SILHOUETTE_REVIEW_SURFACES.map(({ label, style }) => (
+        <div key={label} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, margin: 0 }}>{label}</p>
+          <div
+            style={{
+              ...style,
+              padding: 16,
+              borderRadius: 20,
+              border: "1px solid rgba(148, 163, 184, 0.28)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 18,
+            }}
+          >
+            {CUT_TYPES_DATA.map(({ cutType, label: cutLabel }) => (
+              <div
+                key={`${label}-${cutType}`}
+                style={{ display: "flex", flexDirection: "column", gap: 8 }}
+              >
+                <p
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    margin: 0,
+                    color: label === "Dark background" ? "#e2e8f0" : "#0f172a",
+                  }}
+                >
+                  {cutLabel}
+                </p>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  {VARIANCE_SEEDS.map((seed) => (
+                    <div
+                      key={`${label}-${cutType}-${seed}`}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 6,
+                      }}
+                    >
+                      <HashedGem
+                        size={72}
+                        seed={seed}
+                        gemType="diamond"
+                        cutType={cutType}
+                        static
+                      />
+                      <span
+                        style={{
+                          fontSize: 10,
+                          opacity: 0.72,
+                          color:
+                            label === "Dark background" ? "#cbd5e1" : "#334155",
+                        }}
+                      >
+                        {seed}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

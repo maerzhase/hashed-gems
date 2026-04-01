@@ -12,12 +12,15 @@ export interface UseWebGLOptions {
     uGemType: number;
     uCutType: number;
     uRarity: number;
+    uPassType: number;
     size: number;
     /** Explicit canvas pixel resolution. When omitted, defaults to size × devicePixelRatio. */
     resolution?: number;
   };
   /** Render a single frame and stop. Default: false */
   isStatic?: boolean;
+  /** Called once after the first frame is drawn to the canvas. */
+  onReady?: () => void;
 }
 
 function compileShader(
@@ -55,6 +58,7 @@ interface SharedRenderer {
     uGemType: WebGLUniformLocation | null;
     uCutType: WebGLUniformLocation | null;
     uRarity: WebGLUniformLocation | null;
+    uPassType: WebGLUniformLocation | null;
   };
 }
 
@@ -132,6 +136,7 @@ function getShared(
       uGemType: gl.getUniformLocation(program, "uGemType"),
       uCutType: gl.getUniformLocation(program, "uCutType"),
       uRarity: gl.getUniformLocation(program, "uRarity"),
+      uPassType: gl.getUniformLocation(program, "uPassType"),
     },
   };
   sharedRefCount = 1;
@@ -167,8 +172,11 @@ interface GemInstance {
   uGemType: number;
   uCutType: number;
   uRarity: number;
+  uPassType: number;
   startTime: number;
   isVisible: boolean;
+  onReady?: (() => void) | null;
+  readyCalled: boolean;
 }
 
 const instances = new Set<GemInstance>();
@@ -204,11 +212,17 @@ function renderInstance(
   gl.uniform1i(locs.uGemType, inst.uGemType);
   gl.uniform1i(locs.uCutType, inst.uCutType);
   gl.uniform1i(locs.uRarity, inst.uRarity);
+  gl.uniform1i(locs.uPassType, inst.uPassType);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindVertexArray(null);
 
   inst.ctx2d.clearRect(0, 0, w, h);
   inst.ctx2d.drawImage(canvas as CanvasImageSource, 0, 0);
+
+  if (!inst.readyCalled && inst.onReady) {
+    inst.readyCalled = true;
+    inst.onReady();
+  }
 }
 
 function renderLoop(now: number): void {
@@ -298,13 +312,14 @@ export function useWebGL(
   options: UseWebGLOptions,
 ): React.RefObject<HTMLCanvasElement | null> {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { vertexShader, fragmentShader, uniforms, isStatic = false } = options;
+  const { vertexShader, fragmentShader, uniforms, isStatic = false, onReady } = options;
   const {
     uSeed,
     uCausticCount,
     uGemType,
     uCutType,
     uRarity,
+    uPassType,
     size,
     resolution,
   } = uniforms;
@@ -342,8 +357,11 @@ export function useWebGL(
           uGemType,
           uCutType,
           uRarity,
+          uPassType,
           startTime: now,
           isVisible: true,
+          onReady,
+          readyCalled: false,
         },
         now,
       );
@@ -363,8 +381,11 @@ export function useWebGL(
       uGemType,
       uCutType,
       uRarity,
+      uPassType,
       startTime: now,
       isVisible: true,
+      onReady,
+      readyCalled: false,
     };
 
     // Use shared IntersectionObserver
@@ -392,9 +413,11 @@ export function useWebGL(
     uGemType,
     uCutType,
     uRarity,
+    uPassType,
     size,
     resolution,
     isStatic,
+    onReady,
   ]);
 
   return canvasRef;

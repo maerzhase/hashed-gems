@@ -18,6 +18,8 @@ CutResult computeEmeraldStep(vec2 uv, float seed) {
   res.normal  = vec3(0.0, 0.0, 1.0);
   res.facetId = 0;
   res.edgeMask = 0.0;
+  res.boundary = 0.0;
+  res.silhouette = 0.0;
 
   // Aspect ratio: slightly wider than tall (typical emerald cut ~1.4:1)
   float asp  = seededSpan(seed, 60.0, 1.22, 1.44);
@@ -132,6 +134,8 @@ CutResult computeEmeraldStep(vec2 uv, float seed) {
 
   res.edgeMask = max(1.0 - smoothstep(0.0, 0.011, drStp),
                      (1.0 - smoothstep(0.0, 0.025, diagEdge)) * 0.7);
+  res.boundary = lInf;
+  res.silhouette = smoothstep(sb5, sb6, lInf);
   return res;
 }
 `;

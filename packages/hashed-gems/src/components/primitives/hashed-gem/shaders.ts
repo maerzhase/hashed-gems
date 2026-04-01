@@ -60,6 +60,7 @@ uniform int   uGemType;  // 0=diamond 1=ruby 2=sapphire 3=emerald 4=topaz 5=amet
                          // 7=rose-quartz 8=citrine 9=onyx 10=alexandrite 11=opal
 uniform int   uCutType;  // ${CUT_TYPE_LABELS}
 uniform int   uRarity;   // 0=common 1=uncommon 2=rare 3=epic 4=legendary
+uniform int   uPassType; // 0=core 1=glow
 
 in  vec2 vUv;
 out vec4 outColor;
@@ -153,6 +154,8 @@ struct CutResult {
   vec3  normal;    /* facet surface normal                          */
   int   facetId;   /* unique ID per facet (drives per-facet blink)  */
   float edgeMask;  /* 0-1 facet boundary intensity                  */
+  float boundary;  /* 0=center 1=gem edge, using cut's own shape    */
+  float silhouette;/* 0=solid interior 1=discardable outer rim      */
 };
 `;
 
@@ -429,6 +432,7 @@ void main() {
 
   /* ── 9. Combine ────────────────────────────────────────────────────────── */
   vec3 rawColor = surfaceLight + internalLight;
+  vec3 glowColor = vec3(0.0);
 
   /* ── 10. Cut-specific light patterns ───────────────────────────────────── */
   if (uCutType == ${CUT_INDEX["round-brilliant"]}) {
@@ -458,8 +462,10 @@ void main() {
     float crossContrast = (1.0 - smoothstep(0.016, 0.060, starDist))
       * smoothstep(0.28, 0.42, radNorm)
       * smoothstep(0.86, 0.54, radNorm);
-    rawColor += vec3(apexGlow * 0.22);
+    rawColor += vec3(apexGlow * 0.16);
     rawColor += gemBodyColor * bezelBloom * 0.12;
+    glowColor += vec3(apexGlow * 0.20);
+    glowColor += gemBodyColor * bezelBloom * 0.10;
     rawColor *= 1.0 - crossContrast * 0.16;
   }
 
@@ -469,8 +475,10 @@ void main() {
     float petalMask = 1.0 - smoothstep(0.03, 0.11, petalDist);
     float petalRing = smoothstep(0.10, 0.22, radNorm) * smoothstep(0.72, 0.46, radNorm);
     float apexGlow = smoothstep(0.16, 0.0, radNorm);
-    rawColor += vec3(apexGlow * 0.16);
+    rawColor += vec3(apexGlow * 0.12);
     rawColor += gemBodyColor * petalMask * petalRing * 0.10;
+    glowColor += vec3(apexGlow * 0.16);
+    glowColor += gemBodyColor * petalMask * petalRing * 0.08;
     rawColor *= 1.0 - (1.0 - petalMask) * petalRing * 0.10;
   }
 
@@ -510,9 +518,11 @@ void main() {
   float spk2 = pow(max(0.0, dot(crownNormal, h2)), shin2);
   float spk3 = pow(max(0.0, dot(crownNormal, h3)), shin3);
 
-  rawColor += vec3(step(spkThresh, spk1)) * spkIntensity;
-  rawColor += vec3(step(spkThresh + 0.05, spk2)) * spkIntensity * 0.7;
-  rawColor += vec3(step(spkThresh + 0.08, spk3)) * spkIntensity * 0.5;
+  vec3 sparkleFlash = vec3(step(spkThresh, spk1)) * spkIntensity;
+  sparkleFlash += vec3(step(spkThresh + 0.05, spk2)) * spkIntensity * 0.7;
+  sparkleFlash += vec3(step(spkThresh + 0.08, spk3)) * spkIntensity * 0.5;
+  rawColor += sparkleFlash * 0.78;
+  glowColor += sparkleFlash * 0.04;
 
   // Spectral sparkle — rainbow fire flashes
   float dispAngle = fract(fid * 0.618 + uSeed * 0.137);
@@ -520,7 +530,9 @@ void main() {
     ? hue2rgb(fract(dispAngle + uTime * 0.02))
     : vec3(1.0);
   float spkTotal = step(spkThresh, spk1) + step(spkThresh + 0.05, spk2) * 0.7;
-  rawColor += spkColor * spkTotal * spkIntensity * 0.04;
+  vec3 spectralSparkle = spkColor * spkTotal * spkIntensity * 0.04;
+  rawColor += spectralSparkle * 0.82;
+  glowColor += spectralSparkle * 0.45;
 
   /* ── 12. Facet edge effects ────────────────────────────────────────────── */
   edgeMask *= 0.85 + 0.30 * hash21(uv * 47.0 + vec2(uSeed * 0.3));
@@ -529,7 +541,9 @@ void main() {
   float edgeGlow = edgeMask * edgeLit * (0.4 + 0.4 * sin(uTime * 1.0 + fid * 0.9));
   float edgeHue  = fract(atan(uv.y, uv.x) / TWO_PI * 3.0 + radNorm * 0.4 + uTime * 0.05);
   vec3  edgeColor = (uGemType == 0 || uGemType == 9) ? hue2rgb(edgeHue) : gemBodyColor * 1.2;
-  rawColor += edgeColor * edgeGlow * 0.25;
+  vec3 edgeContribution = edgeColor * edgeGlow * 0.25;
+  rawColor += edgeContribution * 0.88;
+  glowColor += edgeContribution * 0.12;
   rawColor *= 1.0 - edgeMask * 0.10;
 
   /* ── 13. Rarity visual effects ─────────────────────────────────────────── */
@@ -546,7 +560,9 @@ void main() {
       starBright += starLine;
     }
     float starPulse = 0.6 + 0.4 * sin(uTime * 0.5 + uSeed);
-    rawColor += vec3(starBright * starPulse * 2.5);
+    vec3 starContribution = vec3(starBright * starPulse * 2.1);
+    rawColor += starContribution * 0.82;
+    glowColor += starContribution * 0.58;
   }
 
   // Rare+: subtle outer glow
@@ -554,12 +570,43 @@ void main() {
     float glowR = max(abs(uv.x), abs(uv.y));
     float glow = smoothstep(0.60, 0.90, glowR) * rarityGlow;
     float glowPulse = 0.7 + 0.3 * sin(uTime * 0.8 + uSeed * 1.5);
-    rawColor += gemBodyColor * glow * glowPulse * 3.0;
+    vec3 rarityContribution = gemBodyColor * glow * glowPulse * 3.0;
+    rawColor += rarityContribution;
+    glowColor += rarityContribution * 1.10;
   }
 
-  /* ── 14. Tonemap ───────────────────────────────────────────────────────── */
+  /* ── 14. Solid silhouette cleanup ───────────────────────────────────────── */
+  float outerZone    = cut.silhouette;
+  float facingViewer = max(0.0, cut.normal.z);
+  vec3  rimColor = gemBodyColor * (0.40 + facingViewer * 1.20);
+  rawColor = mix(rawColor,
+                 rimColor,
+                 outerZone * 0.55);
+
+  if (uPassType == 1) {
+    float edgeSpill = smoothstep(0.58, 0.98, cut.boundary);
+    float haloReach = 1.0 - smoothstep(1.00, 1.18, cut.boundary);
+    float haloMask = smoothstep(0.10, 0.95, outerZone) * haloReach;
+    float spillMask = max(haloMask, edgeSpill * haloReach * 0.22);
+    vec3 glowTint = mix(glowColor, glowColor * (0.55 + gemBodyColor * 0.45), 0.38);
+    vec3 glowScene = glowTint * (0.05 + spillMask * 1.05);
+    glowScene += gemBodyColor * spillMask * (0.08 + rarityGlow * 3.8);
+    vec3 glowOutput = tonemap(glowScene * 0.58);
+    float glowAlpha = clamp(
+      max(max(glowOutput.r, glowOutput.g), glowOutput.b) * (0.04 + spillMask * 0.58),
+      0.0,
+      0.72
+    );
+    if (glowAlpha < 0.02) discard;
+    outColor = vec4(glowOutput, glowAlpha);
+    return;
+  }
+
+  /* ── 15. Tonemap ───────────────────────────────────────────────────────── */
   vec3 color = tonemap(rawColor);
 
+  if (outerZone >= 0.98) discard;
+  if (outerZone > 0.0 && facingViewer < mix(0.30, 0.55, outerZone)) discard;
   outColor = vec4(color, 1.0);
 }
 `;

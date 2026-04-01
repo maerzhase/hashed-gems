@@ -11,6 +11,8 @@ CutResult computeCushion(vec2 uv, float seed) {
   res.normal  = vec3(0.0, 0.0, 1.0);
   res.facetId = 0;
   res.edgeMask = 0.0;
+  res.boundary = 0.0;
+  res.silhouette = 0.0;
 
   float angle = atan(uv.y, uv.x);
   float p = seededSpan(seed, 50.0, 2.15, 3.10);
@@ -18,11 +20,8 @@ CutResult computeCushion(vec2 uv, float seed) {
   float shoulderWave = 1.0
     + pillowBulge * cos(angle * 4.0 + seed * 0.53)
     + 0.012 * sin(angle * 8.0 + seed * 1.1);
-  float cshR = clamp(
-    pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0/p) / (0.90 * shoulderWave),
-    0.0,
-    1.0
-  );
+  float cushionMetric = pow(pow(abs(uv.x), p) + pow(abs(uv.y), p), 1.0/p) / (0.90 * shoulderWave);
+  float cshR = clamp(cushionMetric, 0.0, 1.0);
 
   float sw = PI / 4.0;  // 8-fold
   float oa = mod(angle + sw*0.5, sw) - sw*0.5;
@@ -88,6 +87,8 @@ CutResult computeCushion(vec2 uv, float seed) {
                  min(abs(cshR-z3), abs(cshR-z4)));
   float da = min(sw*0.5 - abs(oa), abs(oa));
   res.edgeMask = max(1.0 - smoothstep(0.0, 0.014, min(da * 0.7, dr)), 0.0);
+  res.boundary = cushionMetric;
+  res.silhouette = smoothstep(z3, z4, cshR);
   return res;
 }
 `;

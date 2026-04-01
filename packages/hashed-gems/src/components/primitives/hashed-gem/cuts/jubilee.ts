@@ -11,14 +11,13 @@ CutResult computeJubilee(vec2 uv, float seed) {
   res.normal  = vec3(0.0, 0.0, 1.0);
   res.facetId = 0;
   res.edgeMask = 0.0;
+  res.boundary = 0.0;
+  res.silhouette = 0.0;
 
   float angle  = atan(uv.y, uv.x);
   float domeWave = seededSpan(seed, 90.0, 0.018, 0.045);
-  float radius = clamp(
-    length(uv) / (0.90 * (1.0 + domeWave * cos(angle * 8.0 + seed * 0.31))),
-    0.0,
-    1.0
-  );
+  float boundaryRadius = length(uv) / (0.90 * (1.0 + domeWave * cos(angle * 8.0 + seed * 0.31)));
+  float radius = clamp(boundaryRadius, 0.0, 1.0);
 
   float bezelSw = PI / 4.0;    // 8 primary bezel sectors
   float bezelOa = mod(angle + bezelSw*0.5, bezelSw) - bezelSw*0.5;
@@ -107,6 +106,8 @@ CutResult computeJubilee(vec2 uv, float seed) {
       * smoothstep(0.012, z0, radius)
       * 0.34
   );
+  res.boundary = boundaryRadius;
+  res.silhouette = smoothstep(z3, z4, radius);
   return res;
 }
 `;

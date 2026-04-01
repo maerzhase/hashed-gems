@@ -11,6 +11,8 @@ CutResult computePrincess(vec2 uv, float seed) {
   res.normal  = vec3(0.0, 0.0, 1.0);
   res.facetId = 0;
   res.edgeMask = 0.0;
+  res.boundary = 0.0;
+  res.silhouette = 0.0;
 
   float ax = abs(uv.x), ay = abs(uv.y);
   float chevAng = atan(ay, ax);          // 0 to PI/2 within each quadrant
@@ -102,6 +104,8 @@ CutResult computePrincess(vec2 uv, float seed) {
   float diagEdge = abs(chevOa - quadrantDiag);
   res.edgeMask = max(1.0 - smoothstep(0.0, 0.012, drP),
                      (1.0 - smoothstep(0.0, 0.015, diagEdge)) * 0.7);
+  res.boundary = sqR;
+  res.silhouette = smoothstep(z4, z5, sqR);
   return res;
 }
 `;

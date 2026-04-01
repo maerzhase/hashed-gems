@@ -11,14 +11,13 @@ CutResult computeRose(vec2 uv, float seed) {
   res.normal  = vec3(0.0, 0.0, 1.0);
   res.facetId = 0;
   res.edgeMask = 0.0;
+  res.boundary = 0.0;
+  res.silhouette = 0.0;
 
   float angle  = atan(uv.y, uv.x);
   float bloomStrength = seededSpan(seed, 100.0, 0.035, 0.075);
-  float radius = clamp(
-    length(uv) / (0.90 * (1.0 + bloomStrength * cos(angle * 6.0 + seed * 0.41))),
-    0.0,
-    1.0
-  );
+  float boundaryRadius = length(uv) / (0.90 * (1.0 + bloomStrength * cos(angle * 6.0 + seed * 0.41)));
+  float radius = clamp(boundaryRadius, 0.0, 1.0);
 
   float petalSw = PI / 6.0;  // 12 broad petals
   float petalOa = mod(angle + petalSw*0.5, petalSw) - petalSw*0.5;
@@ -30,7 +29,8 @@ CutResult computeRose(vec2 uv, float seed) {
   float splitOi = floor((angle + splitSw*0.5) / splitSw);
 
   float bloom = 0.5 + 0.5 * cos(angle * 6.0 + seed * 0.41);
-  float roseR = radius / (0.92 + 0.06 * bloom);
+  float roseBoundary = boundaryRadius / (0.92 + 0.06 * bloom);
+  float roseR = clamp(roseBoundary, 0.0, 1.0);
 
   float zj = 0.010 * sin(seed * 4.9 + petalOi * 1.1);
   float w0 = seededSpan(seed, 101.0, 0.06, 0.09);
@@ -95,6 +95,8 @@ CutResult computeRose(vec2 uv, float seed) {
       (1.0 - smoothstep(0.0, 0.006, daSplit)) * smoothstep(z1, z4, roseR) * 0.50
     )
   );
+  res.boundary = roseBoundary;
+  res.silhouette = smoothstep(z3, z4, roseR);
   return res;
 }
 `;

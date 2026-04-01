@@ -142,7 +142,7 @@ export function HashedGemGradient({
   const hi3Y = Math.round(50 + Math.sin(angle1) * 14);
 
   const baseGradient = `
-    radial-gradient(circle at ${sparkleX}% ${sparkleY}%, ${colors.inner} 0%, ${colors.inner} 30%, ${colors.outer} 70%, ${colors.outer} 100%)
+    radial-gradient(circle at ${sparkleX}% ${sparkleY}%, ${colors.inner} 0%, ${colors.inner} 30%, ${colors.outer} 60%, transparent 100%)
   `;
 
   const sparkleGradient = `
@@ -201,7 +201,7 @@ export function HashedGemGradient({
     height: "100%",
     borderRadius,
     background:
-      "radial-gradient(circle at center, transparent 52%, rgba(0,0,0,0.65) 100%)",
+      "radial-gradient(circle at center, transparent 52%, rgba(0,0,0,0.4) 80%, transparent 100%)",
     boxShadow: "inset 0 0 25px rgba(255,255,255,0.12)",
     pointerEvents: "none",
   };
