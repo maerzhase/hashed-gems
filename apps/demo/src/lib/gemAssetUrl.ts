@@ -1,16 +1,15 @@
-const DEFAULT_GEM_ASSET_BASE_URL =
-  "https://c36zhng9zp5ehtzj.public.blob.vercel-storage.com";
+const DEFAULT_GEM_SITE_URL = "https://gems.m3000.io";
 
 function trimTrailingSlash(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
-export function getGemAssetBaseUrl(): string {
+export function getGemSiteUrl(): string {
   return trimTrailingSlash(
-    process.env.NEXT_PUBLIC_GEM_ASSET_BASE_URL ?? DEFAULT_GEM_ASSET_BASE_URL,
+    process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_GEM_SITE_URL,
   );
 }
 
-export function getGemAssetUrl(seed: string): string {
-  return `${getGemAssetBaseUrl()}/gems/${encodeURIComponent(seed)}.png`;
+export function getGemApiImageUrl(seed: string, origin = getGemSiteUrl()): string {
+  return `${trimTrailingSlash(origin)}/api/gems/${encodeURIComponent(seed)}`;
 }

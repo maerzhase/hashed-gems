@@ -2,12 +2,19 @@
 
 import type { Rarity } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
 import { getGemShareUrl } from "@/lib/gemShareUrl";
 
 const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
+
+function warmGemShareImage(seed: string) {
+  void fetch(`/api/gems/${encodeURIComponent(seed)}`, {
+    cache: "force-cache",
+    keepalive: true,
+  }).catch(() => {});
+}
 
 function formatCutLabel(cutTypeName: string): string {
   return cutTypeName
@@ -31,59 +38,31 @@ export function GemPageClient({
   cutVariantName,
   rarityName,
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
   const cutLabel = formatCutLabel(cutTypeName);
 
   const gemUrl = getGemShareUrl(seed);
   const tweetText = `Check out ${seed}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
-  const uploadKey = `hashed-gems:uploaded:${seed}`;
+  const warmKey = `hashed-gems:warmed:${seed}`;
 
   useEffect(() => {
     setCanShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
 
   useEffect(() => {
-    if (sessionStorage.getItem(uploadKey) === "1") return;
+    if (sessionStorage.getItem(warmKey) === "1") return;
 
-    const upload = async () => {
-      const srcCanvas = containerRef.current?.querySelector(
-        "canvas.hashed-gem",
-      ) as HTMLCanvasElement | null;
-      if (!srcCanvas) return;
-
-      const { width: w, height: h } = srcCanvas;
-      const out = document.createElement("canvas");
-      out.width = w;
-      out.height = h;
-      const ctx = out.getContext("2d");
-      if (!ctx) return;
-
-      ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(srcCanvas, 0, 0);
-
-      const blob = await new Promise<Blob | null>((resolve) =>
-        out.toBlob(resolve, "image/png"),
-      );
-      if (!blob) return;
-
-      const form = new FormData();
-      form.append("file", blob, `${seed}.png`);
-      form.append("seed", seed);
-      await fetch("/api/gem-image", { method: "POST", body: form });
-      sessionStorage.setItem(uploadKey, "1");
-    };
-
-    // Wait a frame so the WebGL gem has rendered at least once
     const id = requestAnimationFrame(() => {
-      upload().catch(() => {});
+      warmGemShareImage(seed);
+      sessionStorage.setItem(warmKey, "1");
     });
+
     return () => cancelAnimationFrame(id);
-  }, [seed, uploadKey]);
+  }, [seed, warmKey]);
 
   const captureBlob = async (): Promise<Blob | null> => {
-    const srcCanvas = containerRef.current?.querySelector(
+    const srcCanvas = document.querySelector(
       "canvas.hashed-gem",
     ) as HTMLCanvasElement | null;
     if (!srcCanvas) return null;
@@ -103,25 +82,15 @@ export function GemPageClient({
     );
   };
 
-  const uploadBlob = async (blob: Blob) => {
-    const form = new FormData();
-    form.append("file", blob, `${seed}.png`);
-    form.append("seed", seed);
-    await fetch("/api/gem-image", { method: "POST", body: form });
-    sessionStorage.setItem(uploadKey, "1");
-  };
-
   const handleCopyLink = async () => {
-    captureBlob()
-      .then((blob) => blob && uploadBlob(blob))
-      .catch(() => {});
-
+    warmGemShareImage(seed);
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleNativeShare = async () => {
+    warmGemShareImage(seed);
     const blob = await captureBlob();
     if (!blob) return;
     const file = new File([blob], `${seed}-gem.png`, { type: "image/png" });
@@ -146,7 +115,7 @@ export function GemPageClient({
 
   return (
     <div className="flex flex-col items-center">
-      <div ref={containerRef} className="mb-6">
+      <div className="mb-6">
         <HashedGem seed={seed} size={128} resolution={512} />
       </div>
 
@@ -173,6 +142,7 @@ export function GemPageClient({
           target="_blank"
           rel="noopener noreferrer"
           className={BUTTON_CLASS}
+          onClick={() => warmGemShareImage(seed)}
         >
           Post on X
         </a>

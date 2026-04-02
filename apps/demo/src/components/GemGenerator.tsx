@@ -6,12 +6,19 @@ import {
   getGemProperties,
   HashedGem,
 } from "@m3000/hashed-gems";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
 import { getGemShareUrl } from "@/lib/gemShareUrl";
 
 export const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
+
+function warmGemShareImage(seed: string) {
+  void fetch(`/api/gems/${encodeURIComponent(seed)}`, {
+    cache: "force-cache",
+    keepalive: true,
+  }).catch(() => {});
+}
 
 function formatCutLabel(cutTypeName: string): string {
   return cutTypeName
@@ -40,7 +47,10 @@ export function XShareButton({
       target="_blank"
       rel="noopener noreferrer"
       className={BUTTON_CLASS}
-      onClick={onClick}
+      onClick={() => {
+        warmGemShareImage(seed);
+        onClick?.();
+      }}
     >
       Post on X
     </a>
@@ -58,6 +68,7 @@ export function CopyLinkButton({
   const gemUrl = getGemShareUrl(seed);
 
   const handleCopyLink = async () => {
+    warmGemShareImage(seed);
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -89,6 +100,7 @@ export function NativeShareButton({
 
   const handleNativeShare = async () => {
     try {
+      warmGemShareImage(seed);
       await navigator.share({
         title: `${rarityName} ${gemTypeName}`,
         url: gemUrl,
@@ -114,8 +126,6 @@ interface GemGeneratorProps {
 }
 
 export function GemGenerator({ seed }: GemGeneratorProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [sharing, setSharing] = useState(false);
   const [canNativeShare, setCanNativeShare] = useState(false);
 
   const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
@@ -126,56 +136,9 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
     setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
 
-  const captureCanvas = async (): Promise<Blob | null> => {
-    const srcCanvas = containerRef.current?.querySelector(
-      "canvas.hashed-gem",
-    ) as HTMLCanvasElement | null;
-    if (!srcCanvas) return null;
-
-    const { width: w, height: h } = srcCanvas;
-    const out = document.createElement("canvas");
-    out.width = w;
-    out.height = h;
-    const ctx = out.getContext("2d");
-    if (!ctx) return null;
-
-    ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(srcCanvas, 0, 0);
-
-    return new Promise<Blob | null>((resolve) =>
-      out.toBlob(resolve, "image/png"),
-    );
-  };
-
-  const uploadGem = async (blob: Blob): Promise<void> => {
-    const form = new FormData();
-    form.append("file", blob, `${seed}.png`);
-    form.append("seed", seed);
-    await fetch("/api/gem-image", { method: "POST", body: form });
-  };
-
-  const twitterLinkRef = useRef<HTMLAnchorElement>(null);
-
-  const handleShareOnX = async () => {
-    setSharing(true);
-    try {
-      const blob = await captureCanvas();
-      if (blob) await uploadGem(blob);
-    } catch {
-      // Upload failed — proceed anyway, OG will use gradient fallback
-    } finally {
-      setSharing(false);
-    }
-    twitterLinkRef.current?.click();
-  };
-
-  const tweetText = `My gem is a ${rarityName} ${gemTypeName}! What's yours? 💎`;
-  const gemUrl = getGemShareUrl(seed);
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(gemUrl)}`;
-
   return (
     <div className="flex flex-col items-center gap-5 px-4 py-6">
-      <div ref={containerRef}>
+      <div>
         <HashedGem seed={seed} size={128} resolution={512} />
       </div>
 
@@ -197,23 +160,11 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
-        <button
-          type="button"
-          onClick={handleShareOnX}
-          disabled={sharing}
-          className={`${BUTTON_CLASS} disabled:cursor-wait disabled:opacity-60`}
-        >
-          {sharing ? "Preparing…" : "Post on X"}
-        </button>
-        <a
-          ref={twitterLinkRef}
-          href={twitterUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="sr-only"
-        >
-          Share on X
-        </a>
+        <XShareButton
+          seed={seed}
+          gemTypeName={gemTypeName}
+          rarityName={rarityName}
+        />
 
         <CopyLinkButton seed={seed} />
 
