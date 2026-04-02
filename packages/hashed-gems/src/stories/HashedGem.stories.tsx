@@ -31,7 +31,7 @@ export default meta;
 type Story = StoryObj<typeof HashedGem>;
 
 export const Default: Story = {
-  args: { size: 96, seed: "alice", className: "rounded-full" },
+  args: { size: 96, seed: "alice" },
 };
 
 const SEED_NAMES = [
@@ -218,7 +218,7 @@ export const SeedVariations: Story = {
             gap: 6,
           }}
         >
-          <HashedGem size={80} seed={name} className="rounded-full" />
+          <HashedGem size={80} seed={name} />
           <span style={{ fontSize: 11, opacity: 0.6 }}>{name}</span>
         </div>
       ))}
@@ -230,7 +230,6 @@ export const HelperAttributes: Story = {
   args: {
     seed: "alice",
     size: 144,
-    className: "rounded-3xl",
     static: true,
   },
   render: ({
@@ -316,7 +315,6 @@ export const Sizes: Story = {
           key={size}
           size={size}
           seed="alice"
-          className="rounded-full"
         />
       ))}
     </div>
@@ -348,7 +346,6 @@ export const GemTypes: Story = {
               seed="showcase"
               gemType={gemType}
               cutType="round-brilliant"
-              className="rounded-full"
             />
             <span style={{ fontSize: 11, opacity: 0.6 }}>{label}</span>
           </div>
@@ -376,7 +373,6 @@ export const GemTypes: Story = {
               seed="showcase"
               gemType="diamond"
               cutType={cutType}
-              className="rounded-full"
             />
             <span style={{ fontSize: 11, opacity: 0.6 }}>{label}</span>
           </div>
@@ -649,7 +645,6 @@ export const StaticMode: Story = {
             size={64}
             seed={seed}
             static
-            className="rounded-full"
           />
         ))}
       </div>
@@ -660,7 +655,6 @@ export const StaticMode: Story = {
             key={seed}
             size={64}
             seed={seed}
-            className="rounded-full"
           />
         ))}
       </div>
