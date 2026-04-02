@@ -870,16 +870,18 @@ void main() {
     + l3.xy * (0.16 + glint3 * 0.24)
     + lightSweepDir.xy * (0.42 + crownSweep * 0.28);
   vec2 flareAxis = highlightAxis / max(length(highlightAxis), 0.0001);
+  vec2 flareNormal = vec2(-flareAxis.y, flareAxis.x);
+  vec2 flareBias = flareAxis * mix(0.05, 0.14, flareShape)
+    + flareNormal * sin(uSeed * 1.9 + flareClock * 0.35) * mix(0.008, 0.028, flareShape);
   vec2 flareCenter = clamp(
     (
       l1.xy * (0.24 + glint1 * 0.32)
       + l2.xy * (0.12 + glint2 * 0.22)
       + lightSweepDir.xy * (0.16 + crownSweep * 0.18)
-    ) * mix(0.22, 0.34, flareShape),
-    vec2(-0.42),
-    vec2(0.42)
+    ) * mix(0.22, 0.34, flareShape) + flareBias,
+    vec2(-0.48),
+    vec2(0.48)
   );
-  vec2 flareNormal = vec2(-flareAxis.y, flareAxis.x);
   vec2 flareOffset = uv - flareCenter;
   float flareAlong = dot(flareOffset, flareAxis);
   float flareAcross = dot(flareOffset, flareNormal);
@@ -888,17 +890,30 @@ void main() {
     * exp(-pow(abs(flareAlong) / mix(0.22, 0.42, flareShape), 0.82));
   float flareNeedle = exp(-pow(abs(flareAcross) / mix(0.016, 0.006, flareShape), 1.06))
     * exp(-pow(abs(flareAlong) / mix(0.34, 0.62, flareShape), 0.74));
-  vec2 flareGhostCenter = flareCenter - flareAxis * mix(0.12, 0.26, flareShape);
+  vec2 flareGhostCenter = flareCenter - flareAxis * mix(0.18, 0.34, flareShape) + flareNormal * mix(0.015, 0.05, flareShape);
   float flareGhost = exp(
     -pow(length(uv - flareGhostCenter) / mix(0.095, 0.19, flareShape), 2.0)
   ) * smoothstep(0.44, 0.9, flareShape);
-  vec2 flareGhostCenter2 = flareCenter + flareAxis * mix(0.18, 0.34, flareShape);
+  vec2 flareGhostCenter2 = flareCenter + flareAxis * mix(0.24, 0.42, flareShape) - flareNormal * mix(0.01, 0.04, flareShape);
   float flareGhost2 = exp(
     -pow(length(uv - flareGhostCenter2) / mix(0.05, 0.1, flareShape), 1.9)
   ) * smoothstep(0.66, 1.0, flareShape);
+  vec2 sideGlintCenter = clamp(
+    flareCenter + flareAxis * mix(0.16, 0.3, flareShape) + flareNormal * mix(0.04, 0.1, flareShape),
+    vec2(-0.56),
+    vec2(0.56)
+  );
+  float sideGlint = exp(
+    -pow(length(uv - sideGlintCenter) / mix(0.04, 0.075, flareShape), 1.85)
+  ) * smoothstep(0.42, 0.96, flareShape);
   float flareCanvasDist = length(uv);
   float flareMask = (1.0 - smoothstep(0.76, 1.02, flareCanvasDist))
     * smoothstep(0.05, 0.28, cosTheta);
+  float rimSweep = max(dot(normalize(vec3(flareAxis * vec2(1.0, -1.0), 0.45)), crownNormal), 0.0);
+  float sideRim = smoothstep(0.62, 0.9, flareCanvasDist)
+    * smoothstep(0.88, 0.42, flareCanvasDist)
+    * smoothstep(0.18, 0.64, rimSweep)
+    * flareShape;
   vec3 flareColor = mix(vec3(1.0), clamp(gemBodyColor + vec3(0.18), 0.0, 1.2), 0.14 + 0.08 * rarityTier);
   rawColor += flareColor
     * flareCore
@@ -915,6 +930,15 @@ void main() {
     * flarePresence
     * flareMask
     * mix(0.06, 0.22, flareShape);
+  rawColor += mix(vec3(1.0), flareColor, 0.28)
+    * sideGlint
+    * flarePresence
+    * flareMask
+    * mix(0.05, 0.16, flareShape);
+  rawColor += mix(vec3(1.0), flareColor, 0.42)
+    * sideRim
+    * flarePresence
+    * mix(0.025, 0.09, flareShape);
   if (uRarity >= 3) {
     rawColor += mix(vec3(1.0), flareColor, 0.22)
       * flareGhost
