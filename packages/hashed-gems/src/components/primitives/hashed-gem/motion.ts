@@ -212,14 +212,14 @@ function getRarityTuning(rarity: Rarity): MotionTuning {
   switch (rarity) {
     case "common":
       return {
-        motionCadence: 0.96,
-        lightCadence: 0.98,
-        sparkleCadence: 0.94,
-        glowCadence: 0.96,
+        motionCadence: 0.9,
+        lightCadence: 0.92,
+        sparkleCadence: 0.9,
+        glowCadence: 0.94,
         colorCadence: 1,
-        motionIntensity: 0.94,
-        sparkleIntensity: 0.92,
-        glowIntensity: 0.9,
+        motionIntensity: 0.84,
+        sparkleIntensity: 0.86,
+        glowIntensity: 0.86,
       };
     case "uncommon":
       return {
@@ -234,36 +234,36 @@ function getRarityTuning(rarity: Rarity): MotionTuning {
       };
     case "rare":
       return {
-        motionCadence: 1.04,
-        lightCadence: 1.04,
-        sparkleCadence: 1.06,
-        glowCadence: 1.08,
+        motionCadence: 1.01,
+        lightCadence: 1.03,
+        sparkleCadence: 1.04,
+        glowCadence: 1.06,
         colorCadence: 1,
-        motionIntensity: 1.08,
-        sparkleIntensity: 1.08,
-        glowIntensity: 1.1,
+        motionIntensity: 1.04,
+        sparkleIntensity: 1.06,
+        glowIntensity: 1.08,
       };
     case "epic":
       return {
-        motionCadence: 1.08,
-        lightCadence: 1.08,
-        sparkleCadence: 1.1,
-        glowCadence: 1.14,
+        motionCadence: 1.0,
+        lightCadence: 1.05,
+        sparkleCadence: 1.05,
+        glowCadence: 1.08,
         colorCadence: 1,
-        motionIntensity: 1.16,
-        sparkleIntensity: 1.16,
-        glowIntensity: 1.24,
+        motionIntensity: 1.12,
+        sparkleIntensity: 1.12,
+        glowIntensity: 1.14,
       };
     case "legendary":
       return {
-        motionCadence: 1.12,
-        lightCadence: 1.12,
-        sparkleCadence: 1.16,
-        glowCadence: 1.22,
+        motionCadence: 0.96,
+        lightCadence: 1.06,
+        sparkleCadence: 1.06,
+        glowCadence: 1.1,
         colorCadence: 1,
-        motionIntensity: 1.24,
-        sparkleIntensity: 1.28,
-        glowIntensity: 1.36,
+        motionIntensity: 1.18,
+        sparkleIntensity: 1.16,
+        glowIntensity: 1.18,
       };
   }
 }

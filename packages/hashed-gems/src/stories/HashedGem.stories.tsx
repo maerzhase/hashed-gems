@@ -453,7 +453,6 @@ export const MotionByCutFamily: Story = {
               gemType="diamond"
               cutType={cutType}
               size={88}
-              className="rounded-full"
             />
           </div>
           <div style={{ display: "grid", gap: 4 }}>
@@ -573,7 +572,6 @@ export const MotionRarityComparison: Story = {
               gemType={RARITY_INSPECTION_GEM_TYPE}
               cutType={RARITY_INSPECTION_CUT}
               size={104}
-              className="rounded-full"
             />
             <strong style={{ fontSize: 12, textTransform: "capitalize" }}>
               {rarity}
