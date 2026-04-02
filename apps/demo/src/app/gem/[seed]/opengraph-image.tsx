@@ -1,8 +1,8 @@
-import { get } from "@vercel/blob";
 import type { Rarity } from "@m3000/hashed-gems";
 import { getGemProperties } from "@m3000/hashed-gems";
+import { headers } from "next/headers";
 import { ImageResponse } from "next/og";
-import { getGemAssetUrl } from "@/lib/gemAssetUrl";
+import { getGemApiImageUrl, getGemSiteUrl } from "@/lib/gemAssetUrl";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -17,24 +17,30 @@ const RARITY_BADGE_COLORS: Record<Rarity, { bg: string; text: string }> = {
 };
 
 async function getGemImageSrc(seed: string): Promise<string> {
-  if (process.env.NODE_ENV === "production") {
-    return getGemAssetUrl(seed);
-  }
-
-  const pathname = `gems/${encodeURIComponent(seed)}.png`;
+  const requestHeaders = await headers();
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "https";
+  const origin = host ? `${protocol}://${host}` : getGemSiteUrl();
+  const imageUrl = getGemApiImageUrl(seed, origin);
 
   try {
-    const result = await get(pathname, { access: "public" });
-    if (result?.statusCode === 200 && result.stream) {
-      const bytes = await new Response(result.stream).arrayBuffer();
+    const response = await fetch(imageUrl, {
+      cache: "no-store",
+      redirect: "follow",
+    });
+
+    if (response.ok) {
+      const contentType = response.headers.get("content-type") ?? "image/png";
+      const bytes = await response.arrayBuffer();
       const base64 = Buffer.from(bytes).toString("base64");
-      return `data:${result.blob.contentType};base64,${base64}`;
+      return `data:${contentType};base64,${base64}`;
     }
   } catch {
-    // Fall back to the public URL when authenticated blob fetch is unavailable.
+    // Fall back to the canonical URL if the warmup fetch fails.
   }
 
-  return getGemAssetUrl(seed);
+  return imageUrl;
 }
 
 export default async function Image({

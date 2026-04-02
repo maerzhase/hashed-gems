@@ -17,10 +17,12 @@ export interface UseWebGLOptions {
     uLightCadence: number;
     uSparkleCadence: number;
     uGlowCadence: number;
+    uFlareCadence: number;
     uColorCadence: number;
     uMotionIntensity: number;
     uSparkleIntensity: number;
     uGlowIntensity: number;
+    uFlareIntensity: number;
     uMotionPhase: number;
     size: number;
     /** Explicit canvas pixel resolution. When omitted, defaults to size × devicePixelRatio. */
@@ -70,10 +72,12 @@ interface SharedRenderer {
     uLightCadence: WebGLUniformLocation | null;
     uSparkleCadence: WebGLUniformLocation | null;
     uGlowCadence: WebGLUniformLocation | null;
+    uFlareCadence: WebGLUniformLocation | null;
     uColorCadence: WebGLUniformLocation | null;
     uMotionIntensity: WebGLUniformLocation | null;
     uSparkleIntensity: WebGLUniformLocation | null;
     uGlowIntensity: WebGLUniformLocation | null;
+    uFlareIntensity: WebGLUniformLocation | null;
     uMotionPhase: WebGLUniformLocation | null;
   };
 }
@@ -157,10 +161,12 @@ function getShared(
       uLightCadence: gl.getUniformLocation(program, "uLightCadence"),
       uSparkleCadence: gl.getUniformLocation(program, "uSparkleCadence"),
       uGlowCadence: gl.getUniformLocation(program, "uGlowCadence"),
+      uFlareCadence: gl.getUniformLocation(program, "uFlareCadence"),
       uColorCadence: gl.getUniformLocation(program, "uColorCadence"),
       uMotionIntensity: gl.getUniformLocation(program, "uMotionIntensity"),
       uSparkleIntensity: gl.getUniformLocation(program, "uSparkleIntensity"),
       uGlowIntensity: gl.getUniformLocation(program, "uGlowIntensity"),
+      uFlareIntensity: gl.getUniformLocation(program, "uFlareIntensity"),
       uMotionPhase: gl.getUniformLocation(program, "uMotionPhase"),
     },
   };
@@ -202,10 +208,12 @@ interface GemInstance {
   uLightCadence: number;
   uSparkleCadence: number;
   uGlowCadence: number;
+  uFlareCadence: number;
   uColorCadence: number;
   uMotionIntensity: number;
   uSparkleIntensity: number;
   uGlowIntensity: number;
+  uFlareIntensity: number;
   uMotionPhase: number;
   startTime: number;
   isVisible: boolean;
@@ -249,10 +257,12 @@ function renderInstance(
   gl.uniform1f(locs.uLightCadence, inst.uLightCadence);
   gl.uniform1f(locs.uSparkleCadence, inst.uSparkleCadence);
   gl.uniform1f(locs.uGlowCadence, inst.uGlowCadence);
+  gl.uniform1f(locs.uFlareCadence, inst.uFlareCadence);
   gl.uniform1f(locs.uColorCadence, inst.uColorCadence);
   gl.uniform1f(locs.uMotionIntensity, inst.uMotionIntensity);
   gl.uniform1f(locs.uSparkleIntensity, inst.uSparkleIntensity);
   gl.uniform1f(locs.uGlowIntensity, inst.uGlowIntensity);
+  gl.uniform1f(locs.uFlareIntensity, inst.uFlareIntensity);
   gl.uniform1f(locs.uMotionPhase, inst.uMotionPhase);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.bindVertexArray(null);
@@ -366,10 +376,12 @@ export function useWebGL(
     uLightCadence,
     uSparkleCadence,
     uGlowCadence,
+    uFlareCadence,
     uColorCadence,
     uMotionIntensity,
     uSparkleIntensity,
     uGlowIntensity,
+    uFlareIntensity,
     uMotionPhase,
     size,
     resolution,
@@ -436,10 +448,12 @@ export function useWebGL(
           uLightCadence,
           uSparkleCadence,
           uGlowCadence,
+          uFlareCadence,
           uColorCadence,
           uMotionIntensity,
           uSparkleIntensity,
           uGlowIntensity,
+          uFlareIntensity,
           uMotionPhase,
           startTime: now,
           isVisible: true,
@@ -467,10 +481,12 @@ export function useWebGL(
       uLightCadence,
       uSparkleCadence,
       uGlowCadence,
+      uFlareCadence,
       uColorCadence,
       uMotionIntensity,
       uSparkleIntensity,
       uGlowIntensity,
+      uFlareIntensity,
       uMotionPhase,
       startTime: now,
       isVisible: true,
@@ -506,10 +522,12 @@ export function useWebGL(
     uLightCadence,
     uSparkleCadence,
     uGlowCadence,
+    uFlareCadence,
     uColorCadence,
     uMotionIntensity,
     uSparkleIntensity,
     uGlowIntensity,
+    uFlareIntensity,
     uMotionPhase,
     size,
     resolution,

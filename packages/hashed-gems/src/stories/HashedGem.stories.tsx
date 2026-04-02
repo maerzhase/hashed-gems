@@ -31,7 +31,7 @@ export default meta;
 type Story = StoryObj<typeof HashedGem>;
 
 export const Default: Story = {
-  args: { size: 96, seed: "alice", className: "rounded-full" },
+  args: { size: 96, seed: "alice" },
 };
 
 const SEED_NAMES = [
@@ -218,7 +218,7 @@ export const SeedVariations: Story = {
             gap: 6,
           }}
         >
-          <HashedGem size={80} seed={name} className="rounded-full" />
+          <HashedGem size={80} seed={name} />
           <span style={{ fontSize: 11, opacity: 0.6 }}>{name}</span>
         </div>
       ))}
@@ -230,7 +230,6 @@ export const HelperAttributes: Story = {
   args: {
     seed: "alice",
     size: 144,
-    className: "rounded-3xl",
     static: true,
   },
   render: ({
@@ -312,12 +311,7 @@ export const Sizes: Story = {
   render: () => (
     <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
       {[24, 32, 48, 64, 96, 128].map((size) => (
-        <HashedGem
-          key={size}
-          size={size}
-          seed="alice"
-          className="rounded-full"
-        />
+        <HashedGem key={size} size={size} seed="alice" />
       ))}
     </div>
   ),
@@ -348,7 +342,6 @@ export const GemTypes: Story = {
               seed="showcase"
               gemType={gemType}
               cutType="round-brilliant"
-              className="rounded-full"
             />
             <span style={{ fontSize: 11, opacity: 0.6 }}>{label}</span>
           </div>
@@ -376,7 +369,6 @@ export const GemTypes: Story = {
               seed="showcase"
               gemType="diamond"
               cutType={cutType}
-              className="rounded-full"
             />
             <span style={{ fontSize: 11, opacity: 0.6 }}>{label}</span>
           </div>
@@ -453,7 +445,6 @@ export const MotionByCutFamily: Story = {
               gemType="diamond"
               cutType={cutType}
               size={88}
-              className="rounded-full"
             />
           </div>
           <div style={{ display: "grid", gap: 4 }}>
@@ -573,7 +564,6 @@ export const MotionRarityComparison: Story = {
               gemType={RARITY_INSPECTION_GEM_TYPE}
               cutType={RARITY_INSPECTION_CUT}
               size={104}
-              className="rounded-full"
             />
             <strong style={{ fontSize: 12, textTransform: "capitalize" }}>
               {rarity}
@@ -584,6 +574,46 @@ export const MotionRarityComparison: Story = {
               )}
             </span>
             <span style={{ fontSize: 10, opacity: 0.55 }}>{seed}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+};
+
+export const RarityFlareInspection: Story = {
+  render: () => (
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 12, width: 820 }}
+    >
+      <span style={{ fontSize: 12, opacity: 0.62 }}>Sapphire + Jubilee</span>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+          gap: 16,
+        }}
+      >
+        {RARITY_COMPARISON_SEEDS.map(({ rarity, seed }) => (
+          <div
+            key={`${rarity}-flare`}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <HashedGem
+              seed={seed}
+              gemType={RARITY_INSPECTION_GEM_TYPE}
+              cutType={RARITY_INSPECTION_CUT}
+              size={128}
+              resolution={384}
+            />
+            <strong style={{ fontSize: 12, textTransform: "capitalize" }}>
+              {rarity}
+            </strong>
           </div>
         ))}
       </div>
@@ -646,24 +676,13 @@ export const StaticMode: Story = {
       </p>
       <div style={{ display: "flex", gap: 12 }}>
         {["alice", "bob", "carol", "dave", "eve"].map((seed) => (
-          <HashedGem
-            key={seed}
-            size={64}
-            seed={seed}
-            static
-            className="rounded-full"
-          />
+          <HashedGem key={seed} size={64} seed={seed} static />
         ))}
       </div>
       <p style={{ fontSize: 12, opacity: 0.5 }}>Animated (default)</p>
       <div style={{ display: "flex", gap: 12 }}>
         {["alice", "bob", "carol", "dave", "eve"].map((seed) => (
-          <HashedGem
-            key={seed}
-            size={64}
-            seed={seed}
-            className="rounded-full"
-          />
+          <HashedGem key={seed} size={64} seed={seed} />
         ))}
       </div>
     </div>
