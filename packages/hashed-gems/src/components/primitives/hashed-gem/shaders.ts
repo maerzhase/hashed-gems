@@ -67,10 +67,12 @@ uniform float uMotionCadence;
 uniform float uLightCadence;
 uniform float uSparkleCadence;
 uniform float uGlowCadence;
+uniform float uFlareCadence;
 uniform float uColorCadence;
 uniform float uMotionIntensity;
 uniform float uSparkleIntensity;
 uniform float uGlowIntensity;
+uniform float uFlareIntensity;
 uniform float uMotionPhase;
 
 in  vec2 vUv;
@@ -350,10 +352,12 @@ void main() {
   // Rarity-based sparkle multiplier (computed here, applied later)
   float raritySparkle = 1.0;
   float rarityGlow    = 0.0;
+  float rarityFlare   = 0.0;
   if      (uRarity == 1) { raritySparkle = 1.05; }
-  else if (uRarity == 2) { raritySparkle = 1.1; rarityGlow = 0.04; }
-  else if (uRarity == 3) { raritySparkle = 1.2; rarityGlow = 0.06; }
-  else if (uRarity == 4) { raritySparkle = 1.35; rarityGlow = 0.10; }
+  else if (uRarity == 2) { raritySparkle = 1.1; rarityGlow = 0.04; rarityFlare = 0.92; }
+  else if (uRarity == 3) { raritySparkle = 1.2; rarityGlow = 0.06; rarityFlare = 1.56; }
+  else if (uRarity == 4) { raritySparkle = 1.35; rarityGlow = 0.10; rarityFlare = 2.12; }
+  if (uRarity == 1) rarityFlare = 0.16;
 
   float rarityTier = float(uRarity) / 4.0;
   float rarityTravel = mix(0.82, 1.14, rarityTier);
@@ -837,6 +841,92 @@ void main() {
   rawColor *= 1.0 - edgeMask * 0.10;
 
   /* ── 13. Rarity visual effects ─────────────────────────────────────────── */
+
+  float flareClock = motionClock(uFlareCadence * 0.17, 2.61);
+  float highlightPeak = max(
+    max(glint1, glint2),
+    max(glint3, max(innerGlint1 * 0.82 + innerGlint2 * 0.54, deepGlint1 * 0.6 + deepGlint2 * 0.42))
+  );
+  float crownSweep = max(dot(crownNormal, lightSweepDir), 0.0);
+  float flareContinuity = smoothstep(0.12, 0.64, crownSweep) * (0.16 + 0.22 * spkTotal);
+  float flarePeak = smoothstep(
+    0.12,
+    0.68,
+    highlightPeak + spkTotal * 0.24 + bounceEnergy * 0.11 + crownSweep * 0.24
+  );
+  float flareShape = clamp(rarityFlare * 0.55, 0.0, 1.0);
+  float flareDriver = mix(flareContinuity, flarePeak, clamp(rarityFlare * 1.25, 0.0, 1.0));
+  float flarePulse = 0.94
+    + 0.06 * sin(flareClock + uSeed * 1.7)
+    + 0.04 * cos(flareClock * 0.72 - uSeed * 0.43);
+  float flarePresence = flareDriver
+    * flarePulse
+    * rarityFlare
+    * uFlareIntensity
+    * (1.18 + 0.82 * rarityFlare);
+
+  vec2 highlightAxis = l1.xy * (0.52 + glint1 * 0.42)
+    + l2.xy * (0.24 + glint2 * 0.34)
+    + l3.xy * (0.16 + glint3 * 0.24)
+    + lightSweepDir.xy * (0.42 + crownSweep * 0.28);
+  vec2 flareAxis = highlightAxis / max(length(highlightAxis), 0.0001);
+  vec2 flareCenter = clamp(
+    (
+      l1.xy * (0.24 + glint1 * 0.32)
+      + l2.xy * (0.12 + glint2 * 0.22)
+      + lightSweepDir.xy * (0.16 + crownSweep * 0.18)
+    ) * mix(0.22, 0.34, flareShape),
+    vec2(-0.42),
+    vec2(0.42)
+  );
+  vec2 flareNormal = vec2(-flareAxis.y, flareAxis.x);
+  vec2 flareOffset = uv - flareCenter;
+  float flareAlong = dot(flareOffset, flareAxis);
+  float flareAcross = dot(flareOffset, flareNormal);
+  float flareCore = exp(-pow(length(flareOffset) / mix(0.075, 0.125, flareShape), 2.0));
+  float flareStreak = exp(-pow(abs(flareAcross) / mix(0.024, 0.011, flareShape), 1.22))
+    * exp(-pow(abs(flareAlong) / mix(0.22, 0.42, flareShape), 0.82));
+  float flareNeedle = exp(-pow(abs(flareAcross) / mix(0.016, 0.006, flareShape), 1.06))
+    * exp(-pow(abs(flareAlong) / mix(0.34, 0.62, flareShape), 0.74));
+  vec2 flareGhostCenter = flareCenter - flareAxis * mix(0.12, 0.26, flareShape);
+  float flareGhost = exp(
+    -pow(length(uv - flareGhostCenter) / mix(0.095, 0.19, flareShape), 2.0)
+  ) * smoothstep(0.44, 0.9, flareShape);
+  vec2 flareGhostCenter2 = flareCenter + flareAxis * mix(0.18, 0.34, flareShape);
+  float flareGhost2 = exp(
+    -pow(length(uv - flareGhostCenter2) / mix(0.05, 0.1, flareShape), 1.9)
+  ) * smoothstep(0.66, 1.0, flareShape);
+  float flareCanvasDist = length(uv);
+  float flareMask = (1.0 - smoothstep(0.76, 1.02, flareCanvasDist))
+    * smoothstep(0.05, 0.28, cosTheta);
+  vec3 flareColor = mix(vec3(1.0), clamp(gemBodyColor + vec3(0.18), 0.0, 1.2), 0.14 + 0.08 * rarityTier);
+  rawColor += flareColor
+    * flareCore
+    * flarePresence
+    * flareMask
+    * mix(0.18, 0.54, flareShape);
+  rawColor += mix(vec3(1.0), flareColor, 0.35)
+    * flareStreak
+    * flarePresence
+    * flareMask
+    * mix(0.10, 0.29, flareShape);
+  rawColor += vec3(1.0)
+    * flareNeedle
+    * flarePresence
+    * flareMask
+    * mix(0.06, 0.22, flareShape);
+  if (uRarity >= 3) {
+    rawColor += mix(vec3(1.0), flareColor, 0.22)
+      * flareGhost
+      * flarePresence
+      * flareMask
+      * mix(0.10, 0.19, float(uRarity == 4));
+    rawColor += vec3(1.0)
+      * flareGhost2
+      * flarePresence
+      * flareMask
+      * mix(0.07, 0.14, float(uRarity == 4));
+  }
 
   // Epic/Legendary: star sapphire-style asterism (6-pointed star overlay)
   if (uRarity >= 3) {

@@ -585,6 +585,46 @@ export const MotionRarityComparison: Story = {
   ),
 };
 
+export const RarityFlareInspection: Story = {
+  render: () => (
+    <div
+      style={{ display: "flex", flexDirection: "column", gap: 12, width: 820 }}
+    >
+      <span style={{ fontSize: 12, opacity: 0.62 }}>Sapphire + Jubilee</span>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+          gap: 16,
+        }}
+      >
+        {RARITY_COMPARISON_SEEDS.map(({ rarity, seed }) => (
+          <div
+            key={`${rarity}-flare`}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <HashedGem
+              seed={seed}
+              gemType={RARITY_INSPECTION_GEM_TYPE}
+              cutType={RARITY_INSPECTION_CUT}
+              size={128}
+              resolution={384}
+            />
+            <strong style={{ fontSize: 12, textTransform: "capitalize" }}>
+              {rarity}
+            </strong>
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+};
+
 export const SquareVsRounded: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>

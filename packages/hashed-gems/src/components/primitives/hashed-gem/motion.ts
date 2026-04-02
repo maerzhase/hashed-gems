@@ -21,10 +21,12 @@ interface MotionTuning {
   lightCadence: number;
   sparkleCadence: number;
   glowCadence: number;
+  flareCadence: number;
   colorCadence: number;
   motionIntensity: number;
   sparkleIntensity: number;
   glowIntensity: number;
+  flareIntensity: number;
 }
 
 export interface GemMotionProfile {
@@ -33,10 +35,12 @@ export interface GemMotionProfile {
   lightCadence: number;
   sparkleCadence: number;
   glowCadence: number;
+  flareCadence: number;
   colorCadence: number;
   motionIntensity: number;
   sparkleIntensity: number;
   glowIntensity: number;
+  flareIntensity: number;
   phaseOffset: number;
 }
 
@@ -63,40 +67,48 @@ const BASE_TUNING_BY_STYLE: Record<GemMotionStyleName, MotionTuning> = {
     lightCadence: 1.12,
     sparkleCadence: 1.2,
     glowCadence: 0.98,
+    flareCadence: 1.08,
     colorCadence: 0.92,
     motionIntensity: 1.0,
     sparkleIntensity: 1.12,
     glowIntensity: 0.94,
+    flareIntensity: 0.88,
   },
   sweep: {
     motionCadence: 0.94,
     lightCadence: 1.06,
     sparkleCadence: 0.9,
     glowCadence: 0.94,
+    flareCadence: 0.94,
     colorCadence: 0.9,
     motionIntensity: 0.98,
     sparkleIntensity: 0.94,
     glowIntensity: 0.98,
+    flareIntensity: 0.84,
   },
   bloom: {
     motionCadence: 0.82,
     lightCadence: 0.84,
     sparkleCadence: 0.76,
     glowCadence: 0.9,
+    flareCadence: 0.82,
     colorCadence: 0.82,
     motionIntensity: 0.94,
     sparkleIntensity: 0.86,
     glowIntensity: 1.08,
+    flareIntensity: 0.8,
   },
   burst: {
     motionCadence: 0.98,
     lightCadence: 1.02,
     sparkleCadence: 1.04,
     glowCadence: 1.12,
+    flareCadence: 1.02,
     colorCadence: 0.9,
     motionIntensity: 1.04,
     sparkleIntensity: 1.0,
     glowIntensity: 1.12,
+    flareIntensity: 0.94,
   },
 };
 
@@ -145,10 +157,12 @@ function multiplyTuning(
     lightCadence: base.lightCadence * tuning.lightCadence,
     sparkleCadence: base.sparkleCadence * tuning.sparkleCadence,
     glowCadence: base.glowCadence * tuning.glowCadence,
+    flareCadence: base.flareCadence * tuning.flareCadence,
     colorCadence: base.colorCadence * tuning.colorCadence,
     motionIntensity: base.motionIntensity * tuning.motionIntensity,
     sparkleIntensity: base.sparkleIntensity * tuning.sparkleIntensity,
     glowIntensity: base.glowIntensity * tuning.glowIntensity,
+    flareIntensity: base.flareIntensity * tuning.flareIntensity,
   };
 }
 
@@ -163,10 +177,12 @@ function getVariantTuning(cutVariant: CutVariant): MotionTuning {
       lightCadence: 1.08,
       sparkleCadence: 1.14,
       glowCadence: 0.96,
+      flareCadence: 1.12,
       colorCadence: 0.94,
       motionIntensity: 0.98,
       sparkleIntensity: 1.08,
       glowIntensity: 0.94,
+      flareIntensity: 1.06,
     };
   }
 
@@ -176,10 +192,12 @@ function getVariantTuning(cutVariant: CutVariant): MotionTuning {
       lightCadence: 0.92,
       sparkleCadence: 0.84,
       glowCadence: 1.04,
+      flareCadence: 0.9,
       colorCadence: 0.96,
       motionIntensity: 1.04,
       sparkleIntensity: 0.92,
       glowIntensity: 1.06,
+      flareIntensity: 0.92,
     };
   }
 
@@ -189,10 +207,12 @@ function getVariantTuning(cutVariant: CutVariant): MotionTuning {
       lightCadence: 0.94,
       sparkleCadence: 0.88,
       glowCadence: 1.02,
+      flareCadence: 0.92,
       colorCadence: 0.98,
       motionIntensity: 0.96,
       sparkleIntensity: 0.94,
       glowIntensity: 1.04,
+      flareIntensity: 0.94,
     };
   }
 
@@ -201,10 +221,12 @@ function getVariantTuning(cutVariant: CutVariant): MotionTuning {
     lightCadence: 1,
     sparkleCadence: 1,
     glowCadence: 1,
+    flareCadence: 1,
     colorCadence: 1,
     motionIntensity: 1,
     sparkleIntensity: 1,
     glowIntensity: 1,
+    flareIntensity: 1,
   };
 }
 
@@ -216,10 +238,12 @@ function getRarityTuning(rarity: Rarity): MotionTuning {
         lightCadence: 0.92,
         sparkleCadence: 0.9,
         glowCadence: 0.94,
+        flareCadence: 0.92,
         colorCadence: 1,
         motionIntensity: 0.84,
         sparkleIntensity: 0.86,
         glowIntensity: 0.86,
+        flareIntensity: 0,
       };
     case "uncommon":
       return {
@@ -227,10 +251,12 @@ function getRarityTuning(rarity: Rarity): MotionTuning {
         lightCadence: 1,
         sparkleCadence: 1,
         glowCadence: 1,
+        flareCadence: 0.98,
         colorCadence: 1,
         motionIntensity: 1,
         sparkleIntensity: 1,
         glowIntensity: 1,
+        flareIntensity: 0.18,
       };
     case "rare":
       return {
@@ -238,10 +264,12 @@ function getRarityTuning(rarity: Rarity): MotionTuning {
         lightCadence: 1.03,
         sparkleCadence: 1.04,
         glowCadence: 1.06,
+        flareCadence: 1.02,
         colorCadence: 1,
         motionIntensity: 1.04,
         sparkleIntensity: 1.06,
         glowIntensity: 1.08,
+        flareIntensity: 0.72,
       };
     case "epic":
       return {
@@ -249,10 +277,12 @@ function getRarityTuning(rarity: Rarity): MotionTuning {
         lightCadence: 1.05,
         sparkleCadence: 1.05,
         glowCadence: 1.08,
+        flareCadence: 1.04,
         colorCadence: 1,
         motionIntensity: 1.12,
         sparkleIntensity: 1.12,
         glowIntensity: 1.14,
+        flareIntensity: 1.0,
       };
     case "legendary":
       return {
@@ -260,10 +290,12 @@ function getRarityTuning(rarity: Rarity): MotionTuning {
         lightCadence: 1.06,
         sparkleCadence: 1.06,
         glowCadence: 1.1,
+        flareCadence: 1.02,
         colorCadence: 1,
         motionIntensity: 1.18,
         sparkleIntensity: 1.16,
         glowIntensity: 1.18,
+        flareIntensity: 1.18,
       };
   }
 }
@@ -275,10 +307,12 @@ function getGemTypeTuning(gemType: GemType): MotionTuning {
       lightCadence: 0.96,
       sparkleCadence: 0.94,
       glowCadence: 1.04,
+      flareCadence: 0.92,
       colorCadence: 0.7,
       motionIntensity: 1,
       sparkleIntensity: 0.96,
       glowIntensity: 1.12,
+      flareIntensity: 0.88,
     };
   }
 
@@ -288,10 +322,12 @@ function getGemTypeTuning(gemType: GemType): MotionTuning {
       lightCadence: 1.04,
       sparkleCadence: 1.02,
       glowCadence: 1.08,
+      flareCadence: 1,
       colorCadence: 0.72,
       motionIntensity: 1.04,
       sparkleIntensity: 1.08,
       glowIntensity: 1.16,
+      flareIntensity: 0.94,
     };
   }
 
@@ -301,10 +337,12 @@ function getGemTypeTuning(gemType: GemType): MotionTuning {
       lightCadence: 1.04,
       sparkleCadence: 1.08,
       glowCadence: 1.02,
+      flareCadence: 1.06,
       colorCadence: 0.88,
       motionIntensity: 1.04,
       sparkleIntensity: 1.14,
       glowIntensity: 1.04,
+      flareIntensity: 1.08,
     };
   }
 
@@ -313,10 +351,12 @@ function getGemTypeTuning(gemType: GemType): MotionTuning {
     lightCadence: 1,
     sparkleCadence: 0.98,
     glowCadence: 1.02,
+    flareCadence: 0.98,
     colorCadence: 0.94,
     motionIntensity: 1,
     sparkleIntensity: 0.98,
     glowIntensity: 1.04,
+    flareIntensity: 0.9,
   };
 }
 
@@ -344,10 +384,12 @@ export function resolveGemMotionProfile({
   const lightJitter = seededSpan(seedNumber, 161, 0.95, 1.05);
   const sparkleJitter = seededSpan(seedNumber, 162, 0.95, 1.06);
   const glowJitter = seededSpan(seedNumber, 163, 0.96, 1.04);
-  const colorJitter = seededSpan(seedNumber, 164, 0.96, 1.04);
-  const motionJitter = seededSpan(seedNumber, 165, 0.98, 1.03);
-  const sparkleIntensityJitter = seededSpan(seedNumber, 166, 0.97, 1.05);
-  const glowIntensityJitter = seededSpan(seedNumber, 167, 0.97, 1.05);
+  const flareJitter = seededSpan(seedNumber, 164, 0.96, 1.05);
+  const colorJitter = seededSpan(seedNumber, 165, 0.96, 1.04);
+  const motionJitter = seededSpan(seedNumber, 166, 0.98, 1.03);
+  const sparkleIntensityJitter = seededSpan(seedNumber, 167, 0.97, 1.05);
+  const glowIntensityJitter = seededSpan(seedNumber, 168, 0.97, 1.05);
+  const flareIntensityJitter = seededSpan(seedNumber, 169, 0.96, 1.06);
 
   return {
     motionStyle: GEM_MOTION_STYLES[style],
@@ -355,6 +397,7 @@ export function resolveGemMotionProfile({
     lightCadence: clamp(tuning.lightCadence * lightJitter, 0.64, 1.5),
     sparkleCadence: clamp(tuning.sparkleCadence * sparkleJitter, 0.58, 1.7),
     glowCadence: clamp(tuning.glowCadence * glowJitter, 0.64, 1.55),
+    flareCadence: clamp(tuning.flareCadence * flareJitter, 0.58, 1.7),
     colorCadence: clamp(tuning.colorCadence * colorJitter, 0.52, 1.2),
     motionIntensity: clamp(tuning.motionIntensity * motionJitter, 0.78, 1.45),
     sparkleIntensity: clamp(
@@ -363,6 +406,11 @@ export function resolveGemMotionProfile({
       1.5,
     ),
     glowIntensity: clamp(tuning.glowIntensity * glowIntensityJitter, 0.74, 1.6),
-    phaseOffset: seededSpan(seedNumber, 168, 0, Math.PI * 2),
+    flareIntensity: clamp(
+      tuning.flareIntensity * flareIntensityJitter,
+      0,
+      1.7,
+    ),
+    phaseOffset: seededSpan(seedNumber, 170, 0, Math.PI * 2),
   };
 }
