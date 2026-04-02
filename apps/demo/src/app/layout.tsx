@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Inter } from "next/font/google";
-import { AnalyticsWrapper } from "@/components/AnalyticsWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
@@ -36,7 +36,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.variable}>
-        <AnalyticsWrapper />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -45,6 +44,7 @@ export default function RootLayout({
         >
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
