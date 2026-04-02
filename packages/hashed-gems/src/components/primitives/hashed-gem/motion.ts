@@ -406,11 +406,7 @@ export function resolveGemMotionProfile({
       1.5,
     ),
     glowIntensity: clamp(tuning.glowIntensity * glowIntensityJitter, 0.74, 1.6),
-    flareIntensity: clamp(
-      tuning.flareIntensity * flareIntensityJitter,
-      0,
-      1.7,
-    ),
+    flareIntensity: clamp(tuning.flareIntensity * flareIntensityJitter, 0, 1.7),
     phaseOffset: seededSpan(seedNumber, 170, 0, Math.PI * 2),
   };
 }

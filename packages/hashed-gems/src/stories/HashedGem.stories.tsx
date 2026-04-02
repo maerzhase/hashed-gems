@@ -311,11 +311,7 @@ export const Sizes: Story = {
   render: () => (
     <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
       {[24, 32, 48, 64, 96, 128].map((size) => (
-        <HashedGem
-          key={size}
-          size={size}
-          seed="alice"
-        />
+        <HashedGem key={size} size={size} seed="alice" />
       ))}
     </div>
   ),
@@ -680,22 +676,13 @@ export const StaticMode: Story = {
       </p>
       <div style={{ display: "flex", gap: 12 }}>
         {["alice", "bob", "carol", "dave", "eve"].map((seed) => (
-          <HashedGem
-            key={seed}
-            size={64}
-            seed={seed}
-            static
-          />
+          <HashedGem key={seed} size={64} seed={seed} static />
         ))}
       </div>
       <p style={{ fontSize: 12, opacity: 0.5 }}>Animated (default)</p>
       <div style={{ display: "flex", gap: 12 }}>
         {["alice", "bob", "carol", "dave", "eve"].map((seed) => (
-          <HashedGem
-            key={seed}
-            size={64}
-            seed={seed}
-          />
+          <HashedGem key={seed} size={64} seed={seed} />
         ))}
       </div>
     </div>
