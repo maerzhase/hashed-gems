@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { getGemApiImageUrl } from "@/lib/gemAssetUrl";
 import { getGemShareUrl } from "@/lib/gemShareUrl";
 import {
   checkShareImageReady,
@@ -45,17 +46,29 @@ function XShareButton({
   );
 }
 
-function CopyLinkButton({ gemUrl }: { gemUrl: string }) {
+function CopyButton({
+  value,
+  defaultLabel,
+  variant = "default",
+  className,
+}: {
+  value: string;
+  defaultLabel: string;
+  variant?: "default" | "subtle";
+  className?: string;
+}) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopyLink = async () => {
-    await navigator.clipboard.writeText(gemUrl);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(value);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <Button onClick={handleCopyLink}>{copied ? "Copied!" : "Copy link"}</Button>
+    <Button onClick={handleCopy} variant={variant} className={className}>
+      {copied ? "Copied!" : defaultLabel}
+    </Button>
   );
 }
 
@@ -109,6 +122,7 @@ export function GemShareActions({
   const [shareError, setShareError] = useState<string | null>(null);
 
   const gemUrl = getGemShareUrl(seed);
+  const gemImageUrl = getGemApiImageUrl(seed);
   const tweetText = getTweetText(seed, gemTypeName, rarityName);
   const nativeShareTitle = `${rarityName} ${gemTypeName}`;
   const xShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(gemUrl)}`;
@@ -177,16 +191,29 @@ export function GemShareActions({
     : undefined;
 
   return shareReady ? (
-    <div className="flex flex-wrap justify-center gap-2">
-      <XShareButton href={xShareUrl} />
-      <CopyLinkButton gemUrl={gemUrl} />
-      {canNativeShare && (
-        <NativeShareButton
-          title={nativeShareTitle}
-          gemUrl={gemUrl}
-          getShareFile={handleGetShareFile}
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-wrap justify-center gap-2">
+        <XShareButton href={xShareUrl} />
+        <CopyButton value={gemUrl} defaultLabel="Copy link" />
+        {canNativeShare && (
+          <NativeShareButton
+            title={nativeShareTitle}
+            gemUrl={gemUrl}
+            getShareFile={handleGetShareFile}
+          />
+        )}
+      </div>
+      <div className="mt-3 flex max-w-full flex-col items-center gap-1">
+        <span className="text-[11px] tracking-[0.18em] text-neutral-400 uppercase dark:text-neutral-500">
+          Image URL
+        </span>
+        <CopyButton
+          value={gemImageUrl}
+          defaultLabel={gemImageUrl}
+          variant="subtle"
+          className="max-w-full truncate font-mono text-[11px]"
         />
-      )}
+      </div>
     </div>
   ) : (
     <div className="flex flex-col items-center gap-2">

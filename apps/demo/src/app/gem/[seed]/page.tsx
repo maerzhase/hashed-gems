@@ -20,13 +20,16 @@ async function getSeedData(params: Promise<{ seed: string }>) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { seed, gemTypeName, rarityName } = await getSeedData(params);
+  const metaTitle = `${seed} — ${rarityName} ${gemTypeName} — hashed-gems`;
+  const socialTitle = `${seed} — ${rarityName} ${gemTypeName}`;
+  const metaDescription = `${seed}'s gem is a ${rarityName} ${gemTypeName}. What's yours?`;
 
   return {
-    title: `${rarityName} ${gemTypeName} — hashed-gems`,
-    description: `${seed}'s gem is a ${rarityName} ${gemTypeName}. What's yours?`,
+    title: metaTitle,
+    description: metaDescription,
     openGraph: {
-      title: `${rarityName} ${gemTypeName}`,
-      description: `${seed}'s gem is a ${rarityName} ${gemTypeName}. What's yours? 💎`,
+      title: socialTitle,
+      description: `${metaDescription} 💎`,
       images: [
         {
           url: `/gem/${encodeURIComponent(seed)}/opengraph-image`,
@@ -37,8 +40,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: `${rarityName} ${gemTypeName}`,
-      description: `${seed}'s gem is a ${rarityName} ${gemTypeName}. What's yours? 💎`,
+      title: socialTitle,
+      description: `${metaDescription} 💎`,
       images: [`/gem/${encodeURIComponent(seed)}/opengraph-image`],
     },
   };
