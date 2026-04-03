@@ -9,16 +9,13 @@ import {
 import { useEffect, useState } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
 import { getGemShareUrl } from "@/lib/gemShareUrl";
+import {
+  ensureShareImageReady,
+  isShareImageReady,
+} from "@/lib/shareImageReady";
 
 export const BUTTON_CLASS =
   "inline-flex cursor-pointer items-center rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800";
-
-function warmGemShareImage(seed: string) {
-  void fetch(`/api/gems/${encodeURIComponent(seed)}`, {
-    cache: "force-cache",
-    keepalive: true,
-  }).catch(() => {});
-}
 
 function formatCutLabel(cutTypeName: string): string {
   return cutTypeName
@@ -47,10 +44,7 @@ export function XShareButton({
       target="_blank"
       rel="noopener noreferrer"
       className={BUTTON_CLASS}
-      onClick={() => {
-        warmGemShareImage(seed);
-        onClick?.();
-      }}
+      onClick={onClick}
     >
       Post on X
     </a>
@@ -68,7 +62,6 @@ export function CopyLinkButton({
   const gemUrl = getGemShareUrl(seed);
 
   const handleCopyLink = async () => {
-    warmGemShareImage(seed);
     await navigator.clipboard.writeText(gemUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -100,7 +93,6 @@ export function NativeShareButton({
 
   const handleNativeShare = async () => {
     try {
-      warmGemShareImage(seed);
       await navigator.share({
         title: `${rarityName} ${gemTypeName}`,
         url: gemUrl,
@@ -127,6 +119,9 @@ interface GemGeneratorProps {
 
 export function GemGenerator({ seed }: GemGeneratorProps) {
   const [canNativeShare, setCanNativeShare] = useState(false);
+  const [shareReady, setShareReady] = useState(false);
+  const [preparingShare, setPreparingShare] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
 
   const { gemTypeName, cutTypeName, rarityName } = getGemProperties(seed);
   const cutLabel = formatCutLabel(cutTypeName);
@@ -135,6 +130,26 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   useEffect(() => {
     setCanNativeShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
+
+  useEffect(() => {
+    setShareReady(isShareImageReady(seed));
+    setPreparingShare(false);
+    setShareError(null);
+  }, [seed]);
+
+  const handlePrepareShare = async () => {
+    setPreparingShare(true);
+    setShareError(null);
+
+    try {
+      await ensureShareImageReady(seed);
+      setShareReady(true);
+    } catch {
+      setShareError("Could not prepare the share image. Please try again.");
+    } finally {
+      setPreparingShare(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center gap-5 px-4 py-6">
@@ -159,23 +174,41 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
         </span>
       </div>
 
-      <div className="flex flex-wrap justify-center gap-2">
-        <XShareButton
-          seed={seed}
-          gemTypeName={gemTypeName}
-          rarityName={rarityName}
-        />
-
-        <CopyLinkButton seed={seed} />
-
-        {canNativeShare && (
-          <NativeShareButton
+      {shareReady ? (
+        <div className="flex flex-wrap justify-center gap-2">
+          <XShareButton
             seed={seed}
             gemTypeName={gemTypeName}
             rarityName={rarityName}
           />
-        )}
-      </div>
+
+          <CopyLinkButton seed={seed} />
+
+          {canNativeShare && (
+            <NativeShareButton
+              seed={seed}
+              gemTypeName={gemTypeName}
+              rarityName={rarityName}
+            />
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrepareShare}
+            disabled={preparingShare}
+            className={`${BUTTON_CLASS} disabled:cursor-wait disabled:opacity-60`}
+          >
+            {preparingShare ? "Preparing share image..." : "Prepare share"}
+          </button>
+          {shareError && (
+            <p className="text-xs text-red-500 dark:text-red-400">
+              {shareError}
+            </p>
+          )}
+        </div>
+      )}
 
       <a
         href={`/gem/${encodeURIComponent(seed)}`}
