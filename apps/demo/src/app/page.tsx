@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Tabs, TabsList, TabsTab } from "@/components/ui/Tabs";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
@@ -275,22 +276,15 @@ export default function Home() {
             Install with your favourite package manager.
           </p>
           <div className="mb-16 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
-            <div className="flex border-b border-neutral-200 dark:border-neutral-800">
-              {PACKAGE_MANAGERS.map((pm) => (
-                <button
-                  key={pm.id}
-                  type="button"
-                  onClick={() => setSelectedPm(pm.id)}
-                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
-                    selectedPm === pm.id
-                      ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
-                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                  }`}
-                >
-                  {pm.label}
-                </button>
-              ))}
-            </div>
+            <Tabs value={selectedPm} onValueChange={(value) => setSelectedPm(String(value))}>
+              <TabsList>
+                {PACKAGE_MANAGERS.map((pm) => (
+                  <TabsTab key={pm.id} value={pm.id}>
+                    {pm.label}
+                  </TabsTab>
+                ))}
+              </TabsList>
+            </Tabs>
             <Button
               onClick={copyInstall}
               variant="ghost"
