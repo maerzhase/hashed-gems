@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { GemGenerator } from "@/components/GemGenerator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { Button } from "@/components/ui/Button";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
@@ -291,10 +292,10 @@ export default function Home() {
                 </button>
               ))}
             </div>
-            <button
-              type="button"
+            <Button
               onClick={copyInstall}
-              className="group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
+              variant="ghost"
+              className="group w-full"
             >
               <span className="text-neutral-500 dark:text-neutral-500">$</span>
               <span className="flex-1 text-left font-mono text-sm text-neutral-800 dark:text-neutral-300">
@@ -309,7 +310,7 @@ export default function Home() {
               >
                 {copied ? "copied!" : "copy"}
               </span>
-            </button>
+            </Button>
           </div>
 
           <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
@@ -349,13 +350,13 @@ export default function Home() {
                 </div>
                 <div className="relative overflow-hidden p-4">
                   <div className="relative">
-                    <button
-                      type="button"
+                    <Button
                       onClick={() => copyExample(example.code, example.label)}
-                      className="absolute top-0 right-0 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                      variant="subtle"
+                      className="absolute top-0 right-0"
                     >
                       {copiedExample === example.label ? "copied!" : "copy"}
-                    </button>
+                    </Button>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
                       {highlightedExamples[example.label] ? (
                         <div
@@ -399,13 +400,13 @@ export default function Home() {
                 </div>
                 <div className="relative overflow-hidden p-4">
                   <div className="relative">
-                    <button
-                      type="button"
+                    <Button
                       onClick={() => copyExample(example.code, example.label)}
-                      className="absolute top-0 right-0 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                      variant="subtle"
+                      className="absolute top-0 right-0"
                     >
                       {copiedExample === example.label ? "copied!" : "copy"}
-                    </button>
+                    </Button>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
                       {highlightedExamples[example.label] ? (
                         <div
