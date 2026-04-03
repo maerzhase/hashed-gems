@@ -7,14 +7,14 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { RARITY_BADGE } from "@/lib/gemStyles";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full px-3 py-1 text-xs capitalize",
+  "inline-flex items-center rounded-full border px-3 py-1 text-xs capitalize",
   {
     variants: {
       variant: {
         neutral:
-          "bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500",
+          "border-neutral-200/80 bg-neutral-50 text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-500",
         subtle:
-          "bg-neutral-100 font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400",
+          "border-neutral-200/80 bg-neutral-50 font-medium text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-400",
       },
     },
     defaultVariants: {
@@ -61,7 +61,7 @@ export function RarityBadge({
     <span
       {...props}
       className={clsx(
-        "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize",
+        "inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium capitalize",
         RARITY_BADGE[rarity],
         className,
       )}
