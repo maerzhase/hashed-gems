@@ -33,7 +33,9 @@ function XShareButton({
 }) {
   return (
     <Button
-      render={<a href={href} target="_blank" rel="noopener noreferrer" />}
+      render={(props) => (
+        <a {...props} href={href} target="_blank" rel="noopener noreferrer" />
+      )}
       nativeButton={false}
       onClick={onClick}
     >
@@ -52,9 +54,7 @@ function CopyLinkButton({ gemUrl }: { gemUrl: string }) {
   };
 
   return (
-    <Button onClick={handleCopyLink}>
-      {copied ? "Copied!" : "Copy link"}
-    </Button>
+    <Button onClick={handleCopyLink}>{copied ? "Copied!" : "Copy link"}</Button>
   );
 }
 
@@ -93,9 +93,7 @@ function NativeShareButton({
     }
   };
 
-  return (
-    <Button onClick={handleNativeShare}>Share</Button>
-  );
+  return <Button onClick={handleNativeShare}>Share</Button>;
 }
 
 export function GemShareActions({

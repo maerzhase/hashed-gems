@@ -19,7 +19,10 @@ export function Avatar({ children, className, ...props }: AvatarProps) {
   return (
     <BaseAvatar.Root
       {...props}
-      className={clsx("inline-flex shrink-0 overflow-hidden rounded-full", className)}
+      className={clsx(
+        "inline-flex shrink-0 overflow-hidden rounded-full",
+        className,
+      )}
     >
       {children}
     </BaseAvatar.Root>
@@ -34,7 +37,10 @@ export function AvatarFallback({
   return (
     <BaseAvatar.Fallback
       {...props}
-      className={clsx("flex h-full w-full items-center justify-center", className)}
+      className={clsx(
+        "flex h-full w-full items-center justify-center",
+        className,
+      )}
     >
       {children}
     </BaseAvatar.Fallback>

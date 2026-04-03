@@ -280,7 +280,10 @@ export default function Home() {
             Install with your favourite package manager.
           </p>
           <Card className="mb-16">
-            <Tabs value={selectedPm} onValueChange={(value) => setSelectedPm(String(value))}>
+            <Tabs
+              value={selectedPm}
+              onValueChange={(value) => setSelectedPm(String(value))}
+            >
               <TabsList>
                 {PACKAGE_MANAGERS.map((pm) => (
                   <TabsTab key={pm.id} value={pm.id}>
