@@ -138,17 +138,17 @@ export function GemShareActions({
 
   const handleGetShareFile = getShareFile
     ? async () => {
-      const shareFileData = await getShareFile();
+        const shareFileData = await getShareFile();
 
-      if (!shareFileData) {
-        return null;
+        if (!shareFileData) {
+          return null;
+        }
+
+        return {
+          ...shareFileData,
+          text: shareFileData.text ?? tweetText,
+        };
       }
-
-      return {
-        ...shareFileData,
-        text: shareFileData.text ?? tweetText,
-      };
-    }
     : undefined;
 
   return shareReady ? (
