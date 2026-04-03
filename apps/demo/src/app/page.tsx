@@ -6,6 +6,12 @@ import { useEffect, useState } from "react";
 import { GemGenerator } from "@/components/GemGenerator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Tabs, TabsList, TabsTab } from "@/components/ui/Tabs";
+import { GemButton } from "@/components/ui/GemButton";
+import { UserBadge } from "@/components/ui/UserBadge";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
@@ -183,6 +189,13 @@ export default function Home() {
         highlighted[example.label] = highlighter.codeToHtml(example.code, {
           lang: example.lang,
           theme: theme === "dark" ? "github-dark" : "github-light",
+          transformers: [
+            {
+              pre(node) {
+                delete node.properties.tabindex;
+              },
+            },
+          ],
         });
       }
       setHighlightedExamples(highlighted);
@@ -209,14 +222,15 @@ export default function Home() {
       <SiteHeader />
 
       <section className="flex flex-col items-center px-6 pt-24 pb-12 md:pt-36">
-        <button
-          type="button"
-          onClick={() => setSeed(Math.random().toString(36).slice(2))}
-          className="mb-8 cursor-pointer rounded-full transition-transform outline-none hover:scale-110"
-        >
-          <HashedGem seed={seed} size={64} resolution={512} />
-        </button>
-        <h1 className="mb-3 text-center font-sans text-2xl font-medium tracking-tight text-neutral-900 md:text-3xl dark:text-white">
+        <div className="mb-10">
+          <GemButton
+            seed={seed}
+            size={96}
+            resolution={512}
+            onClick={() => setSeed(Math.random().toString(36).slice(2))}
+          />
+        </div>
+        <h1 className="mb-3 text-center font-sans text-3xl font-semibold tracking-tight text-neutral-900 md:text-4xl dark:text-white">
           Your users are gems. Show it.
         </h1>
         <p className="mb-8 max-w-xl text-center text-sm text-neutral-500 md:text-base">
@@ -225,36 +239,28 @@ export default function Home() {
 
         <div className="flex flex-wrap justify-center gap-2">
           {DEMO_USERS.map((user) => (
-            <div
-              key={user}
-              className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 shadow-sm dark:border-neutral-800 dark:bg-neutral-800/80"
-            >
-              <div className="overflow-hidden rounded-full">
-                <HashedGem seed={user} size={24} />
-              </div>
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">
-                @{user}
-              </span>
-            </div>
+            <UserBadge key={user} user={user} />
           ))}
         </div>
       </section>
 
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
-          <h2 className="mb-6 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mb-6 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Create your own gem
           </h2>
-          <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
-            <input
-              type="text"
+          <Card>
+            <Input
               value={generatorInput}
               onChange={(e) => setGeneratorInput(e.target.value)}
               placeholder="What's your gem? Type your name…"
               autoComplete="off"
               data-1p-ignore
               maxLength={100}
-              className="w-full bg-transparent px-4 py-3 font-mono text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600"
             />
             {generatorSeed && (
               <>
@@ -262,39 +268,39 @@ export default function Home() {
                 <GemGenerator seed={generatorSeed} />
               </>
             )}
-          </div>
+          </Card>
         </div>
       </section>
 
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
-          <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Installation
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
             Install with your favourite package manager.
           </p>
-          <div className="mb-16 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
-            <div className="flex border-b border-neutral-200 dark:border-neutral-800">
-              {PACKAGE_MANAGERS.map((pm) => (
-                <button
-                  key={pm.id}
-                  type="button"
-                  onClick={() => setSelectedPm(pm.id)}
-                  className={`flex-1 cursor-pointer px-4 py-2.5 font-mono text-xs transition-colors ${
-                    selectedPm === pm.id
-                      ? "border-b-2 border-neutral-900 bg-neutral-100 text-neutral-900 dark:border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200"
-                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
-                  }`}
-                >
-                  {pm.label}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
+          <Card className="mb-16">
+            <Tabs
+              value={selectedPm}
+              onValueChange={(value) => setSelectedPm(String(value))}
+            >
+              <TabsList>
+                {PACKAGE_MANAGERS.map((pm) => (
+                  <TabsTab key={pm.id} value={pm.id}>
+                    {pm.label}
+                  </TabsTab>
+                ))}
+              </TabsList>
+            </Tabs>
+            <Button
               onClick={copyInstall}
-              className="group flex w-full cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
+              variant="ghost"
+              className="group w-full"
             >
               <span className="text-neutral-500 dark:text-neutral-500">$</span>
               <span className="flex-1 text-left font-mono text-sm text-neutral-800 dark:text-neutral-300">
@@ -309,10 +315,14 @@ export default function Home() {
               >
                 {copied ? "copied!" : "copy"}
               </span>
-            </button>
-          </div>
+            </Button>
+          </Card>
 
-          <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Usage
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
@@ -320,11 +330,8 @@ export default function Home() {
           </p>
           <div className="flex flex-col gap-6">
             {EXAMPLES.map((example) => (
-              <div
-                key={example.label}
-                className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
-              >
-                <div className="flex min-w-0 items-center border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
+              <Card key={example.label}>
+                <CardHeader className="flex min-w-0 items-center py-2">
                   <div className="shrink-0">
                     <HashedGem
                       seed={example.seed}
@@ -338,24 +345,24 @@ export default function Home() {
                       })}
                     />
                   </div>
-                  <div className="ml-4 flex flex-col justify-center">
-                    <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                  <div className="ml-4 flex flex-col justify-center gap-1">
+                    <span className="font-medium leading-5 text-neutral-900 dark:text-neutral-100">
                       {example.label}
                     </span>
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="text-xs leading-5 text-neutral-500 dark:text-neutral-400">
                       {example.description}
                     </span>
                   </div>
-                </div>
-                <div className="relative overflow-hidden p-4">
+                </CardHeader>
+                <CardContent>
                   <div className="relative">
-                    <button
-                      type="button"
+                    <Button
                       onClick={() => copyExample(example.code, example.label)}
-                      className="absolute top-0 right-0 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                      variant="subtle"
+                      className="absolute top-0 right-0"
                     >
                       {copiedExample === example.label ? "copied!" : "copy"}
-                    </button>
+                    </Button>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
                       {highlightedExamples[example.label] ? (
                         <div
@@ -370,12 +377,16 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
-          <h2 className="mt-16 mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mt-16 mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Image API
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
@@ -385,27 +396,24 @@ export default function Home() {
           </p>
           <div className="flex flex-col gap-6">
             {API_EXAMPLES.map((example) => (
-              <div
-                key={example.label}
-                className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
-              >
-                <div className="border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
-                  <span className="block font-medium text-neutral-900 dark:text-neutral-100">
+              <Card key={example.label}>
+                <CardHeader>
+                  <span className="block leading-5 font-medium text-neutral-900 dark:text-neutral-100">
                     {example.label}
                   </span>
-                  <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                  <span className="block pt-1 text-xs leading-5 text-neutral-500 dark:text-neutral-400">
                     {example.description}
                   </span>
-                </div>
-                <div className="relative overflow-hidden p-4">
+                </CardHeader>
+                <CardContent>
                   <div className="relative">
-                    <button
-                      type="button"
+                    <Button
                       onClick={() => copyExample(example.code, example.label)}
-                      className="absolute top-0 right-0 cursor-pointer rounded bg-neutral-200 px-2 py-1 text-xs text-neutral-700 transition-colors hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+                      variant="subtle"
+                      className="absolute top-0 right-0"
                     >
                       {copiedExample === example.label ? "copied!" : "copy"}
-                    </button>
+                    </Button>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
                       {highlightedExamples[example.label] ? (
                         <div
@@ -420,8 +428,8 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

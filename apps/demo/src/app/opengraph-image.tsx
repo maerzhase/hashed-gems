@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { loadInterFont } from "./ogFont";
 
 export const alt =
   "Hashed Gems - Deterministic gemstone avatars. Infinitely shimmering.";
@@ -12,6 +13,12 @@ export const contentType = "image/png";
 
 export default async function Image() {
   const imageData = await readFile(join(process.cwd(), "src/public/gem01.png"));
+  const fontText =
+    "Your users are gems. Show it. Deterministic gemstone avatars. Infinitely shimmering. gems.m3000.io";
+  const [interMedium, interSemibold] = await Promise.all([
+    loadInterFont(500, fontText),
+    loadInterFont(600, fontText),
+  ]);
   const base64 = imageData.toString("base64");
   const dataUrl = `data:image/png;base64,${base64}`;
 
@@ -42,11 +49,13 @@ export default async function Image() {
       <div
         style={{
           color: "#ffffff",
-          fontSize: 64,
+          fontSize: 60,
           fontFamily: "Inter",
-          fontWeight: 600,
+          fontWeight: 500,
+          letterSpacing: "-0.04em",
+          lineHeight: 1.05,
           position: "absolute",
-          bottom: 160,
+          bottom: 156,
         }}
       >
         Your users are gems. Show it.
@@ -54,10 +63,11 @@ export default async function Image() {
       <div
         style={{
           color: "#a3a3a3",
-          fontSize: 28,
+          fontSize: 26,
+          lineHeight: 1.3,
           fontFamily: "Inter",
           position: "absolute",
-          bottom: 100,
+          bottom: 98,
         }}
       >
         Deterministic gemstone avatars. Infinitely shimmering.
@@ -65,10 +75,11 @@ export default async function Image() {
       <div
         style={{
           color: "#525252",
-          fontSize: 20,
+          fontSize: 18,
+          letterSpacing: "-0.01em",
           fontFamily: "Inter",
           position: "absolute",
-          bottom: 50,
+          bottom: 52,
         }}
       >
         gems.m3000.io
@@ -76,6 +87,20 @@ export default async function Image() {
     </div>,
     {
       ...size,
+      fonts: [
+        {
+          name: "Inter",
+          data: interMedium,
+          style: "normal",
+          weight: 500,
+        },
+        {
+          name: "Inter",
+          data: interSemibold,
+          style: "normal",
+          weight: 600,
+        },
+      ],
     },
   );
 }
