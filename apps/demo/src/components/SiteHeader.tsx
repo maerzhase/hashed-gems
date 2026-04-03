@@ -3,6 +3,7 @@
 import { IconBrandGithub, IconMoon, IconSun } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { IconButton } from "@/components/ui/IconButton";
 
 export function SiteHeader() {
   const { theme, setTheme } = useTheme();
@@ -14,31 +15,34 @@ export function SiteHeader() {
 
   return (
     <div className="fixed top-4 right-4 z-10 flex gap-2">
-      <a
-        href="https://github.com/maerzhase/hashed-gems"
-        target="_blank"
-        rel="noopener noreferrer"
+      <IconButton
+        render={(props) => (
+          <a
+            {...props}
+            href="https://github.com/maerzhase/hashed-gems"
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        )}
+        nativeButton={false}
         aria-label="GitHub repository"
-        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
       >
-        <IconBrandGithub className="h-5 w-5" />
-      </a>
-      <button
-        type="button"
+        <IconBrandGithub size={16} />
+      </IconButton>
+      <IconButton
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
         aria-label={
           mounted && theme === "dark"
             ? "Switch to light mode"
             : "Switch to dark mode"
         }
-        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-600 shadow-sm transition-colors hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800"
       >
         {!mounted || theme === "dark" ? (
-          <IconSun className="h-5 w-5" />
+          <IconSun size={16} />
         ) : (
-          <IconMoon className="h-5 w-5" />
+          <IconMoon size={16} />
         )}
-      </button>
+      </IconButton>
     </div>
   );
 }
