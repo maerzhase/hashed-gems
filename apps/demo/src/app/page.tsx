@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import { GemGenerator } from "@/components/GemGenerator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/Tabs";
+import { UserBadge } from "@/components/ui/UserBadge";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
@@ -230,19 +230,7 @@ export default function Home() {
 
         <div className="flex flex-wrap justify-center gap-2">
           {DEMO_USERS.map((user) => (
-            <div
-              key={user}
-              className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 shadow-sm dark:border-neutral-800 dark:bg-neutral-800/80"
-            >
-              <Avatar>
-                <AvatarFallback>
-                  <HashedGem seed={user} size={24} />
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs text-neutral-600 dark:text-neutral-400">
-                @{user}
-              </span>
-            </div>
+            <UserBadge key={user} user={user} />
           ))}
         </div>
       </section>

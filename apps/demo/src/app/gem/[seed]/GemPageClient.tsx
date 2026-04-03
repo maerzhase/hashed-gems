@@ -2,8 +2,8 @@
 
 import type { Rarity } from "@m3000/hashed-gems";
 import { HashedGem } from "@m3000/hashed-gems";
-import { RARITY_BADGE } from "@/lib/gemStyles";
 import { GemShareActions } from "@/components/GemShareActions";
+import { Badge, RarityBadge } from "@/components/ui/Badge";
 
 function formatCutLabel(cutTypeName: string): string {
   return cutTypeName
@@ -57,20 +57,12 @@ export function GemPageClient({
       </div>
 
       <div className="mb-8 flex flex-wrap justify-center gap-1.5">
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium capitalize ${RARITY_BADGE[rarityName]}`}
-        >
-          {rarityName}
-        </span>
-        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600 capitalize dark:bg-neutral-800 dark:text-neutral-400">
-          {gemTypeName}
-        </span>
-        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-500 dark:bg-neutral-800 dark:text-neutral-500">
+        <RarityBadge rarity={rarityName} />
+        <Badge variant="subtle">{gemTypeName}</Badge>
+        <Badge>
           {cutLabel} Cut
-        </span>
-        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-500 capitalize dark:bg-neutral-800 dark:text-neutral-500">
-          {cutVariantName}
-        </span>
+        </Badge>
+        <Badge>{cutVariantName}</Badge>
       </div>
 
       <GemShareActions
