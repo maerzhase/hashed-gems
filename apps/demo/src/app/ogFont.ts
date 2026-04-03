@@ -39,5 +39,11 @@ export function loadInterFont(
     );
   }
 
-  return interFontPromises.get(key)!;
+  const fontPromise = interFontPromises.get(key);
+
+  if (!fontPromise) {
+    throw new Error(`missing cached Inter font promise for key: ${key}`);
+  }
+
+  return fontPromise;
 }
