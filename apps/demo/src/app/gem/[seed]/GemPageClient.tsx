@@ -56,7 +56,7 @@ export function GemPageClient({
         <HashedGem seed={seed} size={128} resolution={512} />
       </div>
 
-      <div className="mb-8 flex flex-wrap justify-center gap-1.5">
+      <div className="mb-5 flex flex-wrap justify-center gap-1.5">
         <RarityBadge rarity={rarityName} />
         <Badge variant="subtle">{gemTypeName}</Badge>
         <Badge>{cutLabel} Cut</Badge>

@@ -191,7 +191,18 @@ export function GemShareActions({
     : undefined;
 
   return shareReady ? (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-4">
+      <div className="mt-1 flex max-w-full flex-col items-center gap-1">
+        <span className="text-[11px] tracking-[0.18em] text-neutral-400 uppercase dark:text-neutral-500">
+          Image URL
+        </span>
+        <CopyButton
+          value={gemImageUrl}
+          defaultLabel={gemImageUrl}
+          variant="subtle"
+          className="max-w-full truncate font-mono text-[11px]"
+        />
+      </div>
       <div className="flex flex-wrap justify-center gap-2">
         <XShareButton href={xShareUrl} />
         <CopyButton value={gemUrl} defaultLabel="Copy link" />
@@ -202,17 +213,6 @@ export function GemShareActions({
             getShareFile={handleGetShareFile}
           />
         )}
-      </div>
-      <div className="mt-3 flex max-w-full flex-col items-center gap-1">
-        <span className="text-[11px] tracking-[0.18em] text-neutral-400 uppercase dark:text-neutral-500">
-          Image URL
-        </span>
-        <CopyButton
-          value={gemImageUrl}
-          defaultLabel={gemImageUrl}
-          variant="subtle"
-          className="max-w-full truncate font-mono text-[11px]"
-        />
       </div>
     </div>
   ) : (
