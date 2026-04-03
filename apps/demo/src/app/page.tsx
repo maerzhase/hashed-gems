@@ -7,6 +7,7 @@ import { GemGenerator } from "@/components/GemGenerator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
@@ -247,15 +248,13 @@ export default function Home() {
             Create your own gem
           </h2>
           <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
-            <input
-              type="text"
+            <Input
               value={generatorInput}
               onChange={(e) => setGeneratorInput(e.target.value)}
               placeholder="What's your gem? Type your name…"
               autoComplete="off"
               data-1p-ignore
               maxLength={100}
-              className="w-full bg-transparent px-4 py-3 font-mono text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600"
             />
             {generatorSeed && (
               <>
