@@ -7,6 +7,7 @@ import { GemGenerator } from "@/components/GemGenerator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/Tabs";
 
@@ -248,7 +249,7 @@ export default function Home() {
           <h2 className="mb-6 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
             Create your own gem
           </h2>
-          <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
+          <Card>
             <Input
               value={generatorInput}
               onChange={(e) => setGeneratorInput(e.target.value)}
@@ -263,7 +264,7 @@ export default function Home() {
                 <GemGenerator seed={generatorSeed} />
               </>
             )}
-          </div>
+          </Card>
         </div>
       </section>
 
@@ -275,7 +276,7 @@ export default function Home() {
           <p className="mb-6 text-sm text-neutral-500">
             Install with your favourite package manager.
           </p>
-          <div className="mb-16 overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50">
+          <Card className="mb-16">
             <Tabs value={selectedPm} onValueChange={(value) => setSelectedPm(String(value))}>
               <TabsList>
                 {PACKAGE_MANAGERS.map((pm) => (
@@ -304,7 +305,7 @@ export default function Home() {
                 {copied ? "copied!" : "copy"}
               </span>
             </Button>
-          </div>
+          </Card>
 
           <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
             Usage
@@ -314,11 +315,8 @@ export default function Home() {
           </p>
           <div className="flex flex-col gap-6">
             {EXAMPLES.map((example) => (
-              <div
-                key={example.label}
-                className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
-              >
-                <div className="flex min-w-0 items-center border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-900">
+              <Card key={example.label}>
+                <CardHeader className="flex min-w-0 items-center py-2">
                   <div className="shrink-0">
                     <HashedGem
                       seed={example.seed}
@@ -340,8 +338,8 @@ export default function Home() {
                       {example.description}
                     </span>
                   </div>
-                </div>
-                <div className="relative overflow-hidden p-4">
+                </CardHeader>
+                <CardContent>
                   <div className="relative">
                     <Button
                       onClick={() => copyExample(example.code, example.label)}
@@ -364,8 +362,8 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
@@ -379,19 +377,16 @@ export default function Home() {
           </p>
           <div className="flex flex-col gap-6">
             {API_EXAMPLES.map((example) => (
-              <div
-                key={example.label}
-                className="overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50"
-              >
-                <div className="border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+              <Card key={example.label}>
+                <CardHeader>
                   <span className="block font-medium text-neutral-900 dark:text-neutral-100">
                     {example.label}
                   </span>
                   <span className="block text-xs text-neutral-500 dark:text-neutral-400">
                     {example.description}
                   </span>
-                </div>
-                <div className="relative overflow-hidden p-4">
+                </CardHeader>
+                <CardContent>
                   <div className="relative">
                     <Button
                       onClick={() => copyExample(example.code, example.label)}
@@ -414,8 +409,8 @@ export default function Home() {
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
