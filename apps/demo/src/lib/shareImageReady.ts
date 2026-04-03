@@ -27,13 +27,15 @@ export async function ensureShareImageReady(seed: string): Promise<void> {
     return;
   }
 
-  const response = await fetch(`/api/gems/${encodeURIComponent(seed)}`, {
-    cache: "no-store",
-  });
+  await new Promise<void>((resolve, reject) => {
+    const image = new window.Image();
 
-  if (!response.ok) {
-    throw new Error(`Failed to prepare share image for seed "${seed}"`);
-  }
+    image.onload = () => resolve();
+    image.onerror = () => {
+      reject(new Error(`Failed to prepare share image for seed "${seed}"`));
+    };
+    image.src = `/api/gems/${encodeURIComponent(seed)}`;
+  });
 
   markShareImageReady(seed);
 }
