@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { GemGenerator } from "@/components/GemGenerator";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { Avatar, AvatarFallback } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
@@ -233,9 +234,11 @@ export default function Home() {
               key={user}
               className="flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 shadow-sm dark:border-neutral-800 dark:bg-neutral-800/80"
             >
-              <div className="overflow-hidden rounded-full">
-                <HashedGem seed={user} size={24} />
-              </div>
+              <Avatar>
+                <AvatarFallback>
+                  <HashedGem seed={user} size={24} />
+                </AvatarFallback>
+              </Avatar>
               <span className="text-xs text-neutral-600 dark:text-neutral-400">
                 @{user}
               </span>
