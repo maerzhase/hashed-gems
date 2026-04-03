@@ -10,9 +10,10 @@ export function getGemSiteUrl(): string {
   );
 }
 
-export function getGemApiImageUrl(
-  seed: string,
-  origin = getGemSiteUrl(),
-): string {
-  return `${trimTrailingSlash(origin)}/api/gems/${encodeURIComponent(seed)}`;
+export function getGemApiImagePath(seed: string): string {
+  return `/api/gems/${encodeURIComponent(seed)}`;
+}
+
+export function getGemApiImageUrl(seed: string, origin = getGemSiteUrl()): string {
+  return `${trimTrailingSlash(origin)}${getGemApiImagePath(seed)}`;
 }

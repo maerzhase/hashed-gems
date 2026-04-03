@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { getGemShareUrl } from "@/lib/gemShareUrl";
 import {
+  checkShareImageReady,
   ensureShareImageReady,
   isShareImageReady,
 } from "@/lib/shareImageReady";
@@ -117,9 +118,33 @@ export function GemShareActions({
   }, []);
 
   useEffect(() => {
-    setShareReady(isShareImageReady(seed));
+    let cancelled = false;
+
+    setShareReady(false);
     setPreparingShare(false);
     setShareError(null);
+
+    const checkExistingShareImage = async () => {
+      try {
+        const ready = await checkShareImageReady(seed);
+
+        if (!cancelled) {
+          setShareReady(ready);
+        }
+      } catch {
+        if (!cancelled) {
+          setShareReady(isShareImageReady(seed));
+        }
+      } finally {
+        // No visible loading state for the background existence probe.
+      }
+    };
+
+    void checkExistingShareImage();
+
+    return () => {
+      cancelled = true;
+    };
   }, [seed]);
 
   const handlePrepareShare = async () => {

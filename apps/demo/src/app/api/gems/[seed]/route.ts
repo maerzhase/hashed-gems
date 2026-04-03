@@ -39,6 +39,19 @@ async function findExistingGemImage(pathname: string): Promise<string | null> {
   }
 }
 
+function imageResponse(pngBytes: ArrayBuffer): NextResponse {
+  return new NextResponse(pngBytes, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=0, must-revalidate",
+      "CDN-Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
+      "Vercel-CDN-Cache-Control":
+        "public, s-maxage=3600, stale-while-revalidate=604800",
+    },
+  });
+}
+
 async function renderGemPng(renderUrl: string): Promise<ArrayBuffer> {
   const isProduction =
     process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
@@ -146,5 +159,28 @@ export async function GET(
     },
   );
 
-  return redirectTo(blob.url);
+  void blob;
+
+  return imageResponse(pngBytes);
+}
+
+export async function HEAD(
+  _request: Request,
+  { params }: { params: Promise<{ seed: string }> },
+) {
+  const { seed: raw } = await params;
+  const seed = decodeGemSeed(raw);
+
+  if (!isValidGemSeed(seed)) {
+    return new NextResponse(null, { status: 400 });
+  }
+
+  const rendererVersion = getGemImageRendererVersion();
+  const blobPath = getGemImageBlobPath(seed, rendererVersion);
+  const existingUrl = await findExistingGemImage(blobPath);
+
+  return new NextResponse(null, {
+    status: existingUrl ? 204 : 404,
+    headers: getGemImageRedirectHeaders(),
+  });
 }
