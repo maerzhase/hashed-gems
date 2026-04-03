@@ -10,7 +10,8 @@ const inputVariants = cva(
   {
     variants: {
       variant: {
-        default: "px-4 py-3 focus:bg-neutral-100/60 dark:focus:bg-neutral-800/40",
+        default:
+          "px-4 py-3 focus:bg-neutral-100/60 dark:focus:bg-neutral-800/40",
       },
     },
     defaultVariants: {

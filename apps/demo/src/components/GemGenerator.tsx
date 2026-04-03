@@ -34,9 +34,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
       <div className="flex flex-wrap justify-center gap-1.5">
         <RarityBadge rarity={rarityName} />
         <Badge variant="subtle">{gemTypeName}</Badge>
-        <Badge>
-          {cutLabel} Cut
-        </Badge>
+        <Badge>{cutLabel} Cut</Badge>
         <Badge>{cutVariantLabel}</Badge>
       </div>
 

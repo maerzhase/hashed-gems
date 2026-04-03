@@ -189,7 +189,13 @@ export default function Home() {
         highlighted[example.label] = highlighter.codeToHtml(example.code, {
           lang: example.lang,
           theme: theme === "dark" ? "github-dark" : "github-light",
-          transformers: [{ pre(node) { delete node.properties.tabindex; } }],
+          transformers: [
+            {
+              pre(node) {
+                delete node.properties.tabindex;
+              },
+            },
+          ],
         });
       }
       setHighlightedExamples(highlighted);
@@ -241,7 +247,10 @@ export default function Home() {
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
           <h2 className="mb-6 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Create your own gem
           </h2>
           <Card>
@@ -266,7 +275,10 @@ export default function Home() {
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
           <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Installation
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
@@ -307,7 +319,10 @@ export default function Home() {
           </Card>
 
           <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Usage
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
@@ -368,7 +383,10 @@ export default function Home() {
           </div>
 
           <h2 className="mt-16 mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Image API
           </h2>
           <p className="mb-6 text-sm text-neutral-500">

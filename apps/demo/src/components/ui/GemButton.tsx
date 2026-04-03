@@ -9,7 +9,12 @@ interface GemButtonProps extends ComponentPropsWithoutRef<"button"> {
   resolution?: number;
 }
 
-export function GemButton({ seed, size = 64, resolution, ...props }: GemButtonProps) {
+export function GemButton({
+  seed,
+  size = 64,
+  resolution,
+  ...props
+}: GemButtonProps) {
   return (
     <button
       type="button"

@@ -1,6 +1,9 @@
 const interFontPromises = new Map<string, Promise<ArrayBuffer>>();
 
-export function loadInterFont(weight: 400 | 500 | 600, text: string): Promise<ArrayBuffer> {
+export function loadInterFont(
+  weight: 400 | 500 | 600,
+  text: string,
+): Promise<ArrayBuffer> {
   const key = `${weight}:${text}`;
 
   if (!interFontPromises.has(key)) {
@@ -15,10 +18,14 @@ export function loadInterFont(weight: 400 | 500 | 600, text: string): Promise<Ar
         }
 
         const css = await cssResponse.text();
-        const match = css.match(/src: url\(([^)]+)\) format\('(opentype|truetype|woff2|woff)'\)/);
+        const match = css.match(
+          /src: url\(([^)]+)\) format\('(opentype|truetype|woff2|woff)'\)/,
+        );
 
         if (!match) {
-          throw new Error(`failed to find Inter font source for weight ${weight}`);
+          throw new Error(
+            `failed to find Inter font source for weight ${weight}`,
+          );
         }
 
         const fontResponse = await fetch(match[1], { cache: "force-cache" });

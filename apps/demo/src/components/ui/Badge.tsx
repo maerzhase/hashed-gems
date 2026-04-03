@@ -35,17 +35,9 @@ interface RarityBadgeProps
   children?: ReactNode;
 }
 
-export function Badge({
-  children,
-  className,
-  variant,
-  ...props
-}: BadgeProps) {
+export function Badge({ children, className, variant, ...props }: BadgeProps) {
   return (
-    <span
-      {...props}
-      className={clsx(badgeVariants({ variant }), className)}
-    >
+    <span {...props} className={clsx(badgeVariants({ variant }), className)}>
       {children}
     </span>
   );

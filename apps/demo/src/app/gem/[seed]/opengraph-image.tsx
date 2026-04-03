@@ -9,12 +9,31 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const revalidate = 86400;
 
-const RARITY_BADGE_COLORS: Record<Rarity, { bg: string; text: string; border: string }> = {
+const RARITY_BADGE_COLORS: Record<
+  Rarity,
+  { bg: string; text: string; border: string }
+> = {
   common: { bg: "#262626", text: "#d4d4d4", border: "#404040" },
-  uncommon: { bg: "rgba(2, 44, 34, 0.7)", text: "#6ee7b7", border: "rgba(16, 185, 129, 0.25)" },
-  rare: { bg: "rgba(23, 37, 84, 0.7)", text: "#93c5fd", border: "rgba(59, 130, 246, 0.25)" },
-  epic: { bg: "rgba(46, 16, 101, 0.7)", text: "#c4b5fd", border: "rgba(139, 92, 246, 0.3)" },
-  legendary: { bg: "rgba(69, 26, 3, 0.6)", text: "#fcd34d", border: "rgba(251, 191, 36, 0.3)" },
+  uncommon: {
+    bg: "rgba(2, 44, 34, 0.7)",
+    text: "#6ee7b7",
+    border: "rgba(16, 185, 129, 0.25)",
+  },
+  rare: {
+    bg: "rgba(23, 37, 84, 0.7)",
+    text: "#93c5fd",
+    border: "rgba(59, 130, 246, 0.25)",
+  },
+  epic: {
+    bg: "rgba(46, 16, 101, 0.7)",
+    text: "#c4b5fd",
+    border: "rgba(139, 92, 246, 0.3)",
+  },
+  legendary: {
+    bg: "rgba(69, 26, 3, 0.6)",
+    text: "#fcd34d",
+    border: "rgba(251, 191, 36, 0.3)",
+  },
 };
 
 async function getGemImageSrc(seed: string): Promise<string> {

@@ -49,7 +49,10 @@ export function CardContent({
   ...props
 }: CardSectionProps) {
   return (
-    <div {...props} className={clsx("relative overflow-hidden p-4.5", className)}>
+    <div
+      {...props}
+      className={clsx("relative overflow-hidden p-4.5", className)}
+    >
       {children}
     </div>
   );
