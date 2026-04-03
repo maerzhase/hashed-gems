@@ -6,11 +6,11 @@ import clsx from "clsx";
 import type { ComponentPropsWithoutRef } from "react";
 
 const inputVariants = cva(
-  "w-full bg-transparent font-mono text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600",
+  "w-full bg-transparent font-mono text-sm text-neutral-800 placeholder:text-neutral-400 outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600",
   {
     variants: {
       variant: {
-        default: "px-4 py-3",
+        default: "px-4 py-3 focus:bg-neutral-100/60 dark:focus:bg-neutral-800/40",
       },
     },
     defaultVariants: {

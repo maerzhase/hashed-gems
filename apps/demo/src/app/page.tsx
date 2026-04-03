@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Tabs, TabsList, TabsTab } from "@/components/ui/Tabs";
+import { GemButton } from "@/components/ui/GemButton";
 import { UserBadge } from "@/components/ui/UserBadge";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
@@ -188,6 +189,7 @@ export default function Home() {
         highlighted[example.label] = highlighter.codeToHtml(example.code, {
           lang: example.lang,
           theme: theme === "dark" ? "github-dark" : "github-light",
+          transformers: [{ pre(node) { delete node.properties.tabindex; } }],
         });
       }
       setHighlightedExamples(highlighted);
@@ -214,14 +216,15 @@ export default function Home() {
       <SiteHeader />
 
       <section className="flex flex-col items-center px-6 pt-24 pb-12 md:pt-36">
-        <button
-          type="button"
-          onClick={() => setSeed(Math.random().toString(36).slice(2))}
-          className="mb-8 cursor-pointer rounded-full transition-transform outline-none hover:scale-110"
-        >
-          <HashedGem seed={seed} size={64} resolution={512} />
-        </button>
-        <h1 className="mb-3 text-center font-sans text-2xl font-medium tracking-tight text-neutral-900 md:text-3xl dark:text-white">
+        <div className="mb-10">
+          <GemButton
+            seed={seed}
+            size={96}
+            resolution={512}
+            onClick={() => setSeed(Math.random().toString(36).slice(2))}
+          />
+        </div>
+        <h1 className="mb-3 text-center font-sans text-3xl font-semibold tracking-tight text-neutral-900 md:text-4xl dark:text-white">
           Your users are gems. Show it.
         </h1>
         <p className="mb-8 max-w-xl text-center text-sm text-neutral-500 md:text-base">
@@ -237,7 +240,8 @@ export default function Home() {
 
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
-          <h2 className="mb-6 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mb-6 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
             Create your own gem
           </h2>
           <Card>
@@ -261,7 +265,8 @@ export default function Home() {
 
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-xl">
-          <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
             Installation
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
@@ -301,7 +306,8 @@ export default function Home() {
             </Button>
           </Card>
 
-          <h2 className="mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
             Usage
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
@@ -324,11 +330,11 @@ export default function Home() {
                       })}
                     />
                   </div>
-                  <div className="ml-4 flex flex-col justify-center">
-                    <span className="font-medium text-neutral-900 dark:text-neutral-100">
+                  <div className="ml-4 flex flex-col justify-center gap-1">
+                    <span className="font-medium leading-5 text-neutral-900 dark:text-neutral-100">
                       {example.label}
                     </span>
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="text-xs leading-5 text-neutral-500 dark:text-neutral-400">
                       {example.description}
                     </span>
                   </div>
@@ -361,7 +367,8 @@ export default function Home() {
             ))}
           </div>
 
-          <h2 className="mt-16 mb-3 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+          <h2 className="mt-16 mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600" aria-hidden="true" />
             Image API
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
@@ -373,10 +380,10 @@ export default function Home() {
             {API_EXAMPLES.map((example) => (
               <Card key={example.label}>
                 <CardHeader>
-                  <span className="block font-medium text-neutral-900 dark:text-neutral-100">
+                  <span className="block leading-5 font-medium text-neutral-900 dark:text-neutral-100">
                     {example.label}
                   </span>
-                  <span className="block text-xs text-neutral-500 dark:text-neutral-400">
+                  <span className="block pt-1 text-xs leading-5 text-neutral-500 dark:text-neutral-400">
                     {example.description}
                   </span>
                 </CardHeader>

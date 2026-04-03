@@ -28,13 +28,13 @@ export function TabsList({
     <BaseTabs.List
       {...props}
       className={clsx(
-        "relative flex rounded-t-lg border-b border-neutral-200 bg-neutral-50 p-1 dark:border-neutral-800 dark:bg-neutral-950/40",
+        "relative flex rounded-t-xl border-b border-neutral-200 bg-neutral-50/70 p-1 dark:border-neutral-700/50 dark:bg-neutral-800/50",
         className,
       )}
     >
       <BaseTabs.Indicator
         className={clsx(
-          "absolute top-1 bottom-1 z-0 rounded-md bg-white shadow-sm transition-[left,width,top,height] duration-300 ease-out dark:bg-neutral-800",
+          "absolute top-1 bottom-1 z-0 rounded-lg bg-white shadow-[0_1px_3px_0_rgb(0_0_0/0.08)] transition-[left,width,top,height] duration-300 ease-out dark:bg-neutral-700 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.08),0_1px_4px_0_rgb(0_0_0/0.4)]",
           "left-[var(--active-tab-left)] w-[var(--active-tab-width)]",
           indicatorClassName,
         )}
@@ -50,7 +50,7 @@ export function TabsTab({ className, ...props }: TabsTabProps) {
       {...props}
       className={(state) =>
         clsx(
-          "relative z-10 flex-1 cursor-pointer rounded-md px-4 py-2.5 font-mono text-xs transition-colors focus-visible:outline-none",
+          "relative z-10 flex-1 cursor-pointer rounded-md px-4 py-2.5 font-mono text-xs transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black/60 dark:focus-visible:ring-white/60",
           state.active
             ? "text-neutral-900 dark:text-white"
             : "text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-100",

@@ -16,7 +16,7 @@ export function Card({ children, className, ...props }: CardProps) {
     <div
       {...props}
       className={clsx(
-        "overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900/50",
+        "overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-[0_1px_3px_0_rgb(0_0_0/0.08),0_1px_2px_-1px_rgb(0_0_0/0.06)] dark:border-neutral-700/60 dark:bg-neutral-900 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.06),0_4px_20px_0_rgb(0_0_0/0.6)]",
         className,
       )}
     >
@@ -34,7 +34,7 @@ export function CardHeader({
     <div
       {...props}
       className={clsx(
-        "border-b border-neutral-200 bg-neutral-50 px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900",
+        "border-b border-neutral-200 bg-neutral-50/80 px-4 py-3.5 dark:border-neutral-700/50 dark:bg-neutral-800/60",
         className,
       )}
     >
@@ -49,7 +49,7 @@ export function CardContent({
   ...props
 }: CardSectionProps) {
   return (
-    <div {...props} className={clsx("relative overflow-hidden p-4", className)}>
+    <div {...props} className={clsx("relative overflow-hidden p-4.5", className)}>
       {children}
     </div>
   );

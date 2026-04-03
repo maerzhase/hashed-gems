@@ -48,7 +48,7 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
 
       <a
         href={`/gem/${encodeURIComponent(seed)}`}
-        className="text-xs text-neutral-400 transition-colors hover:text-neutral-600 dark:hover:text-neutral-300"
+        className="rounded-sm text-xs text-neutral-400 transition-colors hover:text-neutral-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/60 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-white/60 dark:focus-visible:ring-offset-neutral-950 dark:hover:text-neutral-300"
       >
         View gem page →
       </a>
