@@ -191,7 +191,7 @@ export function GemShareActions({
   ) : (
     <div className="flex flex-col items-center gap-2">
       <Button onClick={handlePrepareShare} disabled={preparingShare}>
-        {preparingShare ? "Preparing share image..." : "Prepare share"}
+        {preparingShare ? "Preparing share image..." : "Share"}
       </Button>
       {shareError && (
         <p className="text-xs text-red-500 dark:text-red-400">{shareError}</p>
