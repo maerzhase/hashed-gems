@@ -35,6 +35,10 @@ function getR2BucketName(): string {
   return getRequiredEnv("R2_BUCKET");
 }
 
+function getR2PublicBaseUrl(): string {
+  return trimTrailingSlash(getRequiredEnv("R2_PUBLIC_BASE_URL"));
+}
+
 let r2Client: S3Client | null = null;
 
 function getR2Client(): S3Client {
@@ -84,6 +88,10 @@ export async function headR2Object(key: string): Promise<boolean> {
 
     throw error;
   }
+}
+
+export function getR2PublicUrl(key: string): string {
+  return new URL(key, `${getR2PublicBaseUrl()}/`).toString();
 }
 
 export async function getR2Object(key: string): Promise<ArrayBuffer | null> {

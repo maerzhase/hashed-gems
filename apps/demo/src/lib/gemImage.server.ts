@@ -29,7 +29,7 @@ export function getGemImageObjectCacheControl(): string {
   return `public, max-age=${GEM_IMAGE_OBJECT_CACHE_MAX_AGE}, immutable`;
 }
 
-export function getGemImageRedirectHeaders(): Record<string, string> {
+export function getGemImageResponseHeaders(): Record<string, string> {
   return {
     "Cache-Control": "public, max-age=0, must-revalidate",
     "CDN-Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",

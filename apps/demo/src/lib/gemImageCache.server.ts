@@ -13,6 +13,11 @@ import {
 } from "@/lib/gemImage.server";
 import { getR2Object, putR2Object } from "@/lib/r2.server";
 
+export function getGemImageObjectKey(seed: string): string {
+  const rendererVersion = getGemImageRendererVersion();
+  return getGemImageBlobPath(seed, rendererVersion);
+}
+
 async function renderGemPng(renderUrl: string): Promise<ArrayBuffer> {
   const isProduction =
     process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
@@ -88,20 +93,11 @@ async function renderGemPng(renderUrl: string): Promise<ArrayBuffer> {
   }
 }
 
-export async function getCachedGemImage(
-  seed: string,
-): Promise<ArrayBuffer | null> {
-  const rendererVersion = getGemImageRendererVersion();
-  const objectKey = getGemImageBlobPath(seed, rendererVersion);
-  return getR2Object(objectKey);
-}
-
 export async function getOrCreateGemImage(
   origin: string,
   seed: string,
 ): Promise<ArrayBuffer> {
-  const rendererVersion = getGemImageRendererVersion();
-  const objectKey = getGemImageBlobPath(seed, rendererVersion);
+  const objectKey = getGemImageObjectKey(seed);
   const cachedImage = await getR2Object(objectKey);
 
   if (cachedImage) {

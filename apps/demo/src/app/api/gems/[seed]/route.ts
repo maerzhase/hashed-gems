@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { decodeGemSeed, isValidGemSeed } from "@/lib/gemImage";
 import {
-  getCachedGemImage,
+  getGemImageObjectKey,
   getOrCreateGemImage,
 } from "@/lib/gemImageCache.server";
+import { getGemImageResponseHeaders } from "@/lib/gemImage.server";
+import { getR2PublicUrl, headR2Object } from "@/lib/r2.server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -13,10 +15,17 @@ function imageResponse(pngBytes: ArrayBuffer): NextResponse {
     status: 200,
     headers: {
       "Content-Type": "image/png",
-      "Cache-Control": "public, max-age=0, must-revalidate",
-      "CDN-Cache-Control": "public, s-maxage=300, stale-while-revalidate=86400",
-      "Vercel-CDN-Cache-Control":
-        "public, s-maxage=3600, stale-while-revalidate=604800",
+      ...getGemImageResponseHeaders(),
+    },
+  });
+}
+
+function redirectTo(url: string): NextResponse {
+  return new NextResponse(null, {
+    status: 307,
+    headers: {
+      Location: url,
+      ...getGemImageResponseHeaders(),
     },
   });
 }
@@ -30,6 +39,13 @@ export async function GET(
 
   if (!isValidGemSeed(seed)) {
     return NextResponse.json({ error: "Invalid seed" }, { status: 400 });
+  }
+
+  const objectKey = getGemImageObjectKey(seed);
+  const cached = await headR2Object(objectKey);
+
+  if (cached) {
+    return redirectTo(getR2PublicUrl(objectKey));
   }
 
   const origin = new URL(request.url).origin;
@@ -48,9 +64,11 @@ export async function HEAD(
     return new NextResponse(null, { status: 400 });
   }
 
-  const existingImage = await getCachedGemImage(seed);
+  const objectKey = getGemImageObjectKey(seed);
+  const existingImage = await headR2Object(objectKey);
 
   return new NextResponse(null, {
     status: existingImage ? 204 : 404,
+    headers: getGemImageResponseHeaders(),
   });
 }
