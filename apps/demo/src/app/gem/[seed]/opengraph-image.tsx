@@ -2,8 +2,8 @@ import type { Rarity } from "@m3000/hashed-gems";
 import { getGemProperties } from "@m3000/hashed-gems";
 import { headers } from "next/headers";
 import { ImageResponse } from "next/og";
-import { getGemApiImageUrl, getGemSiteUrl } from "@/lib/gemAssetUrl";
 import { loadInterFont } from "@/app/ogFont";
+import { getOrCreateGemImage } from "@/lib/gemImageCache.server";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -45,26 +45,10 @@ async function getGemImageSrc(seed: string): Promise<string> {
     (host?.startsWith("localhost") || host?.startsWith("127.0.0.1")
       ? "http"
       : "https");
-  const origin = host ? `${protocol}://${host}` : getGemSiteUrl();
-  const imageUrl = getGemApiImageUrl(seed, origin);
-
-  try {
-    const response = await fetch(imageUrl, {
-      cache: "no-store",
-      redirect: "follow",
-    });
-
-    if (response.ok) {
-      const contentType = response.headers.get("content-type") ?? "image/png";
-      const bytes = await response.arrayBuffer();
-      const base64 = Buffer.from(bytes).toString("base64");
-      return `data:${contentType};base64,${base64}`;
-    }
-  } catch {
-    // Fall back to the canonical URL if the warmup fetch fails.
-  }
-
-  return imageUrl;
+  const origin = host ? `${protocol}://${host}` : "https://gems.m3000.io";
+  const bytes = await getOrCreateGemImage(origin, seed);
+  const base64 = Buffer.from(bytes).toString("base64");
+  return `data:image/png;base64,${base64}`;
 }
 
 export default async function Image({

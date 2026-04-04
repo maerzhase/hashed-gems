@@ -15,6 +15,18 @@ pnpm build
 pnpm dev
 ```
 
+For the demo image cache, configure Cloudflare R2 in `apps/demo/.env.local`:
+
+```bash
+R2_ACCOUNT_ID=...
+R2_BUCKET=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_PUBLIC_BASE_URL=https://hashed-gems.m3000.io
+# Optional override:
+# R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+```
+
 ## Useful Commands
 
 ```bash
