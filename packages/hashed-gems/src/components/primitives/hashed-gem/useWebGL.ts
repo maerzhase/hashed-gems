@@ -360,9 +360,7 @@ function getSharedObserver(): IntersectionObserver | null {
 
 // ── Hook ──────────────────────────────────────────────────────────────────
 
-export function useWebGL(
-  options: UseWebGLOptions,
-): {
+export function useWebGL(options: UseWebGLOptions): {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   isRendering: boolean;
 } {
