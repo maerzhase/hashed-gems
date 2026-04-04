@@ -217,6 +217,8 @@ interface GemInstance {
   uMotionPhase: number;
   startTime: number;
   isVisible: boolean;
+  hasRendered: boolean;
+  onRenderStart?: () => void;
 }
 
 const instances = new Set<GemInstance>();
@@ -269,6 +271,10 @@ function renderInstance(
 
   inst.ctx2d.clearRect(0, 0, w, h);
   inst.ctx2d.drawImage(canvas as CanvasImageSource, 0, 0);
+  if (!inst.hasRendered) {
+    inst.hasRendered = true;
+    inst.onRenderStart?.();
+  }
 }
 
 function renderLoop(now: number): void {
@@ -356,8 +362,12 @@ function getSharedObserver(): IntersectionObserver | null {
 
 export function useWebGL(
   options: UseWebGLOptions,
-): React.RefObject<HTMLCanvasElement | null> {
+): {
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  isRendering: boolean;
+} {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [isRendering, setIsRendering] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(
     () =>
       typeof window !== "undefined" &&
@@ -412,6 +422,7 @@ export function useWebGL(
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    setIsRendering(false);
     if (!canvas) return () => undefined;
 
     const dpr =
@@ -457,6 +468,8 @@ export function useWebGL(
           uMotionPhase,
           startTime: now,
           isVisible: true,
+          hasRendered: false,
+          onRenderStart: () => setIsRendering(true),
         },
         now,
       );
@@ -490,6 +503,8 @@ export function useWebGL(
       uMotionPhase,
       startTime: now,
       isVisible: true,
+      hasRendered: false,
+      onRenderStart: () => setIsRendering(true),
     };
 
     // Use shared IntersectionObserver
@@ -534,5 +549,5 @@ export function useWebGL(
     shouldRenderStatic,
   ]);
 
-  return canvasRef;
+  return { canvasRef, isRendering };
 }
