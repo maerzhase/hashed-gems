@@ -6,7 +6,7 @@ import clsx from "clsx";
 import type { ComponentPropsWithoutRef } from "react";
 
 const inputVariants = cva(
-  "w-full bg-transparent font-mono text-sm text-neutral-800 placeholder:text-neutral-400 outline-none dark:text-neutral-200 dark:placeholder:text-neutral-600",
+  "w-full bg-transparent font-mono text-base text-neutral-800 placeholder:text-neutral-400 outline-none md:text-sm dark:text-neutral-200 dark:placeholder:text-neutral-600",
   {
     variants: {
       variant: {
