@@ -59,7 +59,7 @@ export function HashedGem({
   const uCausticCount = props.causticCount;
   const uRarity = props.rarity;
 
-  const canvasRef = useWebGL({
+  const { canvasRef, isRendering } = useWebGL({
     vertexShader: VERTEX_SHADER,
     fragmentShader: FRAGMENT_SHADER,
     uniforms: {
@@ -96,13 +96,15 @@ export function HashedGem({
         overflow: "hidden",
       }}
     >
-      <HashedGemGradient
-        size={size}
-        seed={seed}
-        gemType={gemType}
-        cutType={cutType}
-        position="absolute"
-      />
+      {!isRendering && (
+        <HashedGemGradient
+          size={size}
+          seed={seed}
+          gemType={gemType}
+          cutType={cutType}
+          position="absolute"
+        />
+      )}
       <canvas
         ref={canvasRef}
         className="hashed-gem"

@@ -212,7 +212,7 @@ export function HashedGemGradient({
 
   return (
     <div
-      className={`hashed-gem-gradient ${className}`}
+      className={["hashed-gem-gradient", className].filter(Boolean).join(" ")}
       style={gradientStyle}
       role="img"
       aria-label={`${gemTypeName} gem`}
