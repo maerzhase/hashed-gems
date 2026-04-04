@@ -1,5 +1,7 @@
 export type { HashedGemProps } from "./components/primitives/hashed-gem";
 export { HashedGem } from "./components/primitives/hashed-gem";
+export type { HashedGemGradientProps } from "./components/primitives/hashed-gem";
+export { HashedGemGradient } from "./components/primitives/hashed-gem";
 export {
   CUT_VARIANTS,
   CUT_VARIANT_LABELS,
