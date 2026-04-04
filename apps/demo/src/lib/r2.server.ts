@@ -86,9 +86,7 @@ export async function headR2Object(key: string): Promise<boolean> {
   }
 }
 
-export async function getR2Object(
-  key: string,
-): Promise<ArrayBuffer | null> {
+export async function getR2Object(key: string): Promise<ArrayBuffer | null> {
   try {
     const response = await getR2Client().send(
       new GetObjectCommand({

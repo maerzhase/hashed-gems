@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { decodeGemSeed, isValidGemSeed } from "@/lib/gemImage";
-import { getCachedGemImage, getOrCreateGemImage } from "@/lib/gemImageCache.server";
+import {
+  getCachedGemImage,
+  getOrCreateGemImage,
+} from "@/lib/gemImageCache.server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
