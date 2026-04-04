@@ -3,7 +3,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import { getGemRenderPath } from "@/lib/gemImage";
 
-export const GEM_IMAGE_BLOB_CACHE_MAX_AGE = 60 * 60 * 24 * 365;
+export const GEM_IMAGE_OBJECT_CACHE_MAX_AGE = 60 * 60 * 24 * 365;
 const CHROMIUM_PACK_VERSION = "143.0.4";
 
 function sanitizeVersionSegment(value: string): string {
@@ -23,6 +23,10 @@ export function getGemImageRendererVersion(): string {
 export function getGemImageBlobPath(seed: string, version: string): string {
   const seedHash = createHash("sha256").update(seed).digest("hex");
   return `gems/${sanitizeVersionSegment(version)}/${seedHash}.png`;
+}
+
+export function getGemImageObjectCacheControl(): string {
+  return `public, max-age=${GEM_IMAGE_OBJECT_CACHE_MAX_AGE}, immutable`;
 }
 
 export function getGemImageRedirectHeaders(): Record<string, string> {
