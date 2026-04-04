@@ -1,2 +1,29 @@
 @import "tailwindcss";
 @import "../src/styles/styles.css";
+
+:root {
+  --story-bg: #ffffff;
+  --story-fg: #111111;
+  --story-muted-border: rgba(17, 17, 17, 0.12);
+  --story-muted-surface: rgba(17, 17, 17, 0.04);
+}
+
+html.dark {
+  --story-bg: #000000;
+  --story-fg: #f5f5f5;
+  --story-muted-border: rgba(255, 255, 255, 0.14);
+  --story-muted-surface: rgba(255, 255, 255, 0.04);
+}
+
+html,
+body,
+#storybook-root {
+  background: var(--story-bg);
+  color: var(--story-fg);
+}
+
+body {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}

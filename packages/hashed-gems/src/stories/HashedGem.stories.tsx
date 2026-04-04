@@ -30,6 +30,11 @@ const meta: Meta<typeof HashedGem> = {
 export default meta;
 type Story = StoryObj<typeof HashedGem>;
 
+const storyPanelStyles = {
+  border: "1px solid var(--story-muted-border)",
+  background: "var(--story-muted-surface)",
+} as const;
+
 export const Default: Story = {
   args: { size: 96, seed: "alice" },
 };
@@ -280,9 +285,8 @@ export const HelperAttributes: Story = {
             gap: 10,
             minWidth: 0,
             padding: 16,
-            border: "1px solid rgba(255, 255, 255, 0.14)",
             borderRadius: 16,
-            background: "rgba(255, 255, 255, 0.04)",
+            ...storyPanelStyles,
           }}
         >
           {HELPER_ATTRIBUTE_ROWS.map(({ label, getValue }) => (
@@ -434,9 +438,8 @@ export const MotionByCutFamily: Story = {
             alignItems: "center",
             gap: 18,
             padding: 16,
-            border: "1px solid rgba(255, 255, 255, 0.12)",
             borderRadius: 18,
-            background: "rgba(255, 255, 255, 0.04)",
+            ...storyPanelStyles,
           }}
         >
           <div style={{ display: "flex", justifyContent: "center" }}>
@@ -484,9 +487,8 @@ export const MotionVariantComparison: Story = {
             display: "grid",
             gap: 14,
             padding: 16,
-            border: "1px solid rgba(255, 255, 255, 0.12)",
             borderRadius: 18,
-            background: "rgba(255, 255, 255, 0.04)",
+            ...storyPanelStyles,
           }}
         >
           <div style={{ display: "grid", gap: 4 }}>
@@ -554,9 +556,8 @@ export const MotionRarityComparison: Story = {
               alignItems: "center",
               gap: 8,
               padding: 16,
-              border: "1px solid rgba(255, 255, 255, 0.12)",
               borderRadius: 18,
-              background: "rgba(255, 255, 255, 0.04)",
+              ...storyPanelStyles,
             }}
           >
             <HashedGem
