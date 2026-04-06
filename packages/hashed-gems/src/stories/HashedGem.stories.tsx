@@ -727,13 +727,13 @@ export const StaticMode: Story = {
       </p>
       <div style={{ display: "flex", gap: 12 }}>
         {SEED_VARIATION_SAMPLES.map((seed) => (
-          <HashedGem key={seed} size={64} seed={seed.seed} static />
+          <HashedGem key={seed.seed} size={64} seed={seed.seed} static />
         ))}
       </div>
       <p style={{ fontSize: 12, opacity: 0.5 }}>Animated (default)</p>
       <div style={{ display: "flex", gap: 12 }}>
         {SEED_VARIATION_SAMPLES.map((seed) => (
-          <HashedGem key={seed} size={64} seed={seed.seed} />
+          <HashedGem key={seed.seed} size={64} seed={seed.seed} />
         ))}
       </div>
     </div>
