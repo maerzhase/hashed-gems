@@ -37,7 +37,15 @@ interface ApiExample {
   lang: BundledLanguage;
 }
 
-const EXAMPLES = [
+interface HighlightedExample extends Example {
+  html: string;
+}
+
+interface HighlightedApiExample extends ApiExample {
+  html: string;
+}
+
+const EXAMPLES: Example[] = [
   {
     label: "Basic usage",
     description:
@@ -139,9 +147,9 @@ import { HashedGem } from "@m3000/hashed-gems";
     seed: "ada.lovelace",
     "aria-label": "Avatar for Ada Lovelace",
   },
-] satisfies Example[];
+] ;
 
-const API_EXAMPLES = [
+const API_EXAMPLES: ApiExample[] = [
   {
     label: "Direct image URL",
     description:
@@ -177,7 +185,7 @@ const API_EXAMPLES = [
 }`,
     lang: "tsx",
   },
-] satisfies ApiExample[];
+] ;
 
 const DEMO_USERS = [
   "bob",
@@ -201,15 +209,15 @@ const PACKAGE_MANAGERS = [
 ];
 
 export default async function Home() {
-  const highlightedExamples = await Promise.all(
-    EXAMPLES.map(async (example) => ({
+  const highlightedExamples: HighlightedExample[] = await Promise.all(
+    EXAMPLES.map(async (example): Promise<HighlightedExample> => ({
       ...example,
       html: await highlightCode(example.code, example.lang),
     })),
   );
 
-  const highlightedApiExamples = await Promise.all(
-    API_EXAMPLES.map(async (example) => ({
+  const highlightedApiExamples: HighlightedApiExample[] = await Promise.all(
+    API_EXAMPLES.map(async (example): Promise<HighlightedApiExample> => ({
       ...example,
       html: await highlightCode(example.code, example.lang),
     })),
