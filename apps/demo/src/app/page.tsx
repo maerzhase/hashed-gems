@@ -305,10 +305,11 @@ export default function Home() {
                 {currentCommand}
               </span>
               <span
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${isCopied("install")
+                className={`rounded px-2 py-0.5 text-xs transition-colors ${
+                  isCopied("install")
                     ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
                     : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                  }`}
+                }`}
               >
                 {isCopied("install") ? "copied!" : "copy"}
               </span>
