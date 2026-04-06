@@ -740,6 +740,73 @@ export const StaticMode: Story = {
   ),
 };
 
+export const Accessibility: Story = {
+  render: () => (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, 1fr)",
+        gap: 20,
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gap: 12,
+          padding: 16,
+          borderRadius: 18,
+          ...storyPanelStyles,
+        }}
+      >
+        <strong style={{ fontSize: 13 }}>Standalone image</strong>
+        <span style={{ fontSize: 12, opacity: 0.62 }}>
+          Use <code>aria-label</code> when the gem needs to be announced on its
+          own.
+        </span>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <HashedGem
+            seed="ada.lovelace"
+            size={96}
+            aria-label="Avatar for Ada Lovelace"
+          />
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gap: 12,
+          padding: 16,
+          borderRadius: 18,
+          ...storyPanelStyles,
+        }}
+      >
+        <strong style={{ fontSize: 13 }}>Decorative with nearby text</strong>
+        <span style={{ fontSize: 12, opacity: 0.62 }}>
+          Use <code>aria-hidden</code> when surrounding UI already provides the
+          label.
+        </span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            minHeight: 96,
+          }}
+        >
+          <HashedGem seed="ada.lovelace" size={96} aria-hidden={true} />
+          <div style={{ display: "grid", gap: 2 }}>
+            <strong style={{ fontSize: 13 }}>Ada Lovelace</strong>
+            <span style={{ fontSize: 12, opacity: 0.62 }}>
+              Mathematician and writer
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ),
+};
+
 export const GradientVsWebGL: Story = {
   args: {
     seed: "alice",

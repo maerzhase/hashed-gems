@@ -26,6 +26,8 @@ interface Example {
   gemType?: "emerald";
   cutType?: "rose";
   className?: string;
+  "aria-label"?: string;
+  "aria-hidden"?: true;
 }
 
 interface ApiExample {
@@ -119,6 +121,23 @@ import { HashedGem } from "@m3000/hashed-gems";
     lang: "tsx",
     seed: "hashed-gem",
     className: "rounded-full border border-neutral-500 shadow-lg",
+  },
+  {
+    label: "Accessibility",
+    description:
+      "Use aria-label when the gem should stand alone semantically, or aria-hidden when nearby text already identifies the user.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
+
+<HashedGem seed="ada.lovelace" aria-label="Avatar for Ada Lovelace" />
+
+<div>
+  <HashedGem seed="ada.lovelace" aria-hidden={true} />
+  <span>Ada Lovelace</span>
+</div>`,
+    lang: "tsx",
+    seed: "ada.lovelace",
+    "aria-label": "Avatar for Ada Lovelace",
   },
 ] satisfies Example[];
 
@@ -267,6 +286,8 @@ export default async function Home() {
                       static={example.static}
                       gemType={example.gemType}
                       cutType={example.cutType}
+                      aria-label={example["aria-label"]}
+                      aria-hidden={example["aria-hidden"]}
                       {...(example.className && {
                         className: example.className,
                       })}

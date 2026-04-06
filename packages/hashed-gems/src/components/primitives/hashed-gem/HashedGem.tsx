@@ -22,7 +22,7 @@ export interface HashedGemProps {
    * (e.g. resolution={512} on a size={160} gem for a crisp blob image).
    */
   resolution?: number;
-  /** Any string — username, address, id — hashed to a deterministic avatar */
+  /** Any string — username, email, id — hashed to a deterministic avatar */
   seed: string;
   /** Render a single frame and stop animating. Good for lists. Default: false */
   static?: boolean;
@@ -32,6 +32,38 @@ export interface HashedGemProps {
   cutType?: CutType;
   /** CSS classes for styling (border-radius, shadows, etc.) */
   className?: string;
+  /** Accessible name used when the gem should be announced as an image */
+  "aria-label"?: React.AriaAttributes["aria-label"];
+  /** Hide from assistive technology when adjacent UI already provides context */
+  "aria-hidden"?: React.AriaAttributes["aria-hidden"];
+  /** Override the semantic role. Defaults to img when aria-label is provided. */
+  role?: React.AriaRole;
+}
+
+function getA11yProps({
+  "aria-label": ariaLabel,
+  "aria-hidden": ariaHidden,
+  role,
+}: Pick<HashedGemProps, "aria-label" | "aria-hidden" | "role">): {
+  role?: React.AriaRole;
+  "aria-label"?: string;
+  "aria-hidden"?: React.AriaAttributes["aria-hidden"];
+} {
+  if (ariaHidden === true) {
+    return { "aria-hidden": true };
+  }
+
+  if (ariaLabel) {
+    return {
+      role: role ?? "img",
+      "aria-label": ariaLabel,
+    };
+  }
+
+  return {
+    ...(role ? { role } : {}),
+    "aria-hidden": ariaHidden ?? true,
+  };
 }
 
 export function HashedGem({
@@ -42,6 +74,9 @@ export function HashedGem({
   gemType,
   cutType,
   className,
+  role,
+  "aria-label": ariaLabel,
+  "aria-hidden": ariaHidden,
 }: HashedGemProps): React.ReactElement {
   const props = getGemProperties(seed);
   const resolvedGemType = gemType ?? props.gemTypeName;
@@ -85,16 +120,22 @@ export function HashedGem({
     },
     isStatic,
   });
+  const a11yProps = getA11yProps({
+    role,
+    "aria-label": ariaLabel,
+    "aria-hidden": ariaHidden,
+  });
 
   return (
     <div
-      className={`hashed-gem-container ${className}`}
+      className={["hashed-gem-container", className].filter(Boolean).join(" ")}
       style={{
         width: size,
         height: size,
         position: "relative",
         overflow: "hidden",
       }}
+      {...a11yProps}
     >
       {!isRendering && (
         <HashedGemGradient
@@ -103,6 +144,7 @@ export function HashedGem({
           gemType={gemType}
           cutType={cutType}
           position="absolute"
+          aria-hidden="true"
         />
       )}
       <canvas
@@ -115,8 +157,6 @@ export function HashedGem({
           top: 0,
           left: 0,
         }}
-        role="img"
-        aria-label="Hashed gem avatar"
       />
     </div>
   );

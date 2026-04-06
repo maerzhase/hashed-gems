@@ -12,6 +12,38 @@ export interface HashedGemGradientProps {
   cutType?: CutType;
   className?: string;
   position?: "absolute" | "relative";
+  /** Accessible name used when the gem should be announced as an image */
+  "aria-label"?: React.AriaAttributes["aria-label"];
+  /** Hide from assistive technology when adjacent UI already provides context */
+  "aria-hidden"?: React.AriaAttributes["aria-hidden"];
+  /** Override the semantic role. Defaults to img when aria-label is provided. */
+  role?: React.AriaRole;
+}
+
+function getA11yProps({
+  "aria-label": ariaLabel,
+  "aria-hidden": ariaHidden,
+  role,
+}: Pick<HashedGemGradientProps, "aria-label" | "aria-hidden" | "role">): {
+  role?: React.AriaRole;
+  "aria-label"?: string;
+  "aria-hidden"?: React.AriaAttributes["aria-hidden"];
+} {
+  if (ariaHidden === true) {
+    return { "aria-hidden": true };
+  }
+
+  if (ariaLabel) {
+    return {
+      role: role ?? "img",
+      "aria-label": ariaLabel,
+    };
+  }
+
+  return {
+    ...(role ? { role } : {}),
+    "aria-hidden": ariaHidden ?? true,
+  };
 }
 
 // Replicate the shader's initial light angle (at uTime=0) from uSeed
@@ -110,6 +142,9 @@ export function HashedGemGradient({
   cutType,
   className,
   position = "relative",
+  role,
+  "aria-label": ariaLabel,
+  "aria-hidden": ariaHidden,
 }: HashedGemGradientProps): React.ReactElement {
   const props = getGemProperties(seed);
   const shaderSeed = getShaderSeed(seed);
@@ -209,13 +244,17 @@ export function HashedGemGradient({
   const facetOverlay = getFacetOverlay(cutTypeName, shaderSeed, borderRadius);
   const asterismOverlay = getAsterismOverlay(rarityName, borderRadius);
   const opalRainbow = getOpalRainbowOverlay(gemTypeName, borderRadius);
+  const a11yProps = getA11yProps({
+    role,
+    "aria-label": ariaLabel,
+    "aria-hidden": ariaHidden,
+  });
 
   return (
     <div
       className={["hashed-gem-gradient", className].filter(Boolean).join(" ")}
       style={gradientStyle}
-      role="img"
-      aria-label={`${gemTypeName} gem`}
+      {...a11yProps}
     >
       <div style={edgeVignette} />
       <div style={facetOverlay} />

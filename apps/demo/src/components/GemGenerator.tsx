@@ -22,7 +22,12 @@ export function GemGenerator({ seed }: GemGeneratorProps) {
   return (
     <div className="flex flex-col items-center gap-5 px-4 py-6">
       <div>
-        <HashedGem seed={seed} size={128} resolution={512} />
+        <HashedGem
+          seed={seed}
+          size={128}
+          resolution={512}
+          aria-label={`Gem avatar for ${seed}`}
+        />
       </div>
 
       <div className="flex flex-wrap justify-center gap-1.5">
