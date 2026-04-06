@@ -4,7 +4,11 @@ Generative gem avatars for user identification. Each gem is uniquely rendered ba
 
 Built on React 19.
 
-![Hashed Gems color variations](../../.github/assets/gem-color-variations.png)
+<img
+  src="https://raw.githubusercontent.com/maerzhase/hashed-gems/main/.github/assets/gem-color-variations.png"
+  alt="Hashed Gems color variations"
+  width="512"
+/>
 
 ## Installation
 
@@ -63,7 +67,11 @@ The same seed always produces the same gem, so you can use it as a stable visual
 
 Both renders will resolve to the same gem type, cut, and motion profile.
 
-![Hashed Gems avatar list](../../.github/assets/avatar-list.png | width=256)
+<img
+  src="https://raw.githubusercontent.com/maerzhase/hashed-gems/main/.github/assets/avatar-list.png"
+  alt="Hashed Gems avatar list"
+  width="256"
+/>
 
 ## Props
 
