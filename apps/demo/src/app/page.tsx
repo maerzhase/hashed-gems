@@ -1,19 +1,39 @@
-"use client";
-
 import { CUT_TYPES, HashedGem } from "@m3000/hashed-gems";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import { GemGenerator } from "@/components/GemGenerator";
+import type { BundledLanguage } from "shiki";
+import {
+  CopyCodeButton,
+  GeneratorSection,
+  HeroGemButton,
+  InstallSection,
+} from "@/components/HomePageClient";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
-import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { Tabs, TabsList, TabsTab } from "@/components/ui/Tabs";
-import { GemButton } from "@/components/ui/GemButton";
 import { UserBadge } from "@/components/ui/UserBadge";
+import { highlightCode } from "@/lib/codeHighlight.server";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
+
+interface Example {
+  label: string;
+  description: string;
+  code: string;
+  lang: BundledLanguage;
+  seed: string;
+  size?: number;
+  resolution?: number;
+  static?: boolean;
+  gemType?: "emerald";
+  cutType?: "rose";
+  className?: string;
+}
+
+interface ApiExample {
+  label: string;
+  description: string;
+  code: string;
+  lang: BundledLanguage;
+}
 
 const EXAMPLES = [
   {
@@ -100,7 +120,7 @@ import { HashedGem } from "@m3000/hashed-gems";
     seed: "hashed-gem",
     className: "rounded-full border border-neutral-500 shadow-lg",
   },
-];
+] satisfies Example[];
 
 const API_EXAMPLES = [
   {
@@ -138,7 +158,7 @@ const API_EXAMPLES = [
 }`,
     lang: "tsx",
   },
-];
+] satisfies ApiExample[];
 
 const DEMO_USERS = [
   "bob",
@@ -161,59 +181,20 @@ const PACKAGE_MANAGERS = [
   { id: "bun", label: "bun", command: "bun add @m3000/hashed-gems" },
 ];
 
-function useCopy() {
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const copy = async (text: string, key = "default") => {
-    await navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 2000);
-  };
-  const isCopied = (key = "default") => copiedKey === key;
-  return { copy, isCopied };
-}
+export default async function Home() {
+  const highlightedExamples = await Promise.all(
+    EXAMPLES.map(async (example) => ({
+      ...example,
+      html: await highlightCode(example.code, example.lang),
+    })),
+  );
 
-export default function Home() {
-  const [seed, setSeed] = useState("hashed-gems");
-  const [selectedPm, setSelectedPm] = useState("pnpm");
-  const [generatorInput, setGeneratorInput] = useState("");
-  const [generatorSeed, setGeneratorSeed] = useState("");
-  const [highlightedExamples, setHighlightedExamples] = useState<
-    Record<string, string>
-  >({});
-  const { copy, isCopied } = useCopy();
-  const { theme } = useTheme();
-
-  useEffect(() => {
-    const t = setTimeout(() => setGeneratorSeed(generatorInput.trim()), 200);
-    return () => clearTimeout(t);
-  }, [generatorInput]);
-
-  useEffect(() => {
-    import("shiki").then(async ({ createHighlighter }) => {
-      const highlighter = await createHighlighter({
-        themes: ["github-dark", "github-light"],
-        langs: ["bash", "tsx"],
-      });
-      const highlighted: Record<string, string> = {};
-      for (const example of [...EXAMPLES, ...API_EXAMPLES]) {
-        highlighted[example.label] = highlighter.codeToHtml(example.code, {
-          lang: example.lang,
-          theme: theme === "dark" ? "github-dark" : "github-light",
-          transformers: [
-            {
-              pre(node) {
-                delete node.properties.tabindex;
-              },
-            },
-          ],
-        });
-      }
-      setHighlightedExamples(highlighted);
-    });
-  }, [theme]);
-
-  const currentCommand =
-    PACKAGE_MANAGERS.find((pm) => pm.id === selectedPm)?.command ?? "";
+  const highlightedApiExamples = await Promise.all(
+    API_EXAMPLES.map(async (example) => ({
+      ...example,
+      html: await highlightCode(example.code, example.lang),
+    })),
+  );
 
   return (
     <main className="min-h-screen">
@@ -221,12 +202,7 @@ export default function Home() {
 
       <section className="flex flex-col items-center px-6 pt-24 pb-12 md:pt-36">
         <div className="mb-10">
-          <GemButton
-            seed={seed}
-            size={96}
-            resolution={512}
-            onClick={() => setSeed(Math.random().toString(36).slice(2))}
-          />
+          <HeroGemButton />
         </div>
         <h1 className="mb-3 text-center font-sans text-3xl font-semibold tracking-tight text-neutral-900 md:text-4xl dark:text-white">
           Your users are gems. Show it.
@@ -251,22 +227,7 @@ export default function Home() {
             />
             Create your own gem
           </h2>
-          <Card>
-            <Input
-              value={generatorInput}
-              onChange={(e) => setGeneratorInput(e.target.value)}
-              placeholder="Type your name…"
-              autoComplete="off"
-              data-1p-ignore
-              maxLength={100}
-            />
-            {generatorSeed && (
-              <>
-                <div className="border-t border-neutral-100 dark:border-neutral-800" />
-                <GemGenerator seed={generatorSeed} />
-              </>
-            )}
-          </Card>
+          <GeneratorSection />
         </div>
       </section>
 
@@ -282,39 +243,7 @@ export default function Home() {
           <p className="mb-6 text-sm text-neutral-500">
             Install with your favourite package manager.
           </p>
-          <Card className="mb-16">
-            <Tabs
-              value={selectedPm}
-              onValueChange={(value) => setSelectedPm(String(value))}
-            >
-              <TabsList>
-                {PACKAGE_MANAGERS.map((pm) => (
-                  <TabsTab key={pm.id} value={pm.id}>
-                    {pm.label}
-                  </TabsTab>
-                ))}
-              </TabsList>
-            </Tabs>
-            <Button
-              onClick={() => copy(currentCommand, "install")}
-              variant="ghost"
-              className="group w-full"
-            >
-              <span className="text-neutral-500 dark:text-neutral-500">$</span>
-              <span className="flex-1 text-left font-mono text-sm text-neutral-800 dark:text-neutral-300">
-                {currentCommand}
-              </span>
-              <span
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${
-                  isCopied("install")
-                    ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
-                    : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                }`}
-              >
-                {isCopied("install") ? "copied!" : "copy"}
-              </span>
-            </Button>
-          </Card>
+          <InstallSection packageManagers={PACKAGE_MANAGERS} />
 
           <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
             <span
@@ -327,7 +256,7 @@ export default function Home() {
             Import the component and pass any string as a seed.
           </p>
           <div className="flex flex-col gap-6">
-            {EXAMPLES.map((example) => (
+            {highlightedExamples.map((example) => (
               <Card key={example.label}>
                 <CardHeader className="flex min-w-0 items-center py-2">
                   <div className="shrink-0">
@@ -354,25 +283,19 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <div className="relative">
-                    <Button
-                      onClick={() => copy(example.code, example.label)}
+                    <CopyCodeButton
+                      text={example.code}
                       variant="subtle"
                       className="absolute top-0 right-0"
                     >
-                      {isCopied(example.label) ? "copied!" : "copy"}
-                    </Button>
+                      copy
+                    </CopyCodeButton>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
-                      {highlightedExamples[example.label] ? (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: highlightedExamples[example.label],
-                          }}
-                        />
-                      ) : (
-                        <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
-                          {example.code}
-                        </pre>
-                      )}
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: example.html,
+                        }}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -393,7 +316,7 @@ export default function Home() {
             `512x512` image.
           </p>
           <div className="flex flex-col gap-6">
-            {API_EXAMPLES.map((example) => (
+            {highlightedApiExamples.map((example) => (
               <Card key={example.label}>
                 <CardHeader>
                   <span className="block leading-5 font-medium text-neutral-900 dark:text-neutral-100">
@@ -405,25 +328,19 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <div className="relative">
-                    <Button
-                      onClick={() => copy(example.code, example.label)}
+                    <CopyCodeButton
+                      text={example.code}
                       variant="subtle"
                       className="absolute top-0 right-0"
                     >
-                      {isCopied(example.label) ? "copied!" : "copy"}
-                    </Button>
+                      copy
+                    </CopyCodeButton>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
-                      {highlightedExamples[example.label] ? (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: highlightedExamples[example.label],
-                          }}
-                        />
-                      ) : (
-                        <pre className="overflow-x-auto font-mono text-xs text-neutral-500">
-                          {example.code}
-                        </pre>
-                      )}
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: example.html,
+                        }}
+                      />
                     </div>
                   </div>
                 </CardContent>
