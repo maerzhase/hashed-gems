@@ -1,12 +1,12 @@
-# @m3000/hashed-gems
-
-Deterministic gemstone avatars. Infinitely shimmering.
-
 <img
   src="https://raw.githubusercontent.com/maerzhase/hashed-gems/main/apps/demo/src/app/icon.png"
   alt="Hashed Gems icon"
-  width="128"
+  width="64"
 />
+
+# @m3000/hashed-gems
+
+Deterministic gemstone avatars. Infinitely shimmering.
 
 <img
   src="https://raw.githubusercontent.com/maerzhase/hashed-gems/main/.github/assets/avatar-list.png"
