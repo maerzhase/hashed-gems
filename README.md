@@ -3,6 +3,7 @@
     src="https://raw.githubusercontent.com/maerzhase/hashed-gems/main/apps/demo/src/app/icon.png"
     alt="Hashed Gems icon"
     width="40"
+    align="absmiddle"
   />
   @m3000/hashed-gems
 </h1>
