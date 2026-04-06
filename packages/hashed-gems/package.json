@@ -1,6 +1,6 @@
 {
   "name": "@m3000/hashed-gems",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
     "@storybook/addon-a11y": "10.1.2",
