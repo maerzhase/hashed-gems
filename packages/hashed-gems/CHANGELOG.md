@@ -1,5 +1,18 @@
 # @m3000/hashed-gems
 
+## 1.0.1
+
+### Patch Changes
+
+- 6e10d89: - Add standard `aria-label`, `aria-hidden`, and `role` support to `HashedGem` and `HashedGemGradient`
+  - Document best-practice accessibility usage in the README and demo
+- c3d8da1: - Add repository URL to package.json
+- c56c0fc: - Update package.json
+  - Add author
+  - Add license
+  - Add keywords
+  - Add publishConfig
+
 ## 1.0.0
 
 ### Major Changes
