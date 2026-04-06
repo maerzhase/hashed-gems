@@ -2,6 +2,12 @@
 
 Deterministic gemstone avatars. Infinitely shimmering.
 
+![Hashed Gems icon](./apps/demo/src/app/icon.png)
+
+![Hashed Gems avatar list](./.github/assets/avatar-list.png)
+
+Each seed maps to the same gem every time, so `alice` will render as the same avatar across sessions, devices, and environments.
+
 ## Packages
 
 - [`packages/hashed-gems`](./packages/hashed-gems/) — The published package

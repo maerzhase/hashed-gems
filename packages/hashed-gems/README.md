@@ -4,6 +4,8 @@ Generative gem avatars for user identification. Each gem is uniquely rendered ba
 
 Built on React 19.
 
+![Hashed Gems color variations](../../.github/assets/gem-color-variations.png)
+
 ## Installation
 
 ```bash
@@ -34,6 +36,19 @@ import { HashedGem } from "@m3000/hashed-gems";
 <HashedGem seed="ada.lovelace" />
 <HashedGem seed="grace-hopper@example.com" size={128} />
 ```
+
+## Determinism
+
+The same seed always produces the same gem, so you can use it as a stable visual identity across sessions and devices.
+
+```tsx
+<HashedGem seed="ada.lovelace" />
+<HashedGem seed="ada.lovelace" />
+```
+
+Both renders will resolve to the same gem type, cut, and motion profile.
+
+![Hashed Gems avatar list](../../.github/assets/avatar-list.png)
 
 ## Props
 
