@@ -39,6 +39,26 @@ html.dark ::selection {
 }
 
 @layer utilities {
+  .shiki-code {
+    background-color: transparent;
+  }
+
+  .shiki-code,
+  .shiki-code span {
+    color: var(--shiki-light);
+    font-style: var(--shiki-light-font-style);
+    font-weight: var(--shiki-light-font-weight);
+    text-decoration: var(--shiki-light-text-decoration);
+  }
+
+  :where(.dark, .dark *) .shiki-code,
+  :where(.dark, .dark *) .shiki-code span {
+    color: var(--shiki-dark);
+    font-style: var(--shiki-dark-font-style);
+    font-weight: var(--shiki-dark-font-weight);
+    text-decoration: var(--shiki-dark-text-decoration);
+  }
+
   .shadow-gem-sm {
     box-shadow:
       0 1px 3px 0 rgb(0 0 0 / 0.08),
