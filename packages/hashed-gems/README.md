@@ -63,22 +63,22 @@ The same seed always produces the same gem, so you can use it as a stable visual
 
 Both renders will resolve to the same gem type, cut, and motion profile.
 
-![Hashed Gems avatar list](../../.github/assets/avatar-list.png)
+![Hashed Gems avatar list](../../.github/assets/avatar-list.png | width=256)
 
 ## Props
 
-| Prop         | Type      | Default    | Description                                                                                                                                                |
-| ------------ | --------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `seed`       | `string`  | `""`       | Any string — username, email, id — hashed to a deterministic avatar                                                                                        |
-| `size`       | `number`  | `64`       | Display size in pixels (container width & height)                                                                                                          |
-| `resolution` | `number`  | size × dpr | WebGL canvas pixel resolution. Pass larger value for higher quality captures (e.g. resolution={512} on size={160} for crisp blob image)                    |
-| `gemType`    | `GemType` | auto       | Override gem type: `diamond`, `ruby`, `sapphire`, `emerald`, `topaz`, `amethyst`, `aquamarine`, `rose-quartz`, `citrine`, `onyx`, `alexandrite`, or `opal` |
-| `cutType`    | `CutType` | auto       | Override cut type: `round-brilliant`, `princess`, `cushion`, `emerald-step`, `firework`, `jubilee`, or `rose`                                              |
-| `static`     | `boolean` | `false`    | Render a single frame and stop animating. Good for lists                                                                                                   |
-| `aria-label` | `string`  | -          | Accessible name used when the gem should be exposed as an image                                                                                            |
-| `aria-hidden` | `boolean` | `true` when unlabeled | Hides the gem from assistive technology when surrounding UI already provides the label                                                          |
-| `role`       | `AriaRole` | `"img"` when labeled | Optional semantic role override. Defaults to `img` when `aria-label` is provided                                                               |
-| `className`  | `string`  | -          | Additional CSS classes                                                                                                                                     |
+| Prop          | Type       | Default               | Description                                                                                                                                                |
+| ------------- | ---------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `seed`        | `string`   | `""`                  | Any string — username, email, id — hashed to a deterministic avatar                                                                                        |
+| `size`        | `number`   | `64`                  | Display size in pixels (container width & height)                                                                                                          |
+| `resolution`  | `number`   | size × dpr            | WebGL canvas pixel resolution. Pass larger value for higher quality captures (e.g. resolution={512} on size={160} for crisp blob image)                    |
+| `gemType`     | `GemType`  | auto                  | Override gem type: `diamond`, `ruby`, `sapphire`, `emerald`, `topaz`, `amethyst`, `aquamarine`, `rose-quartz`, `citrine`, `onyx`, `alexandrite`, or `opal` |
+| `cutType`     | `CutType`  | auto                  | Override cut type: `round-brilliant`, `princess`, `cushion`, `emerald-step`, `firework`, `jubilee`, or `rose`                                              |
+| `static`      | `boolean`  | `false`               | Render a single frame and stop animating. Good for lists                                                                                                   |
+| `aria-label`  | `string`   | -                     | Accessible name used when the gem should be exposed as an image                                                                                            |
+| `aria-hidden` | `boolean`  | `true` when unlabeled | Hides the gem from assistive technology when surrounding UI already provides the label                                                                     |
+| `role`        | `AriaRole` | `"img"` when labeled  | Optional semantic role override. Defaults to `img` when `aria-label` is provided                                                                           |
+| `className`   | `string`   | -                     | Additional CSS classes                                                                                                                                     |
 
 ## License
 
