@@ -257,7 +257,7 @@ export default function Home() {
             <Input
               value={generatorInput}
               onChange={(e) => setGeneratorInput(e.target.value)}
-              placeholder="What's your gem? Type your name…"
+              placeholder="Type your name…"
               autoComplete="off"
               data-1p-ignore
               maxLength={100}
@@ -307,11 +307,10 @@ export default function Home() {
                 {currentCommand}
               </span>
               <span
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${
-                  copied
+                className={`rounded px-2 py-0.5 text-xs transition-colors ${copied
                     ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
                     : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                }`}
+                  }`}
               >
                 {copied ? "copied!" : "copy"}
               </span>
