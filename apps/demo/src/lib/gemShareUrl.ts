@@ -1,5 +1,5 @@
-const GEM_URL_BASE = "https://gems.m3000.io/gem";
+import { getGemSiteUrl } from "@/lib/gemAssetUrl";
 
 export function getGemShareUrl(seed: string): string {
-  return `${GEM_URL_BASE}/${encodeURIComponent(seed)}`;
+  return `${getGemSiteUrl()}/gem/${encodeURIComponent(seed)}`;
 }

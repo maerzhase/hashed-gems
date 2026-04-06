@@ -85,11 +85,7 @@ async function renderGemPng(renderUrl: string): Promise<ArrayBuffer> {
       buffer.byteOffset + buffer.byteLength,
     ) as ArrayBuffer;
   } finally {
-    await Promise.race([
-      browser.close(),
-      browser.close(),
-      browser.close(),
-    ]).catch(() => {});
+    await browser.close().catch(() => {});
   }
 }
 

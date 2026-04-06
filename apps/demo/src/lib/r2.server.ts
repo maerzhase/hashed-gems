@@ -7,10 +7,7 @@ import {
   S3Client,
   S3ServiceException,
 } from "@aws-sdk/client-s3";
-
-function trimTrailingSlash(value: string): string {
-  return value.endsWith("/") ? value.slice(0, -1) : value;
-}
+import { trimTrailingSlash } from "@/lib/gemAssetUrl";
 
 function getRequiredEnv(name: string): string {
   const value = process.env[name]?.trim();
