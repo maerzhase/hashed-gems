@@ -8,13 +8,7 @@ import {
 } from "@m3000/hashed-gems";
 import { GemShareActions } from "@/components/GemShareActions";
 import { Badge, RarityBadge } from "@/components/ui/Badge";
-
-function formatCutLabel(cutTypeName: string): string {
-  return cutTypeName
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
+import { formatCutLabel } from "@/lib/gemLabel";
 
 interface GemGeneratorProps {
   seed: string;

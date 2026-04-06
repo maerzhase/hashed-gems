@@ -1,6 +1,6 @@
 const DEFAULT_GEM_SITE_URL = "https://gems.m3000.io";
 
-function trimTrailingSlash(value: string): string {
+export function trimTrailingSlash(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 

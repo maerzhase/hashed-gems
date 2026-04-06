@@ -161,16 +161,26 @@ const PACKAGE_MANAGERS = [
   { id: "bun", label: "bun", command: "bun add @m3000/hashed-gems" },
 ];
 
+function useCopy() {
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const copy = async (text: string, key = "default") => {
+    await navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+  const isCopied = (key = "default") => copiedKey === key;
+  return { copy, isCopied };
+}
+
 export default function Home() {
   const [seed, setSeed] = useState("hashed-gems");
   const [selectedPm, setSelectedPm] = useState("pnpm");
-  const [copied, setCopied] = useState(false);
   const [generatorInput, setGeneratorInput] = useState("");
   const [generatorSeed, setGeneratorSeed] = useState("");
-  const [copiedExample, setCopiedExample] = useState<string | null>(null);
   const [highlightedExamples, setHighlightedExamples] = useState<
     Record<string, string>
   >({});
+  const { copy, isCopied } = useCopy();
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -204,18 +214,6 @@ export default function Home() {
 
   const currentCommand =
     PACKAGE_MANAGERS.find((pm) => pm.id === selectedPm)?.command ?? "";
-
-  const copyInstall = async () => {
-    await navigator.clipboard.writeText(currentCommand);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const copyExample = async (code: string, label: string) => {
-    await navigator.clipboard.writeText(code);
-    setCopiedExample(label);
-    setTimeout(() => setCopiedExample(null), 2000);
-  };
 
   return (
     <main className="min-h-screen">
@@ -298,7 +296,7 @@ export default function Home() {
               </TabsList>
             </Tabs>
             <Button
-              onClick={copyInstall}
+              onClick={() => copy(currentCommand, "install")}
               variant="ghost"
               className="group w-full"
             >
@@ -307,12 +305,13 @@ export default function Home() {
                 {currentCommand}
               </span>
               <span
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${copied
+                className={`rounded px-2 py-0.5 text-xs transition-colors ${
+                  isCopied("install")
                     ? "bg-neutral-600 text-white dark:bg-neutral-600 dark:text-white"
                     : "bg-neutral-200 text-neutral-700 group-hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-300 dark:group-hover:bg-neutral-600"
-                  }`}
+                }`}
               >
-                {copied ? "copied!" : "copy"}
+                {isCopied("install") ? "copied!" : "copy"}
               </span>
             </Button>
           </Card>
@@ -356,11 +355,11 @@ export default function Home() {
                 <CardContent>
                   <div className="relative">
                     <Button
-                      onClick={() => copyExample(example.code, example.label)}
+                      onClick={() => copy(example.code, example.label)}
                       variant="subtle"
                       className="absolute top-0 right-0"
                     >
-                      {copiedExample === example.label ? "copied!" : "copy"}
+                      {isCopied(example.label) ? "copied!" : "copy"}
                     </Button>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
                       {highlightedExamples[example.label] ? (
@@ -407,11 +406,11 @@ export default function Home() {
                 <CardContent>
                   <div className="relative">
                     <Button
-                      onClick={() => copyExample(example.code, example.label)}
+                      onClick={() => copy(example.code, example.label)}
                       variant="subtle"
                       className="absolute top-0 right-0"
                     >
-                      {copiedExample === example.label ? "copied!" : "copy"}
+                      {isCopied(example.label) ? "copied!" : "copy"}
                     </Button>
                     <div className="overflow-x-auto pr-16 [&_code]:font-mono [&_code]:text-xs [&_pre]:m-0 [&_pre]:!bg-transparent [&_pre]:p-0">
                       {highlightedExamples[example.label] ? (
