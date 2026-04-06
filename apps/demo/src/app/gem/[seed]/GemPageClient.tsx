@@ -47,7 +47,12 @@ export function GemPageClient({
   return (
     <div className="flex flex-col items-center">
       <div className="mb-6">
-        <HashedGem seed={seed} size={128} resolution={512} />
+        <HashedGem
+          seed={seed}
+          size={128}
+          resolution={512}
+          aria-label={`Gem avatar for ${seed}`}
+        />
       </div>
 
       <div className="mb-5 flex flex-wrap justify-center gap-1.5">

@@ -26,6 +26,8 @@ interface Example {
   gemType?: "emerald";
   cutType?: "rose";
   className?: string;
+  "aria-label"?: string;
+  "aria-hidden"?: true;
 }
 
 interface ApiExample {
@@ -35,7 +37,15 @@ interface ApiExample {
   lang: BundledLanguage;
 }
 
-const EXAMPLES = [
+interface HighlightedExample extends Example {
+  html: string;
+}
+
+interface HighlightedApiExample extends ApiExample {
+  html: string;
+}
+
+const EXAMPLES: Example[] = [
   {
     label: "Basic usage",
     description:
@@ -120,9 +130,26 @@ import { HashedGem } from "@m3000/hashed-gems";
     seed: "hashed-gem",
     className: "rounded-full border border-neutral-500 shadow-lg",
   },
-] satisfies Example[];
+  {
+    label: "Accessibility",
+    description:
+      "Use aria-label when the gem should stand alone semantically, or aria-hidden when nearby text already identifies the user.",
+    code: `import "@m3000/hashed-gems/styles.css";
+import { HashedGem } from "@m3000/hashed-gems";
 
-const API_EXAMPLES = [
+<HashedGem seed="ada.lovelace" aria-label="Avatar for Ada Lovelace" />
+
+<div>
+  <HashedGem seed="ada.lovelace" aria-hidden={true} />
+  <span>Ada Lovelace</span>
+</div>`,
+    lang: "tsx",
+    seed: "ada.lovelace",
+    "aria-label": "Avatar for Ada Lovelace",
+  },
+];
+
+const API_EXAMPLES: ApiExample[] = [
   {
     label: "Direct image URL",
     description:
@@ -158,7 +185,7 @@ const API_EXAMPLES = [
 }`,
     lang: "tsx",
   },
-] satisfies ApiExample[];
+];
 
 const DEMO_USERS = [
   "bob",
@@ -182,18 +209,22 @@ const PACKAGE_MANAGERS = [
 ];
 
 export default async function Home() {
-  const highlightedExamples = await Promise.all(
-    EXAMPLES.map(async (example) => ({
-      ...example,
-      html: await highlightCode(example.code, example.lang),
-    })),
+  const highlightedExamples: HighlightedExample[] = await Promise.all(
+    EXAMPLES.map(
+      async (example): Promise<HighlightedExample> => ({
+        ...example,
+        html: await highlightCode(example.code, example.lang),
+      }),
+    ),
   );
 
-  const highlightedApiExamples = await Promise.all(
-    API_EXAMPLES.map(async (example) => ({
-      ...example,
-      html: await highlightCode(example.code, example.lang),
-    })),
+  const highlightedApiExamples: HighlightedApiExample[] = await Promise.all(
+    API_EXAMPLES.map(
+      async (example): Promise<HighlightedApiExample> => ({
+        ...example,
+        html: await highlightCode(example.code, example.lang),
+      }),
+    ),
   );
 
   return (
@@ -267,6 +298,8 @@ export default async function Home() {
                       static={example.static}
                       gemType={example.gemType}
                       cutType={example.cutType}
+                      aria-label={example["aria-label"]}
+                      aria-hidden={example["aria-hidden"]}
                       {...(example.className && {
                         className: example.className,
                       })}

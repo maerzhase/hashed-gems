@@ -20,7 +20,7 @@ export function UserBadge({ user, className, ...props }: UserBadgeProps) {
     >
       <Avatar>
         <AvatarFallback>
-          <HashedGem seed={user} size={24} />
+          <HashedGem seed={user} size={24} aria-hidden={true} />
         </AvatarFallback>
       </Avatar>
       <span className="text-xs text-neutral-600 transition-colors group-hover:text-neutral-800 dark:text-neutral-400 dark:group-hover:text-neutral-200">
