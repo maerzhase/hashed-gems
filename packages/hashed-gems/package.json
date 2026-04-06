@@ -1,6 +1,7 @@
 {
   "name": "@m3000/hashed-gems",
   "version": "1.0.0",
+  "author": "maerzhase (https://github.com/maerzhase)",
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
     "@storybook/addon-a11y": "10.1.2",
@@ -29,18 +30,28 @@
   "files": [
     "dist"
   ],
+  "homepage": "https://gems.m3000.io/",
+  "keywords": [
+    "avatar",
+    "gem",
+    "generative-art",
+    "identicon",
+    "react",
+    "webgl"
+  ],
+  "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "peerDependencies": {
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maerzhase/hashed-gems.git"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "scripts": {
     "build": "tsdown",
