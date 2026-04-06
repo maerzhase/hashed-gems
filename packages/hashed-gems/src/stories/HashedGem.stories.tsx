@@ -723,17 +723,17 @@ export const StaticMode: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <p style={{ fontSize: 12, opacity: 0.5 }}>
-        Static (single frame, no animation — great for lists)
+        Static (single frame, no animation)
       </p>
       <div style={{ display: "flex", gap: 12 }}>
-        {["alice", "bob", "carol", "dave", "eve"].map((seed) => (
-          <HashedGem key={seed} size={64} seed={seed} static />
+        {SEED_VARIATION_SAMPLES.map((seed) => (
+          <HashedGem key={seed} size={64} seed={seed.seed} static />
         ))}
       </div>
       <p style={{ fontSize: 12, opacity: 0.5 }}>Animated (default)</p>
       <div style={{ display: "flex", gap: 12 }}>
-        {["alice", "bob", "carol", "dave", "eve"].map((seed) => (
-          <HashedGem key={seed} size={64} seed={seed} />
+        {SEED_VARIATION_SAMPLES.map((seed) => (
+          <HashedGem key={seed} size={64} seed={seed.seed} />
         ))}
       </div>
     </div>
