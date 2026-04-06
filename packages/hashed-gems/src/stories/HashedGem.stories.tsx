@@ -41,16 +41,25 @@ export const Default: Story = {
 
 const SEED_NAMES = [
   "alice",
-  "bob",
-  "0x1a2b3c",
-  "satoshi",
-  "vitalik",
+  "charlie",
   "carol",
   "dave",
   "eve",
   "frank",
   "grace",
+  "martin",
 ];
+
+const SEED_VARIATION_CANDIDATES = [
+  "alice",
+  "charlie",
+  "eve",
+  "pearl",
+  "amber",
+  "meadow",
+  "fern",
+  "iris",
+] as const;
 
 const VARIANCE_SEEDS = [
   "aurora",
@@ -85,6 +94,29 @@ function formatTitle(value: string): string {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
+
+function getSeedVariationSamples() {
+  const samples: Array<{
+    seed: string;
+    gemTypeName: string;
+    cutVariantName: string;
+  }> = [];
+
+  for (const seed of SEED_VARIATION_CANDIDATES) {
+    const properties = getGemProperties(seed);
+    samples.push({
+      seed,
+      gemTypeName: properties.gemTypeName,
+      cutVariantName: getCutVariantLabel(
+        getCutVariant(seed, properties.cutTypeName),
+      ),
+    });
+  }
+
+  return samples;
+}
+
+const SEED_VARIATION_SAMPLES = getSeedVariationSamples();
 
 function findStorySeed(
   predicate: (
@@ -209,13 +241,13 @@ export const SeedVariations: Story = {
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(5, 1fr)",
+        gridTemplateColumns: "repeat(4, 1fr)",
         gap: 16,
       }}
     >
-      {SEED_NAMES.map((name) => (
+      {SEED_VARIATION_SAMPLES.map(({ seed, gemTypeName, cutVariantName }) => (
         <div
-          key={name}
+          key={seed}
           style={{
             display: "flex",
             flexDirection: "column",
@@ -223,8 +255,26 @@ export const SeedVariations: Story = {
             gap: 6,
           }}
         >
-          <HashedGem size={80} seed={name} />
-          <span style={{ fontSize: 11, opacity: 0.6 }}>{name}</span>
+          <HashedGem size={80} seed={seed} />
+          <span style={{ fontSize: 11, opacity: 0.75 }}>{seed}</span>
+          <span
+            style={{
+              fontSize: 10,
+              opacity: 0.55,
+              textTransform: "capitalize",
+            }}
+          >
+            {formatTitle(gemTypeName)}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              opacity: 0.45,
+              textTransform: "capitalize",
+            }}
+          >
+            {cutVariantName}
+          </span>
         </div>
       ))}
     </div>
