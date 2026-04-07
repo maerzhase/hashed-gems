@@ -1,6 +1,6 @@
 {
   "name": "@m3000/hashed-gems",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "maerzhase (https://github.com/maerzhase)",
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
