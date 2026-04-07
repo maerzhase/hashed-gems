@@ -6,6 +6,7 @@ import {
   HeroGemButton,
   InstallSection,
 } from "@/components/HomePageClient";
+import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
@@ -13,6 +14,7 @@ import { UserBadge } from "@/components/ui/UserBadge";
 import { highlightCode } from "@/lib/codeHighlight.server";
 import { DEMO_USERS } from "@/lib/demoUsers";
 
+const BASE_URL = "https://gems.m3000.io";
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
 interface Example {
@@ -196,6 +198,46 @@ const PACKAGE_MANAGERS = [
 ];
 
 export default async function Home() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${BASE_URL}/#website`,
+        url: BASE_URL,
+        name: "@m3000/hashed-gems",
+        description: "Deterministic gemstone avatars. Infinitely shimmering.",
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "@id": `${BASE_URL}/#software`,
+        name: "@m3000/hashed-gems",
+        description:
+          "A React package for deterministic gemstone avatars with a hosted PNG API.",
+        codeRepository: "https://github.com/maerzhase/hashed-gems",
+        programmingLanguage: "TypeScript",
+        runtimePlatform: "React",
+        url: BASE_URL,
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${BASE_URL}/#webpage`,
+        url: BASE_URL,
+        name: "@m3000/hashed-gems",
+        isPartOf: {
+          "@id": `${BASE_URL}/#website`,
+        },
+        about: {
+          "@id": `${BASE_URL}/#software`,
+        },
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: `${BASE_URL}/opengraph-image`,
+        },
+      },
+    ],
+  };
+
   const highlightedExamples: HighlightedExample[] = await Promise.all(
     EXAMPLES.map(
       async (example): Promise<HighlightedExample> => ({
@@ -216,6 +258,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen">
+      <JsonLd data={jsonLd} />
       <SiteHeader />
 
       <section className="flex flex-col items-center px-6 pt-24 pb-12 md:pt-36">

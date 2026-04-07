@@ -5,6 +5,7 @@ import {
   getGemProperties,
 } from "@m3000/hashed-gems";
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/JsonLd";
 import { GemPageContent } from "./GemPageContent";
 
 type Props = { params: Promise<{ seed: string }> };
@@ -55,14 +56,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function GemPage({ params }: Props) {
   const { seed, gemTypeName, cutTypeName, cutVariantName, rarityName } =
     await getSeedData(params);
+  const encodedSeed = encodeURIComponent(seed);
+  const canonicalUrl = `https://gems.m3000.io/gem/${encodedSeed}`;
+  const imageUrl = `https://gems.m3000.io/api/gems/${encodedSeed}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${canonicalUrl}#webpage`,
+        url: canonicalUrl,
+        name: `${seed} gem`,
+        description: `${seed}'s gem is a ${rarityName} ${gemTypeName} with a ${cutTypeName} cut.`,
+        primaryImageOfPage: {
+          "@id": `${canonicalUrl}#primaryimage`,
+        },
+      },
+      {
+        "@type": "ImageObject",
+        "@id": `${canonicalUrl}#primaryimage`,
+        contentUrl: imageUrl,
+        url: imageUrl,
+        name: `${seed} gemstone avatar`,
+        description: `${rarityName} ${gemTypeName} gemstone avatar for ${seed}.`,
+        representativeOfPage: true,
+      },
+    ],
+  };
 
   return (
-    <GemPageContent
-      seed={seed}
-      gemTypeName={gemTypeName}
-      cutTypeName={cutTypeName}
-      cutVariantName={cutVariantName}
-      rarityName={rarityName as Rarity}
-    />
+    <>
+      <JsonLd data={jsonLd} />
+      <GemPageContent
+        seed={seed}
+        gemTypeName={gemTypeName}
+        cutTypeName={cutTypeName}
+        cutVariantName={cutVariantName}
+        rarityName={rarityName as Rarity}
+      />
+    </>
   );
 }
