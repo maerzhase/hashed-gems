@@ -299,6 +299,37 @@ export default async function Home() {
               className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
               aria-hidden="true"
             />
+            Stable avatars for any platform
+          </h2>
+          <div className="space-y-4">
+            <p className="text-sm text-neutral-500">
+              <strong className="font-medium text-neutral-900 dark:text-neutral-100">
+                @m3000/hashed-gems
+              </strong>{" "}
+              is a React avatar component and hosted image API for generating
+              deterministic gemstone avatars from any string seed. The same seed
+              always resolves to the same avatar, which makes it useful for
+              profiles, comments, communities, dashboards, and developer tools.
+            </p>
+            <p className="text-sm text-neutral-500">
+              Use the interactive WebGL component when you want animated
+              gemstone avatars in React or Next.js, or use the static PNG API
+              when you need a canonical avatar URL for HTML, emails, tables, or
+              social sharing. Each avatar includes stable gem traits such as
+              rarity, gemstone type, and cut, all derived directly from the
+              seed.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-xl">
+          <h2 className="mb-3 flex items-center gap-2 font-sans text-sm tracking-wider text-neutral-900 uppercase dark:text-white">
+            <span
+              className="inline-block h-1.5 w-1.5 rounded-full bg-neutral-400 dark:bg-neutral-600"
+              aria-hidden="true"
+            />
             Installation
           </h2>
           <p className="mb-6 text-sm text-neutral-500">
