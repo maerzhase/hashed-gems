@@ -1,6 +1,7 @@
 "use client";
 
 import type { Rarity } from "@m3000/hashed-gems";
+import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { GemPageClient } from "./GemPageClient";
@@ -40,12 +41,12 @@ export function GemPageContent({
           rarityName={rarityName}
         />
 
-        <a
+        <Link
           href="/"
           className="mt-12 text-sm text-neutral-400 transition-colors hover:text-neutral-600 hover:underline dark:hover:text-neutral-300"
         >
           Generate your own gem →
-        </a>
+        </Link>
       </div>
 
       <SiteFooter />

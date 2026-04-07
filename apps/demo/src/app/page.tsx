@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { UserBadge } from "@/components/ui/UserBadge";
 import { highlightCode } from "@/lib/codeHighlight.server";
+import { DEMO_USERS } from "@/lib/demoUsers";
 
 const CUT_TYPE_OPTIONS = `${CUT_TYPES.slice(0, -1).join(", ")}, or ${CUT_TYPES[CUT_TYPES.length - 1]}`;
 
@@ -185,20 +186,6 @@ const API_EXAMPLES: ApiExample[] = [
 }`,
     lang: "tsx",
   },
-];
-
-const DEMO_USERS = [
-  "bob",
-  "hannah",
-  "laura",
-  "rachel",
-  "victor",
-  "wendy",
-  "evan",
-  "alice",
-  "nora",
-  "fiona",
-  "charlie",
 ];
 
 const PACKAGE_MANAGERS = [

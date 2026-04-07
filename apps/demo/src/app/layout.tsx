@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://gems.m3000.io"),
   title: "@m3000/hashed-gems",
   description: "Deterministic gemstone avatars. Infinitely shimmering.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "@m3000/hashed-gems",
     description: "Deterministic gemstone avatars. Infinitely shimmering.",

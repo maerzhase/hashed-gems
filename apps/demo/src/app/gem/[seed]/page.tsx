@@ -20,6 +20,7 @@ async function getSeedData(params: Promise<{ seed: string }>) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { seed, gemTypeName, rarityName } = await getSeedData(params);
+  const canonicalPath = `/gem/${encodeURIComponent(seed)}`;
   const metaTitle = `${seed} — ${rarityName} ${gemTypeName} — hashed-gems`;
   const socialTitle = `${seed} — ${rarityName} ${gemTypeName}`;
   const metaDescription = `${seed}'s gem is a ${rarityName} ${gemTypeName}. What's yours?`;
@@ -27,12 +28,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: metaTitle,
     description: metaDescription,
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
       title: socialTitle,
       description: `${metaDescription} 💎`,
+      url: canonicalPath,
       images: [
         {
-          url: `/gem/${encodeURIComponent(seed)}/opengraph-image`,
+          url: `${canonicalPath}/opengraph-image`,
           width: 1200,
           height: 630,
         },
