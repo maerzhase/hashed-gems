@@ -22,7 +22,19 @@ interface GemShareActionsProps {
   getShareFile?: () => Promise<ShareFileData | null>;
 }
 
+function getXHandle(seed: string) {
+  const normalizedSeed = seed.replace(/^@+/, "");
+
+  return /^[A-Za-z0-9_]+$/.test(normalizedSeed) ? `@${normalizedSeed}` : null;
+}
+
 function getTweetText(seed: string, gemTypeName: string, rarityName: string) {
+  const xHandle = getXHandle(seed);
+
+  if (xHandle) {
+    return `Check out ${xHandle}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
+  }
+
   return `Check out ${seed}'s gem — a ${rarityName} ${gemTypeName}! What's yours? 💎`;
 }
 
