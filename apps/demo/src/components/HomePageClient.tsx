@@ -2,7 +2,7 @@
 
 import { HashedGem } from "@m3000/hashed-gems";
 import type { ComponentProps } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { GemGenerator } from "@/components/GemGenerator";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -39,51 +39,22 @@ function useCopy() {
 
 export function HeroGemButton() {
   const [seed, setSeed] = useState("hashed-gems");
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  useEffect(() => {
-    const updateScrollProgress = () => {
-      const nextProgress = Math.min(window.scrollY / 320, 1);
-      setScrollProgress(nextProgress);
-    };
-
-    updateScrollProgress();
-    window.addEventListener("scroll", updateScrollProgress, { passive: true });
-
-    return () => window.removeEventListener("scroll", updateScrollProgress);
-  }, []);
-
-  const backgroundOpacity = 0.045 + scrollProgress * 0.095;
 
   return (
-    <>
+    <div className="relative">
       <div
-        className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+        className="pointer-events-none absolute inset-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full bg-neutral-950/16 blur-2xl dark:bg-black/45"
         aria-hidden="true"
+      />
+      <button
+        type="button"
+        onClick={() => setSeed(Math.random().toString(36).slice(2))}
+        className="relative z-10 cursor-pointer transition-transform hover:scale-105 focus-visible:outline-none focus-visible:[&_.hashed-gem-container]:ring-2 focus-visible:[&_.hashed-gem-container]:ring-black/60 focus-visible:[&_.hashed-gem-container]:ring-offset-2 focus-visible:[&_.hashed-gem-container]:ring-offset-neutral-50 dark:focus-visible:[&_.hashed-gem-container]:ring-white/60 dark:focus-visible:[&_.hashed-gem-container]:ring-offset-neutral-950"
+        aria-label="Generate a random gem"
       >
-        <div
-          className="absolute top-[8vh] left-1/2 -translate-x-1/2 blur-xl saturate-125 transition-opacity duration-300 ease-out"
-          style={{ opacity: backgroundOpacity }}
-        >
-          <HashedGem seed={seed} size={400} resolution={1280} aria-hidden />
-        </div>
-      </div>
-
-      <div className="relative">
-        <div
-          className="pointer-events-none absolute inset-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full bg-neutral-950/16 blur-2xl dark:bg-black/45"
-          aria-hidden="true"
-        />
-        <button
-          type="button"
-          onClick={() => setSeed(Math.random().toString(36).slice(2))}
-          className="relative z-10 cursor-pointer transition-transform hover:scale-105 focus-visible:outline-none focus-visible:[&_.hashed-gem-container]:ring-2 focus-visible:[&_.hashed-gem-container]:ring-black/60 focus-visible:[&_.hashed-gem-container]:ring-offset-2 focus-visible:[&_.hashed-gem-container]:ring-offset-neutral-50 dark:focus-visible:[&_.hashed-gem-container]:ring-white/60 dark:focus-visible:[&_.hashed-gem-container]:ring-offset-neutral-950"
-          aria-label="Generate a random gem"
-        >
-          <HashedGem seed={seed} size={96} resolution={512} />
-        </button>
-      </div>
-    </>
+        <HashedGem seed={seed} size={96} resolution={512} />
+      </button>
+    </div>
   );
 }
 
