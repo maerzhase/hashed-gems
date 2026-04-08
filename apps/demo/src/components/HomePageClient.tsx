@@ -42,10 +42,6 @@ export function HeroGemButton() {
 
   return (
     <div className="relative">
-      <div
-        className="pointer-events-none absolute inset-1/2 h-44 w-44 -translate-x-1/2 -translate-y-1/2 rounded-full bg-neutral-950/16 blur-2xl dark:bg-black/45"
-        aria-hidden="true"
-      />
       <button
         type="button"
         onClick={() => setSeed(Math.random().toString(36).slice(2))}
