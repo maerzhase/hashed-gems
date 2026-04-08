@@ -257,7 +257,7 @@ export default async function Home() {
   );
 
   return (
-    <main className="min-h-screen">
+    <main className="relative isolate min-h-screen overflow-x-hidden">
       <JsonLd data={jsonLd} />
       <SiteHeader />
 
