@@ -15,7 +15,7 @@
     "@types/react-dom": "19.2.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "storybook": "10.1.2",
+    "storybook": "10.2.10",
     "tsdown": "0.20.3",
     "typescript": "5.9.2",
     "vite-tsconfig-paths": "5.1.4"
