@@ -2,12 +2,12 @@
   "name": "hashed-gems",
   "version": "0.0.0",
   "devDependencies": {
-    "@biomejs/biome": "2.2.0",
-    "@changesets/cli": "2.30.0",
-    "prettier": "3.8.1",
-    "prettier-plugin-tailwindcss": "0.7.2",
-    "syncpack": "^14.3.0",
-    "turbo": "2.8.18"
+    "@biomejs/biome": "2.5.3",
+    "@changesets/cli": "2.31.0",
+    "prettier": "3.9.4",
+    "prettier-plugin-tailwindcss": "0.8.0",
+    "syncpack": "^15.3.2",
+    "turbo": "2.10.4"
   },
   "engines": {
     "node": ">=20"

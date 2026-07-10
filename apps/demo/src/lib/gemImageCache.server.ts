@@ -25,12 +25,12 @@ async function renderGemPng(renderUrl: string): Promise<ArrayBuffer> {
 
   const launchOptions = localChromePath
     ? {
-        args: puppeteer.defaultArgs(),
+        args: await puppeteer.defaultArgs(),
         executablePath: localChromePath,
         headless: true as const,
       }
     : {
-        args: puppeteer.defaultArgs({
+        args: await puppeteer.defaultArgs({
           args: chromium.args,
           headless: "shell",
         }),
