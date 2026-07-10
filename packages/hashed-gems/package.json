@@ -3,22 +3,23 @@
   "version": "1.0.1",
   "author": "maerzhase (https://github.com/maerzhase)",
   "devDependencies": {
-    "@biomejs/biome": "2.2.0",
-    "@storybook/addon-a11y": "10.1.2",
-    "@storybook/addon-docs": "10.1.2",
-    "@storybook/addon-themes": "10.1.2",
-    "@storybook/react": "10.1.2",
-    "@storybook/react-vite": "10.1.2",
-    "@tsconfig/vite-react": "7.0.2",
-    "@types/node": "22.14.1",
-    "@types/react": "19.2.2",
+    "@biomejs/biome": "2.5.3",
+    "@storybook/addon-a11y": "10.4.6",
+    "@storybook/addon-docs": "10.4.6",
+    "@storybook/addon-themes": "10.4.6",
+    "@storybook/react": "10.4.6",
+    "@storybook/react-vite": "10.4.6",
+    "@tsconfig/vite-react": "8.0.6",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "storybook": "10.1.2",
-    "tsdown": "0.20.3",
-    "typescript": "5.9.2",
-    "vite-tsconfig-paths": "5.1.4"
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "storybook": "10.4.6",
+    "tsdown": "0.22.4",
+    "typescript": "5.9.3",
+    "vite": "8.1.4",
+    "vite-tsconfig-paths": "6.1.1"
   },
   "exports": {
     ".": {
@@ -43,8 +44,8 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "peerDependencies": {
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "publishConfig": {
     "access": "public"

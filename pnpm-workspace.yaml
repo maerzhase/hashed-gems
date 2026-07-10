@@ -1,3 +1,18 @@
 packages:
   - "packages/*"
   - "apps/*"
+blockExoticSubdeps: true
+ignoreScripts: true
+
+# Supply-chain safeguards. Dependency lifecycle scripts stay disabled unless a
+# reviewed package and version is explicitly added to allowBuilds.
+minimumReleaseAge: 1440
+overrides:
+  esbuild@>=0.27.3 <0.28.1: '>=0.28.1'
+  postcss@<8.5.10: '>=8.5.10'
+strictDepBuilds: true
+trustPolicy: no-downgrade
+# Older releases commonly predate registry provenance. Keep strict trust checks
+# for anything published within the last year.
+trustPolicyIgnoreAfter: 525600
+allowBuilds: {}
